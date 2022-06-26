@@ -1,0 +1,54 @@
+/**
+ * @Author: 云起时
+ * @Email: limingxiang@yqstech.com
+ * @Description:
+ * @File: AdminPages
+ * @Version: 1.0.0
+ * @Date: 2022/4/28 10:13
+ */
+
+package Registry
+
+import (
+	"github.com/gef/GoEasy/EasyApp"
+	"github.com/gef/GoEasy/Handles/adminHandle"
+)
+
+var AdminPages = map[string]EasyApp.AppPage{
+	"index":            adminHandle.Index{},
+	"admin":            adminHandle.Admin{},
+	"account":          adminHandle.Account{},
+	"admin_rules":      adminHandle.AdminRules{},
+	"admin_group":      adminHandle.AdminGroup{},
+	"admin_log":        adminHandle.AdminLog{},
+	"configs":          adminHandle.Configs{},         //设置项管理
+	"configs_group":    adminHandle.ConfigsGroup{},    //设置分组
+	"attachment_image": adminHandle.AttachmentImage{}, //图片附件
+	"attachment_file":  adminHandle.AttachmentFile{},  //文件附件
+	"option_models":    adminHandle.OptionModels{},    //选项集
+	//!------------ 应用配置 -------------------------
+	"app_configs_g1": adminHandle.AppConfigs{GroupId: 1}, //设置分组管理页
+	"app_configs_g2": adminHandle.AppConfigs{GroupId: 2}, //设置分组管理页
+	"app_configs_g3": adminHandle.AppConfigs{GroupId: 3}, //设置分组管理页
+	"app_configs_g4": adminHandle.AppConfigs{GroupId: 4}, //设置分组管理页
+	"app_configs_g5": adminHandle.AppConfigs{GroupId: 5}, //设置分组管理页
+	"app_configs_g6": adminHandle.AppConfigs{GroupId: 6}, //设置分组管理页
+	"app_configs_g7": adminHandle.AppConfigs{GroupId: 7}, //设置分组管理页
+	"app_configs_g8": adminHandle.AppConfigs{GroupId: 8}, //设置分组管理页
+	"app_configs_g9": adminHandle.AppConfigs{GroupId: 9}, //设置分组管理页
+	//!------------ 短信相关 -------------------------
+	"sms_upstream":        adminHandle.SmsUpstream{},       //短信通道管理
+	"sms_upstream_params": adminHandle.SmsUpstreamParams{}, //短信通道配置项
+	"sms_template":        adminHandle.SmsTemplate{},       //短信模板管理
+	"app_sms_upstream":    adminHandle.AppSmsUpstream{},    //应用短信通道
+	"app_sms_template":    adminHandle.AppSmsTemplate{},    //应用短信模板
+	"app_sms_black_white": adminHandle.AppSmsBlackWhite{},  //应用短信黑白名单
+	"app_sms_record":      adminHandle.AppSmsRecord{},      //应用短信记录
+	"app_sms_hold_back":   adminHandle.AppSmsHoldBack{},    //应用短信防火墙
+	//!------------ EasyModel 简单模型 -------------------------
+	"easy_models":             adminHandle.EasyModels{},           //模型管理
+	"easy_models_fields":      adminHandle.EasyModelsFields{},     //模型字段管理
+	"easy_models_buttons":     adminHandle.EasyModelsButtons{},    //模型按钮管理
+	"easy_curd_models":        adminHandle.EasyCurdModels{},       //接口模型 easyCurd模型管理
+	"easy_curd_models_fields": adminHandle.EasyCurdModelsFields{}, //接口模型字段管理 easyCurd模型字段管理
+}

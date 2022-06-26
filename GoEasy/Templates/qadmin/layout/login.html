@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>{{.title}}</title>
+    <link rel="stylesheet" href="/static/layui/css/layui.css">
+    <link rel="stylesheet" href="/static/qadmin/css/login.css">
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <script src="/static/layui/layui.all.js"></script>
+    <script src="/static/js/vue.min.js"></script>
+    <link rel="icon" type="image/x-icon" href="/static/images/default_favicon.png"/>
+</head>
+
+<body>
+<div class="body">
+    <div class="logo"></div>
+    <div class="login" id="app1" v-cloak>
+        <h2>${ title }</h2>
+        <div class="layui-form-item">
+            <input type="username" v-model="account" placeholder="登录账号（手机号）" class="layui-input">
+            <i class="layui-icon input-icon">&#xe66f;</i>
+        </div>
+        <div class="layui-form-item">
+            <input type="password" v-model="pwd" placeholder="登录密码" class="layui-input">
+            <i class="layui-icon input-icon">&#xe673;</i>
+        </div>
+        <div class="layui-form-item" v-if="verify!=''">
+            <input type="text" v-model="code" placeholder="验证码" class="layui-input" style="width:40%">
+            <i class="layui-icon input-icon">&#xe672;</i>
+            <img v-if="verify!='' && captchaId!=''" class="verifyCode" :src="captchaBase64" class="codeimg" @click="GetCaptcha">
+        </div>
+        <div class="layui-form-item">
+            <button style="width: 100%" class="layui-btn login-btn" @click="form_submit()">立即登录</button>
+        </div>
+    </div>
+</div>
+
+<script src="/static/qadmin/js/config.js?v=12.04"></script>
+<script src="/static/qadmin/js/comm.js?v=12.04"></script>
+<script>
+    var vue = new Vue({
+        el: '#app1',
+        delimiters: ['${', '}'],//修改模板语法
+        data: {
+            title: "{{.title}}",
+            account: "",
+            pwd: "",
+            code: "",
+            verify: "{{.verify}}",
+            captchaId: "",
+            captchaBase64: "",
+        },
+        created: function () {
+            if (!!this.verify) {
+                this.GetCaptcha()
+            }
+        },
+        methods: {
+            GetCaptcha: function () {
+                var that = this;
+                $.ajax({
+                    url: "verifyCode",
+                    type: "POST",
+                    dataType: "text",
+                    success: function (data) {
+                        var data = api_data(data)
+                        if (!!data.captchaId && !!data.captchaBase64) {
+                            that.captchaId = data.captchaId
+                            that.captchaBase64 = data.captchaBase64
+                        }
+                    }
+                });
+            },
+            form_submit: function (event) {
+                var that = this;
+                $.ajax({
+                    url: "{{.submit_url}}",
+                    data: {'account': this.account, 'pwd': this.pwd, 'code': this.code, "captchaId": this.captchaId},
+                    type: "POST",
+                    dataType: "text",
+                    success: function (data) {
+                        var data = api_data(data)
+                        if (!!data.token) {
+                            layer.msg("登录成功！")
+                            setTimeout(function () {
+                                window.location.href = data.url;
+                            }, 2000)
+                        } else if (!!data.verify) {
+                            that.verify = data.verify
+                            that.GetCaptcha()
+                        }
+                    }
+                });
+            }
+        }
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>{{.title}}</title>
+    <link rel="stylesheet" href="/static/layui/css/layui.css">
+    <link rel="stylesheet" href="/static/wangeditor_v5/style.css">
+    <link rel="stylesheet" href="/static/qadmin/css/style.css?v=12">
+    <script src="/static/layui/layui.all.js"></script>
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <script src="/static/js/vue.min.js"></script>
+    <style type="text/css">
+        .layui-form-label{
+            width: 160px;
+        }
+        .layui-form-item .layui-input-inline, .layui-input-block{width:60%;margin-left: 220px;}
+        .form-group .upload_image_btn {
+            height: 50px;
+            width: 80px;
+            text-align: center;
+            line-height: 50px;
+            color: #999;
+            font-size: 20px;
+            border: 1px solid #d7d7d7;
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+        }
+        .form-group .upload_image_btn label,
+        .form-group .upload_image_view label {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 100%;
+            font-size: 0px;
+            cursor: pointer;
+        }
+
+        .form-group .upload_image_btn label input,
+        .form-group .upload_image_view label input {
+            display: none;
+        }
+
+        .form-group .upload_image_view {
+            width: 100%;
+            height: 50px;
+            text-align: left;
+        }
+
+        .form-group .upload_image_view img {
+            max-height: 50px;
+            cursor: pointer;
+            position: relative;
+        }
+
+    </style>
+</head>
+
+<body class="p20">
+<div id="app" v-cloak>
+    {{- if gt .pageTabsLength 0}}
+    <div class="layui-tab">
+        <div class="layui-tab-title">
+            {{$select := .pageTabSelect}}
+            {{range $tabIndex,$tabInfo := .pageTabs}}
+            <li {{if eq $tabIndex $select}}class="layui-this"{{end}}><a href="{{$tabInfo.Href}}" style="color: #777777">{{$tabInfo.Title}}</a></li>
+            {{- end -}}
+        </div>
+    </div>
+    {{- end -}}
+    <div style="margin-top: 20px;padding-bottom: 1px;">
+        {{template "formFields" .}}{{if ne .formSubmitHide 1}}
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn def" @click="formSubmit(true)">{{.formSubmitTitle}}</button>
+                <button class="layui-btn layui-btn-primary" @click="formSubmit(false)">仅保存</button>
+            </div>
+        </div>{{- end -}}
+    </div>
+</div>
+<!--定义迭代器-->
+<!--<template id="skuBody">-->
+<!--    <div>-->
+<!--        <template v-for="(option,option_index) in specList[specIndex]" :key="option_index">-->
+<!--            <tr>-->
+<!--                <td v-for="(spec,i) in specList" v-text="spec.spec_name"></td>-->
+<!--            </tr>-->
+<!--        </template>-->
+<!--    </div>-->
+<!--</template>-->
+<!--html编辑器-->
+<link rel="stylesheet" href="/static/codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="/static/codemirror/addon/hint/show-hint.css">
+<link rel="stylesheet" href="/static/codemirror/addon/lint/lint.css">
+<link rel="stylesheet" href="/static/codemirror/theme/3024-day.css">
+<link rel="stylesheet" href="/static/codemirror/theme/3024-night.css">
+<link rel="stylesheet" href="/static/codemirror/theme/abbott.css">
+<link rel="stylesheet" href="/static/codemirror/theme/abcdef.css">
+<link rel="stylesheet" href="/static/codemirror/theme/ambiance.css">
+<link rel="stylesheet" href="/static/codemirror/theme/ayu-dark.css">
+<link rel="stylesheet" href="/static/codemirror/theme/ayu-mirage.css">
+<link rel="stylesheet" href="/static/codemirror/theme/base16-dark.css">
+<link rel="stylesheet" href="/static/codemirror/theme/bespin.css">
+<link rel="stylesheet" href="/static/codemirror/theme/base16-light.css">
+<link rel="stylesheet" href="/static/codemirror/theme/blackboard.css">
+<link rel="stylesheet" href="/static/codemirror/theme/cobalt.css">
+<link rel="stylesheet" href="/static/codemirror/theme/colorforth.css">
+<link rel="stylesheet" href="/static/codemirror/theme/dracula.css">
+<link rel="stylesheet" href="/static/codemirror/theme/duotone-dark.css">
+<link rel="stylesheet" href="/static/codemirror/theme/duotone-light.css">
+<link rel="stylesheet" href="/static/codemirror/theme/eclipse.css">
+<link rel="stylesheet" href="/static/codemirror/theme/elegant.css">
+<link rel="stylesheet" href="/static/codemirror/theme/erlang-dark.css">
+<link rel="stylesheet" href="/static/codemirror/theme/gruvbox-dark.css">
+<link rel="stylesheet" href="/static/codemirror/theme/hopscotch.css">
+<link rel="stylesheet" href="/static/codemirror/theme/icecoder.css">
+<link rel="stylesheet" href="/static/codemirror/theme/isotope.css">
+<link rel="stylesheet" href="/static/codemirror/theme/juejin.css">
+<link rel="stylesheet" href="/static/codemirror/theme/lesser-dark.css">
+<link rel="stylesheet" href="/static/codemirror/theme/liquibyte.css">
+<link rel="stylesheet" href="/static/codemirror/theme/lucario.css">
+<link rel="stylesheet" href="/static/codemirror/theme/material.css">
+<link rel="stylesheet" href="/static/codemirror/theme/material-darker.css">
+<link rel="stylesheet" href="/static/codemirror/theme/material-palenight.css">
+<link rel="stylesheet" href="/static/codemirror/theme/material-ocean.css">
+<link rel="stylesheet" href="/static/codemirror/theme/mbo.css">
+<link rel="stylesheet" href="/static/codemirror/theme/mdn-like.css">
+<link rel="stylesheet" href="/static/codemirror/theme/midnight.css">
+<link rel="stylesheet" href="/static/codemirror/theme/monokai.css">
+<link rel="stylesheet" href="/static/codemirror/theme/moxer.css">
+<link rel="stylesheet" href="/static/codemirror/theme/neat.css">
+<link rel="stylesheet" href="/static/codemirror/theme/neo.css">
+<link rel="stylesheet" href="/static/codemirror/theme/night.css">
+<link rel="stylesheet" href="/static/codemirror/theme/nord.css">
+<link rel="stylesheet" href="/static/codemirror/theme/oceanic-next.css">
+<link rel="stylesheet" href="/static/codemirror/theme/panda-syntax.css">
+<link rel="stylesheet" href="/static/codemirror/theme/paraiso-dark.css">
+<link rel="stylesheet" href="/static/codemirror/theme/paraiso-light.css">
+<link rel="stylesheet" href="/static/codemirror/theme/pastel-on-dark.css">
+<link rel="stylesheet" href="/static/codemirror/theme/railscasts.css">
+<link rel="stylesheet" href="/static/codemirror/theme/rubyblue.css">
+<link rel="stylesheet" href="/static/codemirror/theme/seti.css">
+<link rel="stylesheet" href="/static/codemirror/theme/shadowfox.css">
+<link rel="stylesheet" href="/static/codemirror/theme/solarized.css">
+<link rel="stylesheet" href="/static/codemirror/theme/the-matrix.css">
+<link rel="stylesheet" href="/static/codemirror/theme/tomorrow-night-bright.css">
+<link rel="stylesheet" href="/static/codemirror/theme/tomorrow-night-eighties.css">
+<link rel="stylesheet" href="/static/codemirror/theme/ttcn.css">
+<link rel="stylesheet" href="/static/codemirror/theme/twilight.css">
+<link rel="stylesheet" href="/static/codemirror/theme/vibrant-ink.css">
+<link rel="stylesheet" href="/static/codemirror/theme/xq-dark.css">
+<link rel="stylesheet" href="/static/codemirror/theme/xq-light.css">
+<link rel="stylesheet" href="/static/codemirror/theme/yeti.css">
+<link rel="stylesheet" href="/static/codemirror/theme/idea.css">
+<link rel="stylesheet" href="/static/codemirror/theme/darcula.css">
+<link rel="stylesheet" href="/static/codemirror/theme/yonce.css">
+<link rel="stylesheet" href="/static/codemirror/theme/zenburn.css">
+<script src="/static/codemirror/lib/codemirror.js"></script>
+<script src="/static/codemirror/lib/util/formatting.js"></script>
+<script src="/static/codemirror/addon/hint/show-hint.js"></script>
+<script src="/static/codemirror/addon/hint/javascript-hint.js"></script>
+<script src="/static/codemirror/addon/hint/xml-hint.js"></script>
+<script src="/static/codemirror/addon/hint/html-hint.js"></script>
+<script src="/static/codemirror/addon/hint/css-hint.js"></script>
+<script src="/static/codemirror/addon/hint/sql-hint.js"></script>
+<script src="/static/codemirror/addon/selection/active-line.js"></script>
+<script src="/static/codemirror/addon/lint/lint.js"></script>
+<script src="/static/codemirror/addon/edit/closetag.js"></script>
+<script src="/static/codemirror/mode/xml/xml.js"></script>
+<script src="/static/codemirror/mode/javascript/javascript.js"></script>
+<script src="/static/codemirror/mode/css/css.js"></script>
+<script src="/static/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+<script src="/static/codemirror/addon/fold/brace-fold.js"></script>
+<script src="/static/codemirror/addon/fold/xml-fold.js"></script>
+<script src="/static/codemirror/addon/fold/indent-fold.js"></script>
+<script src="/static/codemirror/addon/selection/mark-selection.js"></script>
+<!--html编辑器end-->
+<script src="/static/qadmin/js/config.js?v=12.04"></script>
+<script src="/static/qadmin/js/comm.js?v=1.02"></script>
+<script src="/static/js/lodash.min.js"></script>
+<script src="/static/js/vue-resource.min.js"></script>
+<script src="/static/wangeditor_v5/index.min.js"></script>
+<script src="/static/wangeditor_v5/plugin-upload-attachment.js"></script>
+<script src="/static/js/vue-tags-input.js"></script>
+<script>
+    var GetOnlyID = function (){
+        var id = Math.random().toString(36).substr(2)
+        console.log(id)
+        return id
+    }
+    layui.use('form', function () {
+        var form = layui.form;
+    });
+    var formFields = {
+        {{range $fieldIndex,$field:=.formFields}}
+        {{- if $field.Key}}
+        {{- if eq $field.Type "tags"}}
+        "{{$field.Key}}":{{if $field.Value}}{{$field.Value}}{{end}},
+        "_{{$field.Key}}_input":'',
+        "_{{$field.Key}}_options":[
+        {{range $k,$v := $field.Data}}
+        {text:'{{$v.text}}'{{if $v.style}},style:'{{$v.style}}'{{end}}{{if $v.class}},classes:'{{$v.class}}'{{end}}},
+        {{- end -}}
+        ],
+        {{else if eq $field.Type "checkbox"}}
+        "{{$field.Key}}":{{if $field.Value}}{{$field.Value}}{{end}},
+        {{else if eq $field.Type "checkbox_level"}}
+        "{{$field.Key}}":{{if $field.Value}}{{$field.Value}}{{end}},
+        {{else if eq $field.Type "spec"}}
+        "{{$field.Key}}":{{if $field.Value}}{{$field.Value}}{{end}},
+        {{else if eq $field.Type "sku"}}
+        "{{$field.Key}}":{{if $field.Value}}{{$field.Value}}{{end}},
+        {{else if eq $field.Type "code"}}
+        "{{$field.Key}}":"",
+        {{else if eq $field.Type "codeEditor"}}
+        "{{$field.Key}}":"",
+        {{else}}
+        "{{$field.Key}}":`{{if $field.Value}}{{$field.Value}}{{end}}`,
+        {{- end -}}
+        {{- end -}}
+    {{- end -}}
+    }
+    // Vue.component("sku-body",{
+    //     template:"#skuBody",
+    //     props:["spec-list","spec-index"]
+    // })
+    Vue.component("vue-tags-input")
+    var vue = new Vue({
+        el: '#app',
+        delimiters: ['${', '}'],//修改模板语法
+        data: {
+            formFields:{},
+            posting: 0,
+            tempData: {},
+        },
+        created: function () {
+            this.formFields = formFields
+        },
+        methods: {
+            formSubmit: function (LayerClose=false) {
+                if (this.posting == 1) {
+                    layer.msg("重复提交！",{icon:2});
+                    return false;
+                }
+                this.posting = 1;
+                var that = this
+                $.ajax({
+                    url: "{{.editDataUrl}}",
+                    data: {
+                        "formFields": JSON.stringify(this.formFields),
+                    },
+                    type: "POST",
+                    dataType: "text",
+                    success: function (data) {
+                        var data = api_data(data)
+                        if (data == "success") {
+                            layer.msg("保存成功！");
+                            if(LayerClose){
+                                //1.5秒后父页面刷新
+                                setTimeout(function () {
+                                    window.parent.vue.search();
+                                    window.parent.layer.closeAll();
+                                }, 1500)
+                            }else{
+                                that.posting = 0;
+                            }
+                        }else{
+                            that.posting = 0;
+                        }
+                    }
+                });
+            },
+            //上传图片
+            uploadImageFile: function (event,field_key,field_key2="") {
+                let file = event.target.files[0];
+                //获取上传元素信息
+                var that = this;
+                event.preventDefault();
+                // 只能通过formData方式来传输文件
+                var formData = new FormData();
+                formData.append("file", file);
+                let config = {
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    }
+                };
+                this.$http
+                    .post("{{.uploadImageUrl}}", formData, config)
+                    .then(function (res) {
+                        if (res.data.code == 200 && res.data.data.url) {
+                            var image_url = res.data.data.url;
+                            if(field_key2==""){
+                                that.formFields[field_key] = image_url;
+                            }else{
+                                that.formFields[field_key][field_key2] = image_url;
+                            }
+                            that.$forceUpdate()
+                            console.log(that.formFields[field_key])
+                        }
+                    });
+            },
+            //监听数据绑定
+            formFieldsValueBind:function(keyName,watchValue,bindValues){
+                var that = this;
+                setTimeout(function(){
+                    var values = eval('(' + bindValues + ')');
+                    if( values.length == 0){
+                        return false;
+                    }else{
+                        if(that.formFields[keyName].indexOf(watchValue)==-1 && that.formFields[keyName].indexOf(parseInt(watchValue))==-1){
+                            //删除
+                            for(var i = 0; i < values.length;i++){
+                                var v = values[i];
+                                var have = true;
+                                //防止重复值多删除几次
+                                for (var j = 0; j < 3;j++){
+                                    var index = that.formFields[keyName].indexOf(v)
+                                    if(index!=-1){
+                                        console.log("删除值"+v)
+                                        that.formFields[keyName].splice(index, 1);
+                                    }else{
+                                        break;
+                                    }
+                                }
+                            }
+                        }else{
+                            for(var i = 0; i < values.length;i++){
+                                var v = values[i];
+                                var index = that.formFields[keyName].indexOf(v)
+                                if(index==-1){
+                                    console.log("插入值"+v)
+                                    that.formFields[keyName].push(v);
+                                }
+                            }
+                        }
+                    }
+                    console.log(that.formFields[keyName])
+                },100)
+            },
+            //规格转成sku,规格值相乘
+            specToSku(arr2, kname,formField,) {
+                //二维数组
+                console.log(formField)
+                var sku = [];
+                for (var i = 0; i < arr2.length; i++) {
+                    var options = arr2[i][kname];
+                    if (sku.length == 0) {
+                        for (var j = 0; j < options.length; j++) {
+                            sku.push([options[j]])
+                        }
+                    } else {
+                        var temp = []
+                        for (var j = 0; j < sku.length; j++) {
+                            //空的话补充一项
+                            if(options.length==0){
+                                options = [""]
+                            }
+                            for (var k = 0; k < options.length; k++) {
+                                //重新拷贝sku[j]
+                                var tempRow = []
+                                for (var l=0;l<sku[j].length; l++) {
+                                    tempRow.push(sku[j][l])
+                                }
+                                //插入一项新的
+                                tempRow.push(options[k])
+                                temp.push(tempRow)
+                            }
+                        }
+                        sku = temp
+                    }
+                }
+                //sku = [[{},{},{}}]["","",""]]
+                var result = []
+                for (var i=0;i<sku.length;i++){
+                    var skuids = [];
+                    for(var j=0;j<sku[i].length;j++){
+                        skuids.push(sku[i][j].id)
+                    }
+                    skuids.sort()
+                    var sku_id = skuids.join("_")
+                    var skuRow = {"specs":sku[i],"sku_id":sku_id}
+                    result.push(skuRow)
+                }
+
+                return result
+            },
+            //批量设置 sku关键字，批量input关键字,匹配关键字
+            skuBatch(skuField,valueField,keywords){
+                //获取到值
+                var setValue = this.tempData[valueField];
+                if(setValue==""){
+                    return false;
+                }
+                for(var key in this.formFields[skuField]){
+                    console.log(key)
+                    if(key.indexOf(keywords)!=-1){
+                        this.formFields[skuField][key] = setValue
+                    }
+                }
+                this.$forceUpdate()
+            },
+            skuDefault(formField,skuKey,defaultValue=""){
+                if(!this.formFields[formField].hasOwnProperty(skuKey)){
+                    this.formFields[formField][skuKey] = defaultValue
+                }
+            },
+            skuClear(onlyId = ""){
+                //遍历所有的form
+                for(var key in this.formFields){
+                    for (var key2 in this.formFields[key]){
+                        if(key2.indexOf(onlyId)!=-1){
+                            delete this.formFields[key][key2];
+                        }
+                    }
+                }
+            }
+        }
+    });
+    {{/*富文本编辑器对象列表*/}}
+    const E = window.wangEditor;
+    E.Boot.registerModule(window.WangEditorPluginUploadAttachment.default)
+    {{range $fieldIndex,$field:=.formFields}}
+    {{- if eq $field.Type "wangEditor"}}
+    let wangHtml_{{$field.Key}} = `{{$field.Value}}`;
+    var editor_{{$field.Key}} = E.createEditor({
+        selector: '#wangEditor_{{$field.Key}}',
+        html:wangHtml_{{$field.Key}},
+        mode: 'simple',
+        config: {
+            placeholder: '在这里输入内容...',
+            MENU_CONF: {
+                uploadImage: {
+                    server:'wang_editor_upload',
+                    fieldName: 'file',
+                    base64LimitSize: 100 * 1024, // 0.5M 以下插入 base64
+                    timeout: 5 * 1000,
+                    onProgress(progress) {
+                        console.log('onProgress', progress)
+                    },
+                    onSuccess(file, res) {
+                        console.log('onSuccess', file, res)
+                        layer.msg("上传成功！");
+                    },
+                    onFailed(file, res) {
+                        layer.msg(res.message);
+                        console.log('onFailed', file, res)
+                    },
+                    onError(file, err, res) {
+                        layer.msg(res.message);
+                        console.error('onError', file, err, res)
+                    },
+                },
+                uploadAttachment: {
+                    server: 'wang_editor_upload',
+                    fieldName: 'file',
+                    timeout: 5 * 1000,
+                    onInsertedAttachment(elem){
+                        console.log('inserted attachment ---- ', elem)
+                    },
+                    onBeforeUpload(file) {
+                        console.log('onBeforeUpload', file)
+                        return file // 上传 file 文件
+                        // return false // 会阻止上传
+                    },
+                    onProgress(progress) {
+                        console.log('onProgress', progress)
+                    },
+                    onSuccess(file, res) {
+                        console.log('onSuccess', file, res)
+                        layer.msg("上传成功！");
+                    },
+                    onFailed(file, res) {
+                        layer.msg(res.message);
+                        console.log('onFailed', file, res)
+                    },
+                    onError(file, err, res) {
+                        layer.msg(res.message);
+                        console.error('onError', file, err, res)
+                    },
+                }
+            },
+            onChange() {
+                var newHtml = editor_{{$field.Key}}.getHtml();
+                vue.formFields.{{$field.Key}} = newHtml;
+            }
+        }
+    })
+    var toolbar_{{$field.Key}} = E.createToolbar({
+        editor:editor_{{$field.Key}},
+        mode: 'simple',
+        selector: '#Toolbar_{{$field.Key}}',
+        config: {
+            insertKeys: {
+                index: 24, keys: ['uploadAttachment'],
+            },
+        }
+    })
+    {{- end -}}
+    {{- end -}}
+
+    {{/*代码编辑器,2种写法*/}}
+    {{range $fieldIndex,$field:=.formFields}}
+    {{- if eq $field.Type "code"}}
+
+    var code_editor_{{$field.Key}} = CodeMirror(document.getElementById("code_editor_{{$field.Key}}"), {
+        mode: "{{if $field.Expand.type}}{{$field.Expand.type}}{{else}}text/html{{end}}",
+        lineNumbers: true, //是否显示行号
+        lineWrapping: true, //是否强制换行
+        autoCloseTags: true,//自动闭合标签
+        theme: '{{if $field.Expand.theme}}{{$field.Expand.theme}}{{else}}ayu-mirage{{end}}', //设置主题
+        extraKeys: {"Ctrl": "autocomplete"},
+        value: document.getElementById('code_editor_value_{{$field.Key}}').innerText,
+        indentUnit:4,
+        autofocus:true,
+        matchBrackets: true, // 括号匹配
+        smartIndent: true, // 智能缩进
+        spellcheck:true,
+        styleActiveLine: true,          // 选中行高亮
+        modes: [{
+            value: 'javascript',
+            label: 'Javascript'
+        }, {
+            value: 'html',
+            label: 'XML/HTML'
+        }],
+    });
+    code_editor_{{$field.Key}}.setSize('{{if $field.Expand.w}}{{$field.Expand.w}}{{else}}auto{{end}}','{{if $field.Expand.h}}{{$field.Expand.h}}{{else}}1000px{{end}}');
+    code_editor_{{$field.Key}}.on("change",function(){
+        var code_value = code_editor_{{$field.Key}}.getValue();
+        vue.formFields.{{$field.Key}} = code_value;
+    });
+    setTimeout(function(){
+        var code_value = code_editor_{{$field.Key}}.getValue();
+        vue.formFields.{{$field.Key}} = code_value;
+    },200)
+    code_editor_{{$field.Key}}.on('keypress', function () {
+        code_editor_{{$field.Key}}.showHint()
+    });
+    function code_editor_fmt_{{$field.Key}}(){
+        console.log('格式化代码')
+        code_editor_{{$field.Key}}.autoFormatRange(code_editor_{{$field.Key}}.getCursor(true), code_editor_{{$field.Key}}.getCursor(false));
+    }
+
+    {{- end -}}
+    {{- if eq $field.Type "codeEditor"}}
+
+    var code_editor_{{$field.Key}} = CodeMirror(document.getElementById("code_editor_{{$field.Key}}"), {
+        mode: "{{if $field.Expand.type}}{{$field.Expand.type}}{{else}}text/html{{end}}",
+        lineNumbers: true, //是否显示行号
+        lineWrapping: true, //是否强制换行
+        autoCloseTags: true,//自动闭合标签
+        theme: '{{if $field.Expand.theme}}{{$field.Expand.theme}}{{else}}ayu-mirage{{end}}', //设置主题
+        extraKeys: {"Ctrl": "autocomplete"},
+        value: document.getElementById('code_editor_value_{{$field.Key}}').innerText,
+        indentUnit:4,
+        autofocus:true,
+        matchBrackets: true, // 括号匹配
+        smartIndent: true, // 智能缩进
+        spellcheck:true,
+        styleActiveLine: true,          // 选中行高亮
+        modes: [{
+            value: 'javascript',
+            label: 'Javascript'
+        }, {
+            value: 'html',
+            label: 'XML/HTML'
+        }],
+    });
+    code_editor_{{$field.Key}}.setSize('{{if $field.Expand.w}}{{$field.Expand.w}}{{else}}auto{{end}}','{{if $field.Expand.h}}{{$field.Expand.h}}{{else}}1000px{{end}}');
+    code_editor_{{$field.Key}}.on("change",function(){
+        var code_value = code_editor_{{$field.Key}}.getValue();
+        vue.formFields.{{$field.Key}} = code_value;
+    });
+    setTimeout(function(){
+        var code_value = code_editor_{{$field.Key}}.getValue();
+        vue.formFields.{{$field.Key}} = code_value;
+    },200)
+    code_editor_{{$field.Key}}.on('keypress', function () {
+        code_editor_{{$field.Key}}.showHint()
+    });
+    function code_editor_fmt_{{$field.Key}}(){
+        console.log('格式化代码')
+        code_editor_{{$field.Key}}.autoFormatRange(code_editor_{{$field.Key}}.getCursor(true), code_editor_{{$field.Key}}.getCursor(false));
+    }
+    {{- end -}}
+    {{- end -}}
+    {{/*时间组件*/}}
+    {{range $fieldIndex,$field:=.formFields}}
+        {{- if eq $field.Type "datetime"}}
+    var ld_{{$field.Key}} = layui.laydate.render({
+            elem: '#datetime_{{$field.Key}}',
+            type: 'datetime',
+            trigger: 'click',
+            value: "{{$field.Value}}",
+            done: function (value, date, endDate) {
+                vue.formFields.{{$field.Key}} = value;
+            }
+        });
+        {{- end -}}
+        {{- if eq $field.Type "date"}}
+    var ld_{{$field.Key}} = layui.laydate.render({
+            elem: '#date_{{$field.Key}}',
+            type: 'date',
+            trigger: 'click',
+            value: "{{$field.Value}}",
+            done: function (value, date, endDate) {
+                vue.formFields.{{$field.Key}} = value;
+            }
+        });
+        {{- end -}}
+        {{- if eq $field.Type "time"}}
+    var ld_{{$field.Key}} = layui.laydate.render({
+            elem: '#time_{{$field.Key}}',
+            type: 'time',
+            trigger: 'click',
+            value: "{{$field.Value}}",
+            done: function (value, date, endDate) {
+                vue.formFields.{{$field.Key}} = value;
+            }
+        });
+        {{- end -}}
+    {{- end -}}
+
+</script>
+<style type="text/css">
+    input.file {
+        background: #ffffff;
+        border: 1px solid #e6e6e6;
+        padding: 5px;
+    }
+</style>
+</body>
+
+</html>

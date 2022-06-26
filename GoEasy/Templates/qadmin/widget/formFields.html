@@ -1,0 +1,190 @@
+{{define "formFields"}}
+
+{{range $fieldIndex,$field := .formFields}}
+{{if ne $field.Type "hidden"}}
+
+{{if eq $field.Type "message"}}
+<blockquote  {{if $field.Expand.if}}v-if="{{$field.Expand.if}}"{{end}} class="layui-elem-quote" style="border: 1px solid #f1ecdc;border-radius:5px;background-color:#fefbed;">{{$field.Notice}}</blockquote>
+{{else if eq $field.Type "block"}}
+<fieldset  {{if $field.Expand.if}}v-if="{{$field.Expand.if}}"{{end}} class="layui-elem-field layui-field-title">
+    <legend>{{$field.Title}}</legend>
+</fieldset>
+{{/* codeEditor代码编辑器 */}}
+{{else if eq $field.Type "codeEditor"}}
+{{template "codeEditor" $field}}
+{{else if eq $field.Type "code"}}
+{{template "codeEditor" $field}}
+{{else}}
+<div {{if $field.Expand.if}}v-show="{{$field.Expand.if}}"{{end}} class="layui-form-item form-group">
+    <label class="layui-form-label">{{if $field.IsMust}}<span style="color:red">*</span>{{end}}{{$field.Title}}</label>
+    <div class="layui-input-block">
+        {{/* 提示框 */}}
+        {{- if eq $field.Type "notice"}}
+        <blockquote class="layui-elem-quote">{{$field.Notice}}</blockquote>
+        {{- end -}}
+
+        {{/* 隐藏域 */}}
+        {{- if eq $field.Type "hidden"}}
+        <input type="hidden" v-model="formFields.{{$field.Key}}" autocomplete="off" class="layui-input">
+        {{- end -}}
+        {{/* 输入文本 */}}
+        {{- if eq $field.Type "text"}}
+        <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
+            autocomplete="off" class="layui-input">
+        {{- end -}}
+        {{- if eq $field.Type "text-disabled"}}
+        <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
+               autocomplete="off" class="layui-input" disabled="disabled">
+        {{- end -}}
+
+        {{/* 数字 */}}
+        {{- if eq $field.Type "number"}}
+        <input @keyup.enter="formSubmit" type="number" v-model="formFields.{{$field.Key}}"
+            placeholder="{{$field.Notice}}" autocomplete="off" class="layui-input">
+        {{- end -}}
+
+        {{/* 密码 */}}
+        {{- if eq $field.Type "password"}}
+        <input @keyup.enter="formSubmit" type="password" v-model="formFields.{{$field.Key}}"
+            placeholder="{{$field.Notice}}" autocomplete="off" class="layui-input" >
+        {{- end -}}
+
+        {{/* 文本域 */}}
+        {{- if eq $field.Type "textarea"}}
+        <textarea v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}" class="layui-textarea"></textarea>
+        {{- end -}}
+        {{- if eq $field.Type "textarea-disabled"}}
+        <textarea v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}" class="layui-textarea" disabled="disabled"></textarea>
+        {{- end -}}
+
+        {{/* 下拉选择 */}}
+        {{- if eq $field.Type "select"}}
+        <select v-model="formFields.{{$field.Key}}" lay-verify="required" class="layui-select"
+            style="width:100%;color: #777777;{{$field.Style}}">
+            <option value="">请选择</option>
+            {{range $k,$v := $field.Data}}
+            <option value="{{$v.value}}">{{$v.name}}</option>
+            {{- end -}}
+        </select>
+        {{- end -}}
+        {{- if eq $field.Type "select-disabled"}}
+        <select v-model="formFields.{{$field.Key}}" lay-verify="required" class="layui-select"
+                style="width:100%;color: #777777;background-color:#e7e4ea;{{$field.Style}}" disabled="disabled">
+            <option value="">请选择</option>
+            {{range $k,$v := $field.Data}}
+            <option value="{{$v.value}}">{{$v.name}}</option>
+            {{- end -}}
+        </select>
+        {{- end -}}
+
+        {{/* 模拟单选框 */}}
+        {{- if eq $field.Type "radio"}}
+        {{range $k,$v := $field.Data}}
+        <a class="layui-btn" :class="formFields.{{$field.Key}}=='{{$v.value}}'?'layui-btn-primary layui-btn-check':'layui-btn-primary'"
+            @click="formFields.{{$field.Key}}='{{$v.value}}'">
+            <i v-if="formFields.{{$field.Key}}=='{{$v.value}}'" class="ri-checkbox-circle-line"></i>
+            <i v-else class="ri-checkbox-blank-circle-line"></i>
+            {{$v.name}}</a>
+        {{- end -}}
+        {{- end -}}
+
+        {{/* 图片预览 */}}
+        {{- if eq $field.Type "imageview"}}
+        <div class="layui-col-sm3">
+            <div v-if="formFields.{{$field.Key}}==''" class="upload_image_btn" style="color: #00a0e9">
+                <i class="layui-icon layui-icon-picture" style="font-size:32px"></i>
+            </div>
+            <div v-else class="upload_image_view">
+                <img :src="formFields.{{$field.Key}}" />
+            </div>
+        </div>
+        {{- end -}}
+
+        {{/* 图片上传 */}}
+        {{- if eq $field.Type "image"}}
+        <div class="layui-col-sm2">
+            <div v-if="formFields.{{$field.Key}}==''" class="upload_image_btn" style="color: #00a0e9">
+                <i class="layui-icon layui-icon-upload-drag" style="font-size:32px"></i>
+                <label><input type="file" accept="image/x-png,image/gif,image/jpeg,image/bmp"
+                        @change="uploadImageFile($event,'{{$field.Key}}')" /></label>
+            </div>
+            <div v-else class="upload_image_view">
+                <img :src="formFields.{{$field.Key}}" />
+                <label><input type="file" accept="image/x-png,image/gif,image/jpeg,image/bmp"
+                        @change="uploadImageFile($event,'{{$field.Key}}')" /></label>
+            </div>
+        </div>
+        <div class="layui-col-sm2">
+            <a v-if="formFields.{{$field.Key}}!=''" title="清除图片" style="cursor: pointer;background:#ffffff;border: 1px solid #222222;color:#222222;padding:1px;border-radius: 50px" class="ri-close-line" @click="formFields.{{$field.Key}}=''"></a>
+        </div>
+        <div class="layui-col-sm8" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+
+        {{/* 标签框 */}}
+        {{- if eq $field.Type "tags"}}
+        <vue-tags-input
+                :tags="formFields.{{$field.Key}}"
+                v-model="formFields._{{$field.Key}}_input"
+                :autocomplete-items="formFields._{{$field.Key}}_options"
+                @tags-changed="newTags => formFields.{{$field.Key}} = newTags"
+        />
+        {{- end -}}
+
+        {{/* 多选框 */}}
+        {{- if eq $field.Type "checkbox"}}
+        {{range $k,$v := $field.Data}}
+        <label class="checkbox-label">
+            <input class="layui-form-checkbox" type="checkbox" name="{{$field.Key}}" v-model="formFields.{{$field.Key}}"
+                value="{{$v.value}}" /> {{$v.name}}
+        </label>
+        {{- end -}}
+        {{- end -}}
+
+        {{/* 多级多选框 */}}
+        {{- if eq $field.Type "checkbox_level"}}
+        {{template "checkbox_level" $field}}
+        {{- end -}}
+
+        {{/* 富文本编辑 */}}
+        {{- if eq $field.Type "wangEditor"}}
+        <div style="border: 1px solid #ccc;">
+            <div id="Toolbar_{{$field.Key}}" style="border-bottom: 1px solid #ccc;"></div>
+            <div id="wangEditor_{{$field.Key}}" style="height: 500px"></div>
+        </div>
+        {{- end -}}
+
+        {{/* 日期时间组件 */}}
+        {{- if eq $field.Type "datetime"}}
+        <input type="text" class="layui-input" id="datetime_{{$field.Key}}" placeholder="{{$field.Title}}"
+            style="{{$field.Style}}">
+        {{- end -}}
+        {{- if eq $field.Type "date"}}
+        <input type="text" class="layui-input" id="date_{{$field.Key}}" placeholder="{{$field.Title}}"
+            style="{{$field.Style}}">
+        {{- end -}}
+        {{- if eq $field.Type "time"}}
+        <input type="text" class="layui-input" id="time_{{$field.Key}}" placeholder="{{$field.Title}}"
+            style="{{$field.Style}}">
+        {{- end -}}
+
+        {{/* 商品规格spec */}}
+        {{- if eq $field.Type "spec"}}
+        {{template "spec" $field}}
+        {{- end -}}
+
+        {{/* 商品SKU */}}
+        {{- if eq $field.Type "sku"}}
+        {{template "sku" $field}}
+        {{- end -}}
+
+
+
+    </div>
+</div>
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{end}}

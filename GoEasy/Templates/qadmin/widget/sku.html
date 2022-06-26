@@ -1,0 +1,58 @@
+{{define "sku"}}
+<div class="sku">
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th :colspan="formFields.{{.Expand.spec_key}}.length">规格</th>
+            {{range $index,$sku := .Expand.sku_columns}}
+            <th rowspan="2">{{$sku.name}}</th>
+            {{end}}
+        </tr>
+        <tr>
+            <th v-for="spec in formFields.{{.Expand.spec_key}}" v-text="spec.spec_name"></th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr v-for="(row,index) in specToSku(formFields.{{.Expand.spec_key}},'spec_options','{{$.Key}}')">
+                <td v-for="(option,i) in row.specs" v-text="option.name"></td>
+                {{range $index,$sku := .Expand.sku_columns}}
+                <th>
+                    {{if eq $sku.type "text"}}
+                    <input class="layui-input" type="text" v-model="formFields.{{$.Key}}[row.sku_id+'#{{$sku.value}}']">
+                    ${skuDefault('{{$.Key}}',row.sku_id+'#{{$sku.value}}')}
+                    {{else if eq $sku.type "image"}}
+                    <input class="layui-input" type="hidden" v-model="formFields.{{$.Key}}[row.sku_id+'#{{$sku.value}}']">
+                    <div v-if="!formFields.{{$.Key}}[row.sku_id+'#{{$sku.value}}'] || formFields.{{$.Key}}[row.sku_id+'#{{$sku.value}}']==''" class="upload_image_btn" style="color: #00a0e9;height:30px;width:50px;line-height: 36px">
+                        <i class="layui-icon layui-icon-upload-drag" style="font-size:22px"></i>
+                        <label><input type="file" accept="image/x-png,image/gif,image/jpeg,image/bmp"
+                                      @change="uploadImageFile($event,'{{$.Key}}',row.sku_id+'#{{$sku.value}}')" /></label>
+                    </div>
+                    <div v-else class="upload_image_view">
+                        <img :src="formFields.{{$.Key}}[row.sku_id+'#{{$sku.value}}']" />
+                        <label><input type="file" accept="image/x-png,image/gif,image/jpeg,image/bmp"
+                                      @change="uploadImageFile($event,'{{$.Key}}',row.sku_id+'#{{$sku.value}}')" /></label>
+                    </div>
+                    {{end}}
+                </th>
+                {{end}}
+            </tr>
+            <tr style="background: #f2f2f2">
+                <th :colspan="formFields.{{.Expand.spec_key}}.length">批量设置</th>
+                {{range $index,$sku := .Expand.sku_columns}}
+                <th style="position:relative;height:50px;overflow:hidden;">
+                    {{if eq $sku.type "text"}}
+                    <input type="text" placeholder="批量设置"
+                           v-model="tempData['{{$.Key}}_{{$sku.value}}']"
+                           class="layui-input"
+                           @keyup="skuBatch('{{$.Key}}','{{$.Key}}_{{$sku.value}}','{{$sku.value}}')"
+                           @blur="tempData['{{$.Key}}_{{$sku.value}}']=''"
+                    >
+                    {{end}}
+                </th>
+                {{end}}
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+{{end}}

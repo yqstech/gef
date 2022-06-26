@@ -1,0 +1,22 @@
+{{define "codeEditor"}}
+<div class="codeEditor {{if .Expand.isWide}}wide{{else}}layui-form-item form-group{{end}}">
+    <div class="layui-row code_editor_header wide_header">
+        <div class="layui-col-md6">
+            <label class="layui-form-label">{{if .IsMust}}<span style="color:red">*</span>{{end}}{{.Title}}</label>
+        </div>
+        <div class="layui-col-md6" style="text-align:right;padding-top: 4px">
+            <a href="javascript:code_editor_fmt_{{.Key}}()" class="layui-btn layui-btn-normal layui-btn-sm">格式化选中</a>
+        </div>
+    </div>
+    <label class="layui-form-label narrow_title">{{if .IsMust}}<span style="color:red">*</span>{{end}}{{.Title}}</label>
+    <div class="layui-input-block">
+        <div class="narrow_bar" style="text-align:right;">
+            <a href="javascript:code_editor_fmt_{{.Key}}()" class="layui-btn layui-btn-normal layui-btn-sm">格式化选中</a>
+        </div>
+        <div class="code_editor">
+            <div id="code_editor_{{.Key}}"></div>
+            <textarea style="display:none;" id="code_editor_value_{{.Key}}">{{.Value}}</textarea>
+        </div>
+    </div>
+</div>
+{{end}}

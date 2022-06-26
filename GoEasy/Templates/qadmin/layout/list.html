@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>{{.title}}</title>
+    <link rel="stylesheet" href="/static/layui/css/layui.css">
+    <link rel="stylesheet" href="/static/qadmin/css/style.css?v=12">
+    <script src="/static/layui/layui.all.js"></script>
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <script src="/static/js/vue.min.js"></script>
+    <style>
+        {{.pageStyle}}
+    </style>
+</head>
+
+<body>
+<div class="p20" id="app" v-cloak>
+    {{if .pageNotice}}<blockquote class="layui-elem-quote">{{.pageNotice}}</blockquote>{{end}}
+    <div class="layui-row" style="border-bottom: 1px dashed #e1e1e1">
+        <div class="layui-col-lg4 layui-col-md6">
+            <fieldset class="layui-elem-field layui-field-title">
+                <legend>{{.title}}</legend>
+            </fieldset>
+        </div>
+        <div class="layui-col-lg8 layui-col-md6" style="text-align: right;padding-top: 5px">
+
+            {{range $index,$button := .topBtns}}
+            {{ if $button}}
+            <a {{if $button.Display}}v-if="{{$button.Display}}"{{end}}
+               {{if eq $button.ActionType 0}}
+               href="{{$button.ActionUrl}}"
+               {{end}}
+               {{if eq $button.ActionType 1}}
+               {{if $button.ConfirmMsg}} @click="confirm(0,'{{$button.ActionUrl}}','{{$button.ConfirmMsg}}')" {{else}} @click="ajax(0,'{{$button.ActionUrl}}')" {{end}}
+               {{end}}
+               {{if eq $button.ActionType 2}}
+               @click="layer(0,'{{$button.ActionUrl}}','{{$button.ButtonName}}','{{$button.LayerTitle}}','{{$button.Expand.w}}','{{$button.Expand.h}}')"
+               {{end}}
+               {{if eq $button.ActionType 3}}
+               onclick="{{$button.ActionUrl}}"
+               {{end}}
+
+               class="layui-btn {{$button.Class}}"
+            >{{template "icon" $button.Icon}}
+                {{$button.ButtonName}}</a>
+            {{end}}
+            {{end}}
+            <a href="javascript:location.reload();" class="layui-btn">{{template "icon" "layui-icon-refresh"}}
+                刷新</a>
+        </div>
+    </div>
+    {{if .listSearchFields}}
+    <div class="layui-row" style="padding:15px 0 10px">
+        <div class="layui-col-lg12">
+            {{range $fieldIndex,$field:=.listSearchFields}}
+            <div class="layui-input-inline">
+                {{if eq $field.Type "text"}}
+                <input type="text" v-model="searchForm.{{$field.Key}}" placeholder="{{$field.Title}}" class="layui-input key"
+                       style="{{$field.Style}}">
+                {{end}}
+                {{if eq $field.Type "select"}}
+                <select v-model="searchForm.{{$field.Key}}" class="layui-select" style="color: #777777;min-width: 120px;{{$field.Style}}">
+                    <option value="{{$field.DefValue}}">{{$field.Title}}</option>
+                    {{range $k,$v := $field.Data}}
+                    <option value="{{$k}}">{{$v}}</option>
+                    {{end}}
+                </select>
+                {{end}}
+                {{if eq $field.Type "datetime"}}
+                <span>{{$field.Title}}</span>
+                <input type="text" class="layui-input" v-model="searchForm.{{$field.Key}}" id="time_{{$field.Key}}" placeholder="{{$field.Title}}" style="display:inline-block;width: 150px;{{$field.Style}}">
+                {{end}}
+            </div>
+            {{end}}
+            <button type="button" class="layui-btn sou" @click="search(1)">查询</button>
+        </div>
+    </div>
+    {{end}}
+    {{if gt .pageTabsLength 0}}
+    <div class="layui-tab">
+        <div class="layui-tab-title">
+            {{$select := .pageTabSelect}}
+            {{range $tabIndex,$tabInfo := .pageTabs}}
+            <li {{if eq $tabIndex $select}}class="layui-this"{{end}}><a href="{{$tabInfo.Href}}">{{$tabInfo.Title}}</a></li>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
+    <div class="list_table" style="width:100%;overflow-x: auto;">
+        <table class="layui-table layui-form">
+            <thead>
+            <tr>
+                {{range .listColumns}}<th class="column column_{{.FieldName}} title" {{if $style := index $.listColumnsStyles .FieldName}} style="{{$style}}" {{end}}>{{.ColumnName}}</th>{{end}}
+                {{if .rightBtns}}
+                <th class="column column_action title " {{if $style := index $.listColumnsStyles "action"}} style="{{$style}}" {{end}}>操作</th>
+                {{end}}
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="(item,index) in data_list" :key="item.id">
+                {{range $columnIndex,$column :=.listColumns}}
+                <td class="column column_{{.FieldName}}" {{if $style := index $.listColumnsStyles .FieldName}} style="{{$style}}" {{end}} >
+                    {{ template "listColumn" $column}}
+                </td>
+                {{end}}
+                {{if .rightBtns}}
+                <td class="column column_action" {{if $style := index $.listColumnsStyles "action"}} style="{{$style}}" {{end}}>
+                {{range $index,$button := .rightBtns}}
+                {{ if $button}}
+                <a {{if $button.Display}}v-if="{{$button.Display}}"{{end}}
+                   {{if eq $button.ActionType 1}}
+                   {{if $button.ConfirmMsg}}
+                   @click="confirm(item.id,'{{$button.ActionUrl}}','{{$button.ConfirmMsg}}')"
+                   {{else}}
+                   @click="ajax(item.id,'{{$button.ActionUrl}}')"
+                   {{end}}
+                   {{end}}
+                   {{if eq $button.ActionType 2}}
+                   @click="layer(item.id,'{{$button.ActionUrl}}','{{$button.ButtonName}}','{{$button.LayerTitle}}','{{$button.Expand.w}}','{{$button.Expand.h}}')"
+                   {{end}}
+                   {{if eq $button.ActionType 3}}
+                   onclick="{{$button.ActionUrl}}"
+                   {{end}}
+                   class="layui-btn layui-btn-sm {{$button.Class}}"
+                >{{template "icon" $button.Icon}}
+                    {{$button.ButtonName}}</a>
+                {{end}}
+
+                {{end}}
+                </td>
+                {{end}}
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {{if eq .listPageHide false}}
+    <div class="layui-row" style="display: flex">
+        <div class="layui-col-lg6" style="padding-top: 20px;width: 50%">
+            <div style="color: #777777;">共检索到<strong style="color: #f31515"> ${data_total} </strong>条数据</div>
+        </div>
+        <div class="layui-col-lg6" style="text-align: right;width: 50%">
+            <div id="pages"></div>
+        </div>
+    </div>
+    {{end}}
+</div>
+<script src="/static/qadmin/js/config.js?v=12.04"></script>
+<script src="/static/qadmin/js/comm.js?v=12.04"></script>
+<script>
+    //分页逻辑
+    var laypage = layui.laypage;
+    var laydate = layui.laydate;
+    var searchFormDefault = {
+    {{range $fieldIndex,$field:=.listSearchFields}}"{{$field.Key}}":"{{if $field.Value}}{{$field.Value}}{{end}}", {{end}}
+    }
+    var vue = new Vue({
+        el: '#app',
+        delimiters: ['${', '}'],//修改模板语法
+        data: {
+            searchForm:{},
+            data_list: [],
+            data_total: 0,
+            page: 1,
+            page_size: {{.listPageSize}},
+    },
+
+    created: function () {
+        this.searchForm = searchFormDefault
+        //直接查询数据
+        this.search(1);
+    },
+    mounted: function (e) {
+    },
+    methods: {
+        search: function (is_laypage) {
+            var that = this
+            $.ajax({
+                url: "{{.listDataUrl}}",
+                data: {
+                    "page": this.page,
+                    "page_size": this.page_size,
+                    "search":JSON.stringify(this.searchForm)
+                },
+                type: "POST",
+                dataType: "text",
+                success: function (r) {
+                    var data = api_data(r)
+                    if(!!data){
+                        layer.msg("列表已加载",{time:1000,offset:'t',icon:6});
+                        that.data_list = data.data;
+                        that.data_total = data.total;
+                        laypage.render({
+                            elem: 'pages',
+                            count: data.total,
+                            curr: that.page,
+                            limit: that.page_size,
+                            jump: function (obj, first) {
+                                that.page = obj.curr
+                                that.page_size = obj.limit
+                                if (!first) {
+                                    that.search(0)
+                                }
+                            }
+                        });
+                        setTimeout(function() {
+                            LaySwitch();
+                        },50)
+                    }
+
+                }
+            });
+        },
+        //弹出层操作
+        layer: function (id = 0,action="",title,layerTitle,expand0,expand1) {
+            var that = this;
+            if(id != 0){
+                if(action.indexOf("?")===-1){
+                    action = action+"?id="+id
+                }else{
+                    action = action+"&id="+id
+                }
+            }
+            if(!layerTitle){
+                layerTitle = title+"{{.pageName}}"
+            }
+            layer.open({
+                type: 2,
+                title:layerTitle,
+                maxmin:true,
+                content: action,
+                area: [expand0, expand1],
+                cancel: function (index, layero) {
+                    that.search();
+                }
+            });
+        },
+        ajax: function (id, action){ //角色状态
+            var that = this
+            $.ajax({
+                url: action,
+                data: {
+                    "id":id,
+                },
+                type: "POST",
+                dataType: "text",
+                success: function (r) {
+                    var data = api_data(r)
+                    if(!!data){
+                        layer.msg("操作成功！",{time:1000,icon:1,offset:'t'});
+                        that.search();
+                    }
+                }
+            });
+        },
+        confirm:function(id, action,msg){
+            if(confirm(msg)){
+                this.ajax(id,action)
+            }
+        },
+        switchClick:function (index, field, value) {
+            var id = this.data_list[index].id;
+            var that = this;
+            $.ajax({
+                url: "",//提交到列表
+                data: {
+                    "formFields": '{"id":"'+id+'","'+field+'":"'+value+'"}',
+                    "action":"fastUpdate",//快速修改标记
+                },
+                type: "POST",
+                dataType: "text",
+                success: function (data) {
+                    var data = api_data(data)
+                    if (data == "success") {
+                        layer.msg("修改成功！",{time:2000,icon:1,offset:'t'});
+                    } else {
+                        layer.msg("修改失败！",{time:2000,icon:2,offset:'t'})
+                    }
+                    setTimeout(function() {
+                        that.search();
+                    },1200)
+                }
+            });
+        },
+        inputChange:function(index,field) {
+            var id = this.data_list[index].id;
+            var that = this;
+            var value = this.data_list[index][field];
+            $.ajax({
+                url: "",//提交到列表
+                data: {
+                    "formFields": '{"id":"'+id+'","'+field+'":"'+value+'"}',
+                    "action":"fastUpdate",//快速修改标记
+                },
+                type: "POST",
+                dataType: "text",
+                success: function (data) {
+                    var data = api_data(data)
+                    if (data == "success") {
+                        layer.msg("修改成功！",{time:2000,icon:1,offset:'t'});
+                    } else {
+                        layer.msg("修改失败！",{time:2000,icon:2,offset:'t'})
+                    }
+                    setTimeout(function() {
+                        that.search();
+                    },1200)
+                }
+            });
+        }
+    }
+    })
+
+    setTimeout(function() {
+        {{range $fieldIndex,$field:=.listSearchFields}}
+        {{if eq $field.Type "datetime"}}
+        laydate.render({
+            elem: '#time_{{$field.Key}}',
+            type: 'datetime',
+            value: "{{$field.DefValue}}",
+            done: function (value, date, endDate) {
+                vue.searchForm.{{$field.Key}} = value;
+            }
+        });
+        {{end}}
+        {{end}}
+    },50)
+
+    function LaySwitch(){
+        layui.use(['form'], function () {
+            //加载layui的表单组件样式,延迟一下子，让vue处理完
+            var form = layui.form;
+            form.render();
+            form.on('switch(switch)', function(data) {
+                console.log(data.elem.checked);
+                var index = data.elem.getAttribute('index');
+                var field_name = data.elem.getAttribute('field_name');
+                if(data.elem.checked){
+                    vue.switchClick(index,field_name,1)
+                }else{
+                    vue.switchClick(index,field_name,0)
+                }
+
+            });
+        })
+    }
+</script>
+</body>
+
+</html>

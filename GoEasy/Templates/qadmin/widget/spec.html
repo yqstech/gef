@@ -1,0 +1,72 @@
+{{define "spec"}}
+<div class="spec">
+    <div class="spec_item" v-for="(item,index) in formFields.{{.Key}}">
+        <div class="spec_top">
+            <div class="layui-row">
+                <div class="layui-col-md4">
+                    <strong>规格项：</strong>
+                    <input type="text" class="layui-input" placeholder="如:尺码、颜色等规格项" v-model="item.spec_name">
+                </div>
+                <div class="layui-col-md4">
+                    <div class="tools">
+                        <input type="text" class="layui-input" placeholder="新增 规格" v-model="item.option_name">
+                        <button type="button" class="layui-btn layui-btn-sm layui-btn-normal"
+                                @click='if(item.option_name=="")return false;item.spec_options.push({"id":GetOnlyID(),"name":item.option_name});item.option_name=""'
+                        >
+                            <i class="layui-icon icon-add-fill"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="layui-col-md4" style="text-align: right;">
+                    <div class="tools">
+                        <button v-if="index>0" type="button"
+                                @click="formFields.{{.Key}}[index] = formFields.{{.Key}}.splice(index-1,1,formFields.{{.Key}}[index])[0]"
+                                class="layui-btn layui-btn-sm layui-btn-warm">
+                            <i class="layui-icon icon-arrow-up-fill"></i>
+                        </button>
+                        <button v-if="index<(formFields.{{.Key}}.length-1)"
+                                @click="formFields.{{.Key}}[index] = formFields.{{.Key}}.splice(index+1,1,formFields.{{.Key}}[index])[0]"
+                                type="button" class="layui-btn layui-btn-sm layui-btn-warm">
+                            <i class="layui-icon icon-arrow-down-fill"></i>
+                        </button>
+                        <button type="button"
+                                @click="var spec = formFields.{{.Key}}.splice(index,1);for(let i = 0; i < spec[0].spec_options.length; i++){skuClear(spec[0].spec_options[i]['id'])}"
+                                class="layui-btn layui-btn-sm layui-btn-danger">
+                            <i class="layui-icon icon-delete-bin-2-line"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-card-body spec_options">
+<!--            <button v-for="(option,i) in item.spec_options" type="button"-->
+<!--                    @click="item.spec_options.splice(i,1)"-->
+<!--                    class="layui-btn layui-btn-md layui-btn-normal spec_option">-->
+<!--                <span>${option.name}</span><i class="layui-icon icon-delete-bin-2-line"></i>-->
+<!--            </button>-->
+            <div class="spec_option_item" v-for="(option,i) in item.spec_options">
+                <input type="text" class="layui-input" v-model="option.name" :style="'width:'+(byteLength(option.name)*7+25)+'px'">
+                <span @click="var option = item.spec_options.splice(i,1);skuClear(option[0]['id'])"><i class="layui-icon icon-close-circle-fill"></i></span>
+            </div>
+        </div>
+    </div>
+    <div>
+        <button type="button" class="layui-btn layui-btn-md layui-btn-primary"
+                @click='formFields.{{.Key}}.push({"spec_name":"","option_name":"","spec_options":[]})'>
+            <i class="layui-icon icon-add-circle-fill"></i>
+            <span>自定义规格项</span>
+        </button>
+        <button type="button" class="layui-btn layui-btn-md layui-btn-primary"
+                @click='formFields.{{.Key}}.push({"spec_name":"颜色分类","option_name":"","spec_options":[{"id":GetOnlyID(),"name":"红色"},{"id":GetOnlyID(),"name":"黄色"},{"id":GetOnlyID(),"name":"蓝色"}]})'>
+            <i class="layui-icon icon-add-circle-fill"></i>
+            <span>新增颜色分类</span>
+        </button>
+        <button type="button" class="layui-btn layui-btn-md layui-btn-primary"
+                @click='formFields.{{.Key}}.push({"spec_name":"尺码","option_name":"","spec_options":[{"id":GetOnlyID(),"name":"M"},{"id":GetOnlyID(),"name":"L"},{"id":GetOnlyID(),"name":"XL"},{"id":GetOnlyID(),"name":"2XL"},{"id":GetOnlyID(),"name":"3XL"},{"id":GetOnlyID(),"name":"4XL"}]})'>
+            <i class="layui-icon icon-add-circle-fill"></i>
+            <span>新增尺码</span>
+        </button>
+    </div>
+
+</div>
+{{end}}
