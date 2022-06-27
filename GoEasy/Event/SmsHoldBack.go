@@ -24,26 +24,25 @@ type SmsHoldBack struct {
 // Do 短信发送过滤，防止恶意发送短信
 func (that SmsHoldBack) Do(eventName string, data ...interface{}) (error, int) {
 	ps := data[0].(map[string]interface{})
-
+	
 	//手机号临时阻止
-	holdBack, holdBackMsg := Models.Sms{}.IsHoldBackTel(ps["app_id"].(string), ps["tel"].(string))
+	holdBack, holdBackMsg := Models.Sms{}.IsHoldBackTel(ps["tel"].(string))
 	if holdBack {
 		return errors.New(holdBackMsg), 502
 	}
 	//ip地址临时阻止
-	holdBack, holdBackMsg = Models.Sms{}.IsHoldBackIp(ps["app_id"].(string), ps["ip"].(string))
+	holdBack, holdBackMsg = Models.Sms{}.IsHoldBackIp(ps["ip"].(string))
 	if holdBack {
 		return errors.New(holdBackMsg), 502
 	}
 	//短信功能暂停
-	holdBack, holdBackMsg = Models.Sms{}.IsHoldBackAll(ps["app_id"].(string))
+	holdBack, holdBackMsg = Models.Sms{}.IsHoldBackAll()
 	if holdBack {
 		return errors.New(holdBackMsg), 502
 	}
-
+	
 	//查找黑白名单
 	blackWhite, err := db.New().Table("tb_app_sms_black_white").
-		Where("app_id", ps["app_id"]).
 		Where("is_delete", 0).
 		Where("status", 1).
 		Get()
@@ -55,8 +54,8 @@ func (that SmsHoldBack) Do(eventName string, data ...interface{}) (error, int) {
 		if item["type"].(int64) == 0 {
 			//黑名单直接拦截
 			if item["rule"].(string) == ps["tel"].(string) || item["rule"].(string) == ps["ip"].(string) {
-				Models.Sms{}.HoldBackIp(ps["app_id"].(string), ps["ip"].(string), "短信发送失败!", 120)
-				Models.Sms{}.HoldBackTel(ps["app_id"].(string), ps["tel"].(string), "短信发送失败!", 120)
+				Models.Sms{}.HoldBackIp(ps["ip"].(string), "短信发送失败!", 120)
+				Models.Sms{}.HoldBackTel(ps["tel"].(string), "短信发送失败!", 120)
 				return errors.New("短信发送失败！"), 502
 			}
 		} else {
@@ -74,7 +73,6 @@ func (that SmsHoldBack) Do(eventName string, data ...interface{}) (error, int) {
 	//执行操作：临时冻结、加入黑名单
 	//冻结分钟数
 	holdBackRules, err := db.New().Table("tb_app_sms_hold_back").
-		Where("app_id", ps["app_id"]).
 		Where("is_delete", 0).
 		Where("status", 1).
 		Order("sms_max asc").
@@ -86,7 +84,7 @@ func (that SmsHoldBack) Do(eventName string, data ...interface{}) (error, int) {
 	t := time.Now().Unix()
 	var returnErr error
 	for _, rule := range holdBackRules {
-
+		
 		//#规则一
 		if rule["rule_type"].(int64) == 0 {
 			//按手机号统计多少秒内的次数
@@ -96,7 +94,6 @@ func (that SmsHoldBack) Do(eventName string, data ...interface{}) (error, int) {
 			}
 			formTime := util.UnixTimeFormat(t-rule["range_second"].(int64), "2006-01-02 15:04:05")
 			sendCount, err := db.New().Table("tb_app_sms_record").
-				Where("app_id", ps["app_id"]).
 				Where("is_delete", 0).
 				Where("tel", ps["tel"].(string)).
 				Where("status", "<", 4).
@@ -110,11 +107,11 @@ func (that SmsHoldBack) Do(eventName string, data ...interface{}) (error, int) {
 				//满足条件
 				if rule["action"].(int64) == 1 && rule["frozen_second"].(int64) > 0 {
 					//临时冻结
-					Models.Sms{}.HoldBackTel(ps["app_id"].(string), ps["tel"].(string), "您的操作过于频繁！", time.Duration(rule["frozen_second"].(int64)))
+					Models.Sms{}.HoldBackTel(ps["tel"].(string), "您的操作过于频繁！", time.Duration(rule["frozen_second"].(int64)))
 					returnErr = errors.New("您的操作过于频繁！")
 				} else if rule["action"].(int64) == 2 {
 					//手机号拉黑
-					Models.AppSmsBlackWhite{}.AddBlack(ps["manager_id"].(string), ps["app_id"].(string), 0, ps["tel"].(string), "[自动拉黑]"+rule["note"].(string))
+					Models.AppSmsBlackWhite{}.AddBlack(0, ps["tel"].(string), "[自动拉黑]"+rule["note"].(string))
 					returnErr = errors.New("您的操作过于频繁！")
 				}
 			}
@@ -126,7 +123,6 @@ func (that SmsHoldBack) Do(eventName string, data ...interface{}) (error, int) {
 			}
 			formTime := util.UnixTimeFormat(t-rule["range_second"].(int64), "2006-01-02 15:04:05")
 			sendCount, err := db.New().Table("tb_app_sms_record").
-				Where("app_id", ps["app_id"]).
 				Where("is_delete", 0).
 				Where("ip", ps["ip"].(string)).
 				Where("status", "<", 4).
@@ -140,11 +136,11 @@ func (that SmsHoldBack) Do(eventName string, data ...interface{}) (error, int) {
 				//满足条件
 				if rule["action"].(int64) == 1 && rule["frozen_second"].(int64) > 0 {
 					//临时冻结
-					Models.Sms{}.HoldBackIp(ps["app_id"].(string), ps["ip"].(string), "您的操作过于频繁！", time.Duration(rule["frozen_second"].(int64)))
+					Models.Sms{}.HoldBackIp(ps["ip"].(string), "您的操作过于频繁！", time.Duration(rule["frozen_second"].(int64)))
 					returnErr = errors.New("您的操作过于频繁！")
 				} else if rule["action"].(int64) == 2 {
 					//IP地址拉黑
-					Models.AppSmsBlackWhite{}.AddBlack(ps["manager_id"].(string), ps["app_id"].(string), 1, ps["ip"].(string), "[自动拉黑]"+rule["note"].(string))
+					Models.AppSmsBlackWhite{}.AddBlack(1, ps["ip"].(string), "[自动拉黑]"+rule["note"].(string))
 					returnErr = errors.New("您的操作过于频繁！")
 				}
 			}
@@ -156,7 +152,6 @@ func (that SmsHoldBack) Do(eventName string, data ...interface{}) (error, int) {
 			}
 			formTime := util.UnixTimeFormat(t-rule["range_second"].(int64), "2006-01-02 15:04:05")
 			sendCount, err := db.New().Table("tb_app_sms_record").
-				Where("app_id", ps["app_id"]).
 				Where("is_delete", 0).
 				Where("status", "<", 4).
 				Where("create_time", ">=", formTime).
@@ -167,7 +162,7 @@ func (that SmsHoldBack) Do(eventName string, data ...interface{}) (error, int) {
 			}
 			if sendCount >= rule["sms_max"].(int64) {
 				//临时冻结
-				Models.Sms{}.HoldBackAll(ps["app_id"].(string), time.Duration(rule["frozen_second"].(int64)))
+				Models.Sms{}.HoldBackAll(time.Duration(rule["frozen_second"].(int64)))
 				returnErr = errors.New("短信发送频次超过限制！")
 			}
 		}

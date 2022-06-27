@@ -60,7 +60,7 @@ func (that SmsUpstream) NodeForm(pageData *EasyApp.PageData, id int64) (error, i
 	if err != nil {
 		return err, 500
 	}
-	pluginList := []map[string]interface{}{}
+	var pluginList []map[string]interface{}
 	for _, pluginName := range pluginNames {
 		pluginList = append(pluginList, map[string]interface{}{
 			"name":  pluginName,

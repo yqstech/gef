@@ -5,11 +5,13 @@ import (
 	"github.com/joho/godotenv"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 )
 
 // 系统
 var (
+	GOOS       = "linux"
 	WorkPath = ""
 	AppPath  = ""
 )
@@ -51,6 +53,9 @@ var (
 // Init 在环境变量中读取配置信息
 func Init() error {
 	var err error
+	//! 获取运行的系统类型
+	GOOS = runtime.GOOS
+	
 	//! 获取工作目录
 	WorkPath, err = os.Getwd()
 	if err != nil {

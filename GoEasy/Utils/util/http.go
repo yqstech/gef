@@ -19,8 +19,6 @@ type FileSystems []http.FileSystem
 
 func (fs FileSystems) Open(name string) (file http.File, err error) {
 	for _, i := range fs {
-		// 依次打开多个http.FileSystem返回一个成功打开的数据。
-		fmt.Println(name)
 		file, err = i.Open(name)
 		if err == nil {
 			return file, err

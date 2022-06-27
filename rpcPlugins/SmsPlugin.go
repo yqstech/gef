@@ -11,6 +11,7 @@ package rpcPlugins
 
 import (
 	"errors"
+	"github.com/gef/config"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	"github.com/wonderivan/logger"
@@ -97,7 +98,7 @@ func GetSmsPlugin(pluginName string) (SmsPlugin, error) {
 		//!不存在则加载插件
 		SmsPluginLoad(pluginName)
 	}
-
+	
 	if client, ok := RpcPluginClients[pluginName]; ok {
 		//!通过【进程客户端】获取【Rpc协议客户端】，用于之后的通信
 		rpcClient, err := client.Client()
@@ -123,6 +124,14 @@ func GetSmsPlugin(pluginName string) (SmsPlugin, error) {
 // SmsPluginLoad
 //!通过文件名，加载插件文件并初始化进程连接对象
 func SmsPluginLoad(pluginName string) {
+	//!检索插件路径
+	filePath := config.WorkPath + "/plugins/" + config.GOOS + "/" + pluginName
+	if _, err := os.Stat(filePath); err != nil {
+		filePath = config.AppPath + "/plugins/" + config.GOOS + "/" + pluginName
+		if _, err := os.Stat(filePath); err != nil {
+			return
+		}
+	}
 	//!定义插件的日志对象
 	logger := hclog.New(&hclog.LoggerOptions{
 		Name:   "plugin",
@@ -138,7 +147,7 @@ func SmsPluginLoad(pluginName string) {
 	client := plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig: HandshakeConfig, //默认插件验证方法
 		Plugins:         pluginMap,
-		Cmd:             exec.Command("./rpcPluginFiles/" + pluginName),
+		Cmd:             exec.Command(filePath),
 		Logger:          logger,
 	})
 	//! 保存到进程连接对象中，后期可一并销毁

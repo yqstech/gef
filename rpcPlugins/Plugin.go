@@ -10,22 +10,25 @@
 package rpcPlugins
 
 import (
+	"github.com/gef/config"
 	"github.com/hashicorp/go-plugin"
 	"github.com/wonderivan/logger"
 	"io/ioutil"
-	"path"
 )
 
-// PluginsLookup 检索全部的RPC插件
+// PluginsLookup 检索项目目录的插件
 func PluginsLookup(prefix string) ([]string, error) {
+	var pluginNames []string
 	//查找Rpc插件目录所有文件
-	rpcPluginFiles, err := ioutil.ReadDir("rpcPluginFiles")
+	plugins, err := ioutil.ReadDir(config.WorkPath + "/plugins/" + config.GOOS)
 	if err != nil {
-		return nil, err
+		plugins, err = ioutil.ReadDir(config.AppPath + "/plugins/" + config.GOOS)
+		if err != nil {
+			return pluginNames, nil
+		}
 	}
 	//查找所有的非目录文件
-	var pluginNames []string
-	for _, file := range rpcPluginFiles {
+	for _, file := range plugins {
 		if !file.IsDir() {
 			pluginName := file.Name()
 			//按前缀过滤
@@ -34,11 +37,7 @@ func PluginsLookup(prefix string) ([]string, error) {
 					continue
 				}
 			}
-			//过滤源文件，主要用在开发环境
-			if path.Ext(pluginName) != ".go" {
-				pluginNames = append(pluginNames, pluginName)
-			}
-
+			pluginNames = append(pluginNames, pluginName)
 		}
 	}
 	return pluginNames, nil

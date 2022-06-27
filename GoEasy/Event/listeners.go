@@ -16,7 +16,7 @@ var Listeners = map[string][]Listener{
 	},
 	//发送短信
 	"SmsSend": []Listener{
-		//# manager_id,app_id (int64) tel(string) ip(string) content(string) template_out_id(string)
+		//#Map tel(string) ip(string) content(string) template_out_id(string)
 		SmsSend{},
 	},
 }

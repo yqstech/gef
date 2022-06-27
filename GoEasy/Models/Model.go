@@ -132,12 +132,11 @@ func (mod Model) GoroseDataLevelTree(data []gorose.Data, idKey string, pidKey st
 
 // Select 万能查询方法
 // 数据表 查询条件 排序条件 查询数量
-func (mod Model) Select(AppID int64, dbName string, Where string, orderBy string, limit int, offset int) []map[string]string {
+func (mod Model) Select(dbName string, Where string, orderBy string, limit int, offset int) []map[string]string {
 	var results []map[string]string
 	conn := db.New().Table(dbName).
 		Where("is_delete", 0).
-		Where("status", 1).
-		Where("app_id", AppID)
+		Where("status", 1)
 	if Where != "" {
 		conn = conn.Where(Where)
 	}

@@ -42,7 +42,6 @@ func (that SmsSend) Do(eventName string, data ...interface{}) (error, int) {
 
 	//查找可用的通道列表
 	appSmsUpstreams, err := db.New().Table("tb_app_sms_upstream").
-		Where("app_id", ps["app_id"]).
 		Where("is_delete", 0).
 		Where("status", 1).
 		WhereIn("upstream_id", UpstreamIds).
@@ -71,8 +70,6 @@ func (that SmsSend) Do(eventName string, data ...interface{}) (error, int) {
 		//保存短信记录
 		recordId, err := db.New().Table("tb_app_sms_record").
 			InsertGetId(map[string]interface{}{
-				"manager_id":      ps["manager_id"].(string),
-				"app_id":          ps["app_id"].(string),
 				"template_name":   ps["template_name"].(string),
 				"upstream_id":     upstreamId,
 				"tel":             ps["tel"],

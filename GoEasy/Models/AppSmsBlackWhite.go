@@ -40,11 +40,9 @@ var SmsBlackWhiteRuleTypes = []map[string]interface{}{
 }
 
 // AddBlack 加入黑名单
-func (that AppSmsBlackWhite) AddBlack(manager_id, app_id string, ruleType int, rule string, note string) {
+func (that AppSmsBlackWhite) AddBlack(ruleType int, rule string, note string) {
 	_, err := db.New().Table("tb_app_sms_black_white").
 		Insert(map[string]interface{}{
-			"manager_id":  manager_id,
-			"app_id":      app_id,
 			"type":        0,
 			"rule_type":   ruleType,
 			"rule":        rule,

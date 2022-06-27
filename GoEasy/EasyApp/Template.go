@@ -15,6 +15,7 @@ import (
 	"github.com/gef/GoEasy/Utils/util"
 	"github.com/wonderivan/logger"
 	"html"
+	"io/fs"
 	"strings"
 	"text/template"
 )
@@ -95,7 +96,7 @@ func (t *Template) PageData2Display(pageData *PageData) {
 	//分页
 	data["listPageHide"] = pageData.listPageHide //是否隐藏分页
 	data["listPageSize"] = pageData.listPageSize //分页
-
+	
 	//表单
 	//提交地址
 	data["editDataUrl"] = pageData.editDataUrl
@@ -126,22 +127,22 @@ func (t *Template) PageData2Display(pageData *PageData) {
 			if ftype == "code" || ftype == "codeEditor" {
 				pageData.formFields[k].Value = html.EscapeString(pageData.formFields[k].Value)
 			}
-
+			
 		}
 	}
 	data["formFields"] = pageData.formFields
-
+	
 	if pageData.formSubmitTitle == "" {
 		pageData.formSubmitTitle = pageData.actionName + pageData.pageName
 	}
 	data["formSubmitTitle"] = pageData.formSubmitTitle
-
+	
 	data["formSubmitHide"] = pageData.formSubmitHide
-
+	
 	//组件需要
 	//上传图片的地址
 	data["uploadImageUrl"] = pageData.uploadImageUrl
-
+	
 	//组件默认
 	t.DisplayData = data
 }
@@ -155,10 +156,22 @@ func (t *Template) Display() (string, error) {
 		template.New(t.TplName).Funcs(t.Functions()).
 			ParseFS(Templates.Files, "qadmin/layout/*.html"),
 	)
+	fd, err := fs.ReadDir(Templates.FilesAdd,"admin")
+	if err == nil {
+		if len(fd)>0{
+			//加载替换页面
+			tpl, err = tpl.ParseFS(Templates.FilesAdd, "admin/*.html")
+			if err != nil {
+				logger.Error(err.Error())
+				return "", err
+			}
+		}
+	}
 	//加载自定义页面
 	if len(t.TemplateSelf) > 0 {
-		tpl, err = tpl.ParseFS(Templates.FilesAdd, t.TemplateSelf...)
+		tpl, err = tpl.ParseFS(Templates.FilesSelf, t.TemplateSelf...)
 		if err != nil {
+			logger.Error(err.Error())
 			return "", err
 		}
 	}
