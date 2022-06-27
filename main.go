@@ -22,7 +22,6 @@ import (
 	"github.com/gef/GoEasy/Utils/pool"
 	"github.com/gef/GoEasy/Utils/serv"
 	"github.com/gef/config"
-	"github.com/gef/events"
 	"github.com/gef/routers"
 	"github.com/gef/rpcPlugins"
 	"github.com/gef/static"
@@ -91,11 +90,11 @@ func (g *Gef) SetFrontRouters(FrontRouters interface{}) {
 	routers.FrontRouters = FrontRouters
 }
 
-// SetEvent 设置监听事件
-func (g *Gef) SetEvent(Event map[string][]Event.Listener) {
-	for k, v := range Event {
+// SetEvent 补充监听事件
+func (g *Gef) SetEvent(EventAdd map[string][]Event.Listener) {
+	for k, v := range EventAdd {
 		for _, l := range v {
-			events.Listeners[k] = append(events.Listeners[k], l)
+			Event.Listeners[k] = append(Event.Listeners[k], l)
 		}
 	}
 }
@@ -133,7 +132,7 @@ func (g *Gef) Run() {
 	}
 	//!退出web服务清除RPC链接
 	defer rpcPlugins.RpcPluginClientsKill()
-
+	
 	//!启动web服务组
 	Server := serv.Server{}
 	for _, serv := range g.Servers {
