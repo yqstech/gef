@@ -87,7 +87,7 @@ func (that *EasyCurd) Select(w http.ResponseWriter, r *http.Request, ps httprout
 		that.ApiResult(w, 500, "数据库操作错误！", nil)
 		return
 	}
-	logger.Debug(conn.LastSql())
+	//logger.Debug(conn.LastSql())
 	total, err := that.getOrm(ps).Count()
 	if err != nil {
 		logger.Error(err.Error())

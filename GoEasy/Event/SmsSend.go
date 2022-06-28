@@ -33,7 +33,7 @@ func (that SmsSend) Do(eventName string, data ...interface{}) (error, int) {
 	if len(SmsUpstreams) == 0 {
 		return errors.New("系统未开启短信通道！"), 501
 	}
-	UpstreamIds := []interface{}{}
+	var UpstreamIds []interface{}
 	UpstreamPlugins := map[int64]string{}
 	for _, v := range SmsUpstreams {
 		UpstreamPlugins[v["id"].(int64)] = v["plugin_name"].(string)
@@ -94,7 +94,6 @@ func (that SmsSend) Do(eventName string, data ...interface{}) (error, int) {
 				return errors.New("短信通道未指定插件！"), 503
 			}
 			//获取插件对象
-			//Plugin, err := plugins.GetSmsPlugin(pluginName)
 			Plugin, err := rpcPlugins.GetSmsPlugin(pluginName)
 			if err != nil {
 				logger.Error(err.Error())

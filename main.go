@@ -66,6 +66,7 @@ func New() Gef {
 // Gef Gef应用结构
 type Gef struct {
 	Servers      []Server //服务器列表
+	selfServers  []Server //自定义服务列表
 	StaticFile   embed.FS //静态资源文件
 	TemplateFile embed.FS //模板文件
 }
@@ -90,13 +91,14 @@ func (g *Gef) SetFrontRouters(FrontRouters interface{}) {
 	routers.FrontRouters = FrontRouters
 }
 
+// SetFrontRouterType 设置前台路由
+func (g *Gef) SetFrontRouterType(routerType int) {
+	routers.FrontRouterType = routerType
+}
+
 // SetEvent 补充监听事件
 func (g *Gef) SetEvent(EventAdd map[string][]Event.Listener) {
-	for k, v := range EventAdd {
-		for _, l := range v {
-			Event.Listeners[k] = append(Event.Listeners[k], l)
-		}
-	}
+	Event.BindEvents(EventAdd)
 }
 
 // SetAdminStatic 设置静态文件
@@ -109,10 +111,13 @@ func (g *Gef) SetAdminTemplate(f embed.FS) {
 	Templates.FilesAdd = f
 }
 
+// SetServer 设置服务器
+func (g *Gef) SetServer(serv Server) {
+	g.selfServers = append(g.selfServers, serv)
+}
+
 // Run 启动Gef应用
 func (g *Gef) Run() {
-	//! 绑定应用监听事件
-	Event.BindEvents(Event.Listeners)
 	//! 设置web服务组
 	if config.AdminPort != "" {
 		g.Servers = append(g.Servers, Server{
@@ -127,20 +132,24 @@ func (g *Gef) Run() {
 			Name:       "gef-front",
 			Port:       config.FrontPort,
 			Router:     routers.FrontRouters,
-			RouterType: 0,
+			RouterType: routers.FrontRouterType,
 		})
 	}
+	for _, server := range g.selfServers {
+		g.Servers = append(g.Servers, server)
+	}
+	
 	//!退出web服务清除RPC链接
 	defer rpcPlugins.RpcPluginClientsKill()
 	
 	//!启动web服务组
-	Server := serv.Server{}
+	HttpServers := serv.Server{}
 	for _, serv := range g.Servers {
 		if serv.RouterType == 0 {
-			Server.Set(serv.Name, serv.Port, serv.Router.(*httprouter.Router))
+			HttpServers.Set(serv.Name, serv.Port, serv.Router.(*httprouter.Router))
 		} else if serv.RouterType == 1 {
-			Server.SetMux(serv.Name, serv.Port, serv.Router.(*mux.Router))
+			HttpServers.SetMux(serv.Name, serv.Port, serv.Router.(*mux.Router))
 		}
 	}
-	Server.Run()
+	HttpServers.Run()
 }

@@ -23,7 +23,7 @@ type SmsMock struct {
 }
 
 func (that *SmsMock) SendSms(programs map[string]interface{}) (int64, string) {
-	that.logger.Error("rpcSmsMock插件接收到数据:" + util.JsonEncode(programs))
+	that.logger.Debug("rpcSmsMock插件接收到数据:" + util.JsonEncode(programs))
 	return 200, ""
 }
 

@@ -9,4 +9,8 @@
 
 package routers
 
+// FrontRouters 前台路由
 var FrontRouters interface{}
+
+// FrontRouterType 前台路由类型
+var FrontRouterType = 0
