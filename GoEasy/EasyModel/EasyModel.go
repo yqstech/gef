@@ -96,7 +96,7 @@ func GetEasyModelInfo(modelKey string) (EasyModel, error) {
 			return EasyModel{}, errors.New("系统运行错误！")
 		}
 		if modelInfo == nil {
-			return EasyModel{}, errors.New("模型不存在！")
+			return EasyModel{}, errors.New("模型"+modelKey+"不存在！")
 		}
 		//!初始化模型
 		easyModel := EasyModel{

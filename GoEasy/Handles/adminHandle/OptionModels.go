@@ -58,7 +58,7 @@ func (that OptionModels) NodeListData(pageData *EasyApp.PageData, data []gorose.
 			util.JsonDecode(v["static_data"].(string), &staticData)
 			transData := []string{}
 			for _, opt := range staticData {
-				transData = append(transData, opt["name"].(string)+" : "+opt["value"].(string))
+				transData = append(transData, opt["name"].(string)+" : "+util.Interface2String(opt["value"]))
 			}
 			data[k]["static_data"] = strings.Join(transData, "<br>")
 		}
@@ -122,7 +122,7 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 	}
 	pageData.FormFieldsAdd("match_fields", "textarea", "自动匹配字段", "每个字段占一行，支持全匹配字段和半匹配字段,例如is_*", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("index_num", "text", "排序", "", util.Int2String(indexNum), true, nil, "", nil)
-
+	
 	return nil, 0
 }
 
