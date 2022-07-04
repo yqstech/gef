@@ -210,8 +210,8 @@ func (that EasyModelsFields) NodeForm(pageData *EasyApp.PageData, id int64) (err
 		"if": "formFields.option_models_id!=''",
 	})
 
-	pageData.FormFieldsAdd("field_name_reset", "text", "设置此列标题", "重新定义列表页此字段的名称", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("field_name_reset", "text", "设置此列样式", "设置列样式，例如：width:20%", "", false, nil, "", nil)
+	pageData.FormFieldsAdd("field_name_reset", "text", "重置列标题", "重新设置列表页中此字段的标题", "", false, nil, "", nil)
+	pageData.FormFieldsAdd("field_style_reset", "text", "重置列样式", "设置列表页此列的样式，例如：width:20%", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("field_augment", "textarea", "美化原始数据", "支持html代码，列表数据类型需要改为html，{{this}}代表原数据", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("attach_to_field", "text", "多字段合并显示", "将此字段数据合并到其他字段", "", false, nil, "", nil)
 

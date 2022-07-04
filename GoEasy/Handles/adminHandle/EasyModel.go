@@ -59,12 +59,12 @@ func (that EasyModel) NodeList(pageData *EasyApp.PageData) (error, int) {
 		//获取第几页
 		tabIndex := that.GetTabIndex(pageData, "tab")
 		pageData.SetPageTabSelect(tabIndex)
-
+		
 		//!获取自定义按钮列表
 		for btnName, Btn := range easyModel.Buttons {
 			pageData.SetButton(btnName, Btn)
 		}
-
+		
 		//!顶部按钮
 		topBtns := easyModel.TopButtons
 		//新增
@@ -113,6 +113,10 @@ func (that EasyModel) NodeList(pageData *EasyApp.PageData) (error, int) {
 					field.FieldName = field.FieldNameReset
 				}
 				pageData.ListColumnAdd(field.FieldKey, field.FieldName, field.DataTypeOnList+"::"+field.DataTypeCommandOnList, field.FieldOptions)
+				//自定义列样式
+				if field.FieldStyleReset != "" {
+					pageData.SetListColumnStyle(field.FieldKey, field.FieldStyleReset)
+				}
 			}
 		}
 		return nil, 0
@@ -192,7 +196,7 @@ func (that EasyModel) NodeListData(pageData *EasyApp.PageData, data []gorose.Dat
 		}
 		return data, nil, 0
 	}
-
+	
 }
 
 // NodeForm 初始化表单
@@ -309,7 +313,7 @@ func (that EasyModel) NodeForm(pageData *EasyApp.PageData, id int64) (error, int
 				}
 			}
 		}
-
+		
 		return nil, 0
 	}
 }

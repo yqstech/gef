@@ -53,8 +53,9 @@ type UrlParam struct {
 // ModelField 模型字段信息
 type ModelField struct {
 	FieldKey              string                   //字段关键字
-	FieldName             string                   //字段关键字
-	FieldNameReset        string                   //字段关键字
+	FieldName             string                   //字段名称
+	FieldNameReset        string                   //字段重置名称（列表）
+	FieldStyleReset       string                   //字段重设样式（列表）
 	FieldNotice           string                   //字段提示信息
 	IsShowOnList          bool                     //是否在列表页展示该字段
 	DataTypeOnList        string                   //列表页展示时的数据类型
@@ -96,7 +97,7 @@ func GetEasyModelInfo(modelKey string) (EasyModel, error) {
 			return EasyModel{}, errors.New("系统运行错误！")
 		}
 		if modelInfo == nil {
-			return EasyModel{}, errors.New("模型"+modelKey+"不存在！")
+			return EasyModel{}, errors.New("模型" + modelKey + "不存在！")
 		}
 		//!初始化模型
 		easyModel := EasyModel{
@@ -215,6 +216,7 @@ func GetEasyModelInfo(modelKey string) (EasyModel, error) {
 				FieldKey:              field["field_key"].(string),
 				FieldName:             field["field_name"].(string),
 				FieldNameReset:        field["field_name_reset"].(string),
+				FieldStyleReset:       field["field_style_reset"].(string),
 				FieldNotice:           field["field_notice"].(string),
 				IsShowOnList:          field["is_show_on_list"].(int64) == 1,
 				DataTypeOnList:        field["data_type_on_list"].(string),
@@ -248,7 +250,7 @@ func GetEasyModelInfo(modelKey string) (EasyModel, error) {
 			}
 			easyModel.Fields = append(easyModel.Fields, modelField)
 		}
-
+		
 		//!保存并返回
 		easyModelList[modelKey] = easyModel
 		//!定时删除数据
@@ -311,7 +313,7 @@ func GetSelectData(id int64) []map[string]interface{} {
 			defer selectDataListLock.Unlock()
 			delete(selectDataList, id)
 		}()
-
+		
 		selectDataList[id] = selectData
 		return selectData
 	}
