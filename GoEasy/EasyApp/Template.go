@@ -111,7 +111,7 @@ func (t *Template) PageData2Display(pageData *PageData) {
 				pageData.formFields[k].Value = util.Interface2String(dbvalue)
 			}
 			//修正checkbox默认值
-			if util.IsInArray(ftype, []interface{}{"checkbox", "checkbox_level", "tags"}) {
+			if util.IsInArray(ftype, []interface{}{"checkbox", "checkbox_level", "tags", "images"}) {
 				if pageData.formFields[k].Value == "" {
 					pageData.formFields[k].Value = "[]"
 				}
@@ -156,9 +156,9 @@ func (t *Template) Display() (string, error) {
 		template.New(t.TplName).Funcs(t.Functions()).
 			ParseFS(Templates.Files, "qadmin/layout/*.html"),
 	)
-	fd, err := fs.ReadDir(Templates.FilesAdd,"admin")
+	fd, err := fs.ReadDir(Templates.FilesAdd, "admin")
 	if err == nil {
-		if len(fd)>0{
+		if len(fd) > 0 {
 			//加载替换页面
 			tpl, err = tpl.ParseFS(Templates.FilesAdd, "admin/*.html")
 			if err != nil {

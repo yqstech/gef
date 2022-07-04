@@ -48,6 +48,7 @@
             width: 100%;
             height: 50px;
             text-align: left;
+            margin-bottom: 10px;
         }
 
         .form-group .upload_image_view img {
@@ -205,6 +206,8 @@
         {text:'{{$v.text}}'{{if $v.style}},style:'{{$v.style}}'{{end}}{{if $v.class}},classes:'{{$v.class}}'{{end}}},
         {{- end -}}
         ],
+        {{else if eq $field.Type "images"}}
+        "{{$field.Key}}":{{if $field.Value}}{{$field.Value}}{{end}},
         {{else if eq $field.Type "checkbox"}}
         "{{$field.Key}}":{{if $field.Value}}{{$field.Value}}{{end}},
         {{else if eq $field.Type "checkbox_level"}}
@@ -299,6 +302,36 @@
                             }
                             that.$forceUpdate()
                             console.log(that.formFields[field_key])
+                        }
+                    });
+            },
+            uploadImages: function (event,field_key,field_key2="") {
+                let file = event.target.files[0];
+                //获取上传元素信息
+                var that = this;
+                event.preventDefault();
+                // 只能通过formData方式来传输文件
+                var formData = new FormData();
+                formData.append("file", file);
+                let config = {
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    }
+                };
+                this.$http
+                    .post("{{.uploadImageUrl}}", formData, config)
+                    .then(function (res) {
+                        if (res.data.code == 200 && res.data.data.url) {
+                            var image_url = res.data.data.url;
+                            if(field_key2==""){
+                                that.formFields[field_key].push(image_url);
+                            }else{
+                                if(!that.formFields[field_key][field_key2]){
+                                    that.formFields[field_key][field_key2] = [];
+                                }
+                                that.formFields[field_key][field_key2].push(image_url);
+                            }
+                            that.$forceUpdate()
                         }
                     });
             },

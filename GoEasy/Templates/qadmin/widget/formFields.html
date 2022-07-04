@@ -122,6 +122,24 @@
         </div>
         {{- end -}}
 
+        {{/* 多图片上传 */}}
+        {{- if eq $field.Type "images"}}
+        <div class="image-list">
+            <div v-for="(item,index) in formFields.{{$field.Key}}" class="upload_image_view">
+                <img :src="item" />
+                <a title="删除" style="cursor: pointer;background:#ffffff;border: 1px solid #222222;color:#222222;padding:1px;border-radius: 50px" class="ri-close-line" @click="formFields.{{$field.Key}}.splice(index,1)"></a>
+            </div>
+            <div class="upload_image_btn" style="color: #00a0e9">
+                <i class="layui-icon layui-icon-upload-drag" style="font-size:32px"></i>
+                <label><input type="file" accept="image/x-png,image/gif,image/jpeg,image/bmp"
+                              @change="uploadImages($event,'{{$field.Key}}')" /></label>
+            </div>
+        </div>
+        <div style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+
         {{/* 标签框 */}}
         {{- if eq $field.Type "tags"}}
         <vue-tags-input
