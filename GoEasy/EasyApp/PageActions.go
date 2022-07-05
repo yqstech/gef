@@ -797,7 +797,7 @@ func (nf Page) doUpload(pageData *PageData, w http.ResponseWriter, r *http.Reque
 
 	buf := bytes.NewBuffer(nil)
 	if _, err := io.Copy(buf, file); err != nil {
-		return nil, errors.New("图片计算出错！")
+		return nil, errors.New("拷贝文件出错！")
 	}
 	//md5
 	md5er := md5.New()

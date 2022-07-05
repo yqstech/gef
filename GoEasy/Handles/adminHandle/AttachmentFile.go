@@ -46,6 +46,10 @@ var FileExtImage = map[string]string{
 	".rmvb": "/static/images/exts/video.png",
 	".flv":  "/static/images/exts/video.png",
 	".3gp":  "/static/images/exts/video.png",
+	".png":  "/static/images/exts/png.png",
+	".jpg":  "/static/images/exts/jpg.png",
+	".jpeg":  "/static/images/exts/jpg.png",
+	".gif":  "/static/images/exts/gif.png",
 	"other": "/static/images/exts/other.png",
 }
 

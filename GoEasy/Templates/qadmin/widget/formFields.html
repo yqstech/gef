@@ -104,14 +104,12 @@
         {{- if eq $field.Type "image"}}
         <div class="layui-col-sm2">
             <div v-if="formFields.{{$field.Key}}==''" class="upload_image_btn" style="color: #00a0e9">
-                <i class="layui-icon layui-icon-upload-drag" style="font-size:32px"></i>
+                <i class="ri-image-add-fill" style="font-size:32px!important"></i>
                 <label><input type="file" accept="image/x-png,image/gif,image/jpeg,image/bmp"
                         @change="uploadImageFile($event,'{{$field.Key}}')" /></label>
             </div>
             <div v-else class="upload_image_view">
                 <img :src="formFields.{{$field.Key}}" />
-                <label><input type="file" accept="image/x-png,image/gif,image/jpeg,image/bmp"
-                        @change="uploadImageFile($event,'{{$field.Key}}')" /></label>
             </div>
         </div>
         <div class="layui-col-sm2">
@@ -130,13 +128,86 @@
                 <a title="删除" style="cursor: pointer;background:#ffffff;border: 1px solid #222222;color:#222222;padding:1px;border-radius: 50px" class="ri-close-line" @click="formFields.{{$field.Key}}.splice(index,1)"></a>
             </div>
             <div class="upload_image_btn" style="color: #00a0e9">
-                <i class="layui-icon layui-icon-upload-drag" style="font-size:32px"></i>
+                <i class="ri-image-add-fill" style="font-size:32px!important"></i>
                 <label><input type="file" accept="image/x-png,image/gif,image/jpeg,image/bmp"
                               @change="uploadImages($event,'{{$field.Key}}')" /></label>
             </div>
         </div>
         <div style="line-height: 36px;text-align: left;color:#999">
             <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+
+        {{/* 文件上传 */}}
+        {{- if eq $field.Type "file"}}
+        <div class="layui-col-sm2">
+            <div v-if="formFields.{{$field.Key}}==''" class="upload_image_btn" style="color: #fc8a43">
+                <i class="ri-file-upload-line" style="font-size:32px!important"></i>
+                <label><input type="file" @change="uploadFile($event,'{{$field.Key}}')" /></label>
+            </div>
+            <div v-else class="upload_image_view">
+                <img :src="'/static/images/exts/'+file_ext_image(formFields.{{$field.Key}})+'.png'" style="width:40px" />
+            </div>
+        </div>
+        <div class="layui-col-sm2">
+            <a v-if="formFields.{{$field.Key}}!=''" title="删除" style="cursor: pointer;background:#ffffff;border: 1px solid #222222;color:#222222;padding:1px;border-radius: 50px" class="ri-close-line" @click="formFields.{{$field.Key}}=''"></a>
+        </div>
+        <div class="layui-col-sm8" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+
+        {{/* 视频上传 */}}
+        {{- if eq $field.Type "video"}}
+        <div class="layui-col-sm6">
+            <div v-if="formFields.{{$field.Key}}==''" class="upload_image_btn" style="color: #fc8a43">
+                <i class="ri-video-upload-line" style="font-size:32px!important"></i>
+                <label><input type="file" accept="video/mp4,video/avi,video/mov,video/rmvb,video/3gp" @change="uploadFile($event,'{{$field.Key}}')" /></label>
+            </div>
+            <div v-else class="upload_image_view">
+                <video width="320" controls>
+                    <source :src="formFields.{{$field.Key}}" :type="'video/'+file_ext(formFields.{{$field.Key}})">
+                    您的浏览器不支持 HTML5 video 标签。
+                </video>
+            </div>
+        </div>
+        <div class="layui-col-sm2">
+            <a v-if="formFields.{{$field.Key}}!=''" title="删除" style="cursor: pointer;background:#ffffff;border: 1px solid #222222;color:#222222;padding:1px;border-radius: 50px" class="ri-close-line" @click="formFields.{{$field.Key}}=''"></a>
+        </div>
+        <div style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+
+        {{/* 音频上传 */}}
+        {{- if eq $field.Type "audio"}}
+        <div class="layui-col-sm6">
+            <div v-if="formFields.{{$field.Key}}==''" class="upload_image_btn" style="color: #fc8a43">
+                <i class="ri-music-2-fill" style="font-size:32px!important"></i>
+                <i class="ri-add-circle-line" style="font-size: 15px !important; margin-left: -15px;color:#ffffff;background:#fc8a43;border-radius:50%"></i>
+                <label><input type="file" accept="audio/*" @change="uploadFile($event,'{{$field.Key}}')" /></label>
+            </div>
+            <div v-else class="upload_image_view">
+                <audio controls>
+                    <source v-if="file_ext(formFields.{{$field.Key}})=='wav'" :src="formFields.{{$field.Key}}" type="audio/wav">
+                    <source v-else :src="formFields.{{$field.Key}}" type="audio/mpeg">
+                    您的浏览器不支持 audio 元素。
+                </audio>
+            </div>
+        </div>
+        <div class="layui-col-sm2">
+            <a v-if="formFields.{{$field.Key}}!=''" title="删除" style="cursor: pointer;background:#ffffff;border: 1px solid #222222;color:#222222;padding:1px;border-radius: 50px" class="ri-close-line" @click="formFields.{{$field.Key}}=''"></a>
+        </div>
+        <div style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+
+        {{/* 百度取经纬度 */}}
+        {{- if eq $field.Type "lnglat"}}
+        <div class="bd_map" style="width:100%;height:400px;position: relative;">
+            <div id="bd_map_{{$field.Key}}" style="width:100%;height:100%"></div>
+            <i class="map_center ri-map-pin-2-fill"></i>
         </div>
         {{- end -}}
 

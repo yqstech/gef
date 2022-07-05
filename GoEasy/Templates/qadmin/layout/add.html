@@ -46,17 +46,27 @@
 
         .form-group .upload_image_view {
             width: 100%;
-            height: 50px;
             text-align: left;
             margin-bottom: 10px;
         }
 
         .form-group .upload_image_view img {
-            max-height: 50px;
+            max-height: 80px;
             cursor: pointer;
             position: relative;
         }
-
+        .map_center{
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width:26px;
+            height: 26px;
+            margin-left: -13px;
+            margin-top: -26px;
+            z-index: 999;
+            color: #ff5900 !important;
+            font-size: 28px!important;
+        }
     </style>
 </head>
 
@@ -175,6 +185,7 @@
 <script src="/static/wangeditor_v5/index.min.js"></script>
 <script src="/static/wangeditor_v5/plugin-upload-attachment.js"></script>
 <script src="/static/js/vue-tags-input.js"></script>
+<script src="//api.map.baidu.com/api?type=webgl&v=1.0&ak=aWyD3O4BEPzwhriksb0cRcqTbjS8Lt2v"></script>
 <script>
     var GetOnlyID = function (){
         var id = Math.random().toString(36).substr(2)
@@ -287,6 +298,9 @@
                                 that.formFields[field_key][field_key2] = image_url;
                             }
                             that.$forceUpdate()
+                        }else{
+                            //错误提示
+                            layer.msg(res.data.msg);
                         }
                     });
             },
@@ -317,8 +331,75 @@
                                 that.formFields[field_key][field_key2].push(image_url);
                             }
                             that.$forceUpdate()
+                        }else{
+                            //错误提示
+                            layer.msg(res.data.msg);
                         }
                     });
+            },
+            uploadFile: function (event,field_key,field_key2="") {
+                let file = event.target.files[0];
+                //获取上传元素信息
+                var that = this;
+                event.preventDefault();
+                // 只能通过formData方式来传输文件
+                var formData = new FormData();
+                formData.append("file", file);
+                let config = {
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    }
+                };
+                this.$http
+                    .post("{{.uploadImageUrl}}", formData, config)
+                    .then(function (res) {
+                        if (res.data.code == 200 && res.data.data.url) {
+                            const url = res.data.data.url
+                            if(field_key2==""){
+                                that.formFields[field_key] = url;
+                            }else{
+                                that.formFields[field_key][field_key2] = url;
+                            }
+                            that.$forceUpdate()
+                        }else{
+                            //错误提示
+                            layer.msg(res.data.msg);
+                        }
+                    });
+            },
+            //根据后缀判断文件类型
+            file_ext_image(path) {
+                const p = path.split(".")
+                if (p.length == 2) {
+                    let ext = p[1].toLowerCase();
+                    let extMap = {
+                        "video":["mp4","avi","mov","rmvb","flv","3gp"],
+                        "audio":["mp3","wav","aif","midi","m4a"],
+                        "doc":["doc","docx","dotx","dot","docm"],
+                        "ppt":["ppt","pptx","pps","ppsx"],
+                        "xls":["xls","xlsx"],
+                        "pdf":["pdf"],
+                        "txt":["txt"],
+                        "zip":["zip","7z","rar"],
+                        "jpg":["jpg","jpeg"],
+                        "gif":["gif"],
+                        "png":["png"]
+                    }
+                    for(let extName in extMap){
+                        if (extMap[extName].indexOf(ext) !== -1) {
+                            return extName;
+                        }
+                    }
+                }
+                return 'other';
+            },
+            file_ext(path){
+                const p = path.split(".")
+                if (p.length == 2) {
+                    let ext = p[1].toLowerCase();
+                    return ext
+                }
+                return '';
             },
             //监听数据绑定
             formFieldsValueBind:function(keyName,watchValue,bindValues){
@@ -638,6 +719,48 @@
             vue.formFields.{{$field.Key}} = value;
         }
     });
+    {{- end -}}
+    {{- end -}}
+    {{range $fieldIndex,$field:=.formFields}}
+    {{- if eq $field.Type "lnglat"}}
+    var map_{{$field.Key}} = new BMapGL.Map('bd_map_{{$field.Key}}');
+    var lnglat_{{$field.Key}} = vue.formFields.{{$field.Key}}
+    var lng_{{$field.Key}} = 116.331398;
+    var lat_{{$field.Key}} = 39.897445;
+    if(lnglat_{{$field.Key}}!=""){
+        var ll_{{$field.Key}} = lnglat_{{$field.Key}}.split(',')
+        lng_{{$field.Key}} = ll_{{$field.Key}}[0]
+        lat_{{$field.Key}} = ll_{{$field.Key}}[1]
+    }
+    map_{{$field.Key}}.centerAndZoom(new BMapGL.Point(lng_{{$field.Key}}, lat_{{$field.Key}}), 15);
+    map_{{$field.Key}}.enableScrollWheelZoom(true);
+    map_{{$field.Key}}.addEventListener('click', function (e) {
+        //点击设置位置并移动中心点
+        vue.formFields.{{$field.Key}} = e.latlng.lng + ',' + e.latlng.lat;
+        map_{{$field.Key}}.setCenter(new BMapGL.Point(e.latlng.lng, e.latlng.lat));
+        layer.msg("选择经纬度："+vue.formFields.{{$field.Key}});
+    });
+    map_{{$field.Key}}.addEventListener('dragend', function(){
+        //拖动获取中心点
+        var cen = map_{{$field.Key}}.getCenter();
+        vue.formFields.{{$field.Key}} = cen.lng + ',' + cen.lat;
+        layer.msg("选择经纬度："+vue.formFields.{{$field.Key}});
+    })
+    map_{{$field.Key}}.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+    var scaleCtrl = new BMapGL.ScaleControl();  // 添加比例尺控件
+    map_{{$field.Key}}.addControl(scaleCtrl);
+    var zoomCtrl = new BMapGL.ZoomControl();  // 添加缩放控件
+    map_{{$field.Key}}.addControl(zoomCtrl);
+    // 创建城市选择控件
+    var cityControl = new BMapGL.CityListControl({
+        // 控件的停靠位置（可选，默认左上角）
+        anchor: BMAP_ANCHOR_TOP_RIGHT,
+        // 控件基于停靠位置的偏移量（可选）
+        offset: new BMapGL.Size(10, 5)
+    });
+    // 将控件添加到地图上
+    map_{{$field.Key}}.addControl(cityControl);
+
     {{- end -}}
     {{- end -}}
 
