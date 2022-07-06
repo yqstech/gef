@@ -538,7 +538,10 @@
                     type: 1,
                     content: $('#iconSelectBox'),
                     title: "选择图标",
-                    area: ['80%', '90%']
+                    area: ['80%', '90%'],
+                    cancel: function (index, layero) {
+                        $("#iconSelectBox").hide()
+                    }
                 })
             }
         }
