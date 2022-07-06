@@ -210,5 +210,19 @@ func (t *Template) Functions() template.FuncMap {
 			return nil
 		},
 		"json_encode": util.JsonEncode,
+		"hasType": func(formFields []FormField, types string) bool {
+			if types == "" {
+				return false
+			}
+			typeList := strings.Split(types, ",")
+			for _, formField := range formFields {
+				for _, t := range typeList {
+					if formField.Type == t {
+						return true
+					}
+				}
+			}
+			return false
+		},
 	}
 }

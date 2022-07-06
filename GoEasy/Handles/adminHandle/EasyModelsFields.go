@@ -58,10 +58,13 @@ var formDataType = []map[string]interface{}{
 	{"name": "视频上传(video)", "value": "video"},
 	{"name": "音频上传(audio)", "value": "audio"},
 	{"name": "文件上传(file)", "value": "file"},
+	{"name": "Icon图标选择器(icon)", "value": "icon"},
+	{"name": "标签Tags(tags)", "value": "tags"},
 	{"name": "富文本编辑(wangEditor)", "value": "wangEditor"},
 	{"name": "日期时间选择器(datetime)", "value": "datetime"},
 	{"name": "日期选择器(date)", "value": "date"},
 	{"name": "时间选择器(time)", "value": "time"},
+	{"name": "百度地图位置选择器(lnglat)", "value": "lnglat"},
 }
 
 //数据库数据变换规则

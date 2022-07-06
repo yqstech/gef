@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>{{.title}}</title>
     <link rel="stylesheet" href="/static/layui/css/layui.css">
+    {{if hasType .formFields "wangEditor" -}}
     <link rel="stylesheet" href="/static/wangeditor_v5/style.css">
+    {{- end -}}
     <link rel="stylesheet" href="/static/qadmin/css/style.css?v=12">
     <script src="/static/layui/layui.all.js"></script>
     <script src="/static/js/jquery-3.3.1.min.js"></script>
@@ -69,7 +70,6 @@
         }
     </style>
 </head>
-
 <body class="p20">
 <div id="app" v-cloak>
     {{- if gt .pageTabsLength 0}}
@@ -91,6 +91,8 @@
         </div>{{- end -}}
     </div>
 </div>
+
+{{if hasType .formFields "codeEditor,code" -}}
 <!--html编辑器-->
 <link rel="stylesheet" href="/static/codemirror/lib/codemirror.css">
 <link rel="stylesheet" href="/static/codemirror/addon/hint/show-hint.css">
@@ -178,20 +180,29 @@
 <script src="/static/codemirror/addon/fold/indent-fold.js"></script>
 <script src="/static/codemirror/addon/selection/mark-selection.js"></script>
 <!--html编辑器end-->
+{{- end -}}
+
 <script src="/static/qadmin/js/config.js?v=12.04"></script>
 <script src="/static/qadmin/js/comm.js?v=1.02"></script>
 <script src="/static/js/lodash.min.js"></script>
 <script src="/static/js/vue-resource.min.js"></script>
+{{if hasType .formFields "tags" -}}
+<script src="/static/js/vue-tags-input.js"></script>
+{{- end -}}
+{{if hasType .formFields "wangEditor" -}}
 <script src="/static/wangeditor_v5/index.min.js"></script>
 <script src="/static/wangeditor_v5/plugin-upload-attachment.js"></script>
-<script src="/static/js/vue-tags-input.js"></script>
+{{- end -}}
+{{if hasType .formFields "lnglat" -}}
 <script src="//api.map.baidu.com/api?type=webgl&v=1.0&ak=aWyD3O4BEPzwhriksb0cRcqTbjS8Lt2v"></script>
+{{- end -}}
 <script>
     var GetOnlyID = function (){
         var id = Math.random().toString(36).substr(2)
         console.log(id)
         return id
     }
+    var iconLayer;
     layui.use('form', function () {
         var form = layui.form;
     });
@@ -236,6 +247,7 @@
             formFields:{},
             posting: 0,
             tempData: {},
+            iconFieldKey:"",//弹出图标选择框
         },
         created: function () {
             this.formFields = formFields
@@ -517,11 +529,24 @@
                         }
                     }
                 }
+            },
+            iconSelect(fieldKey){
+                //记录当前操作的字段
+                this.iconFieldKey = fieldKey;
+                //打开选择框
+                iconLayer = layer.open({
+                    type: 1,
+                    content: $('#iconSelectBox'),
+                    title: "选择图标",
+                    area: ['80%', '90%']
+                })
             }
         }
     });
+    {{if hasType .formFields "wangEditor" -}}
     const E = window.wangEditor;
     E.Boot.registerModule(window.WangEditorPluginUploadAttachment.default)
+    {{- end -}}
     {{range $fieldIndex,$field:=.formFields}}
     {{- if eq $field.Type "wangEditor"}}
     let wangHtml_{{$field.Key}} = `{{$field.Value}}`;
@@ -772,6 +797,9 @@
         padding: 5px;
     }
 </style>
+{{if hasType .formFields "icon" -}}
+{{template "iconSelectBox" .}}
+{{- end -}}
 </body>
 
 </html>

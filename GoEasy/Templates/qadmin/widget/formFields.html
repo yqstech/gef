@@ -77,6 +77,21 @@
         </select>
         {{- end -}}
 
+        {{/* 图标选择器 */}}
+        {{- if eq $field.Type "icon"}}
+        <div class="layui-col-sm6" style="max-width:200px">
+            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
+                   autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-col-sm3" style="width:50px;text-align:center;line-height:36px">
+            <i class="" :class="formFields.{{$field.Key}}" style="min-width: 20px;display:block;"></i>
+        </div>
+        <div class="layui-col-sm3" style="line-height:36px;margin-left: 3px">
+            <button type="button" class="layui-btn layui-btn-normal" @click="iconSelect('{{$field.Key}}')">选择图标</button>
+            <button type="button" class="layui-btn layui-btn-warm" @click="formFields.{{$field.Key}}=''">清除</button>
+        </div>
+        {{- end -}}
+
         {{/* 模拟单选框 */}}
         {{- if eq $field.Type "radio"}}
         {{range $k,$v := $field.Data}}
