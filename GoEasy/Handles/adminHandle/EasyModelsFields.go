@@ -33,6 +33,7 @@ var listDataType = []map[string]interface{}{
 	{"name": "图标(icon)", "value": "icon"},
 	{"name": "开关(switch)", "value": "switch"},
 	{"name": "图片(image)", "value": "image"},
+	{"name": "图片100尺寸(image100)", "value": "image100"},
 	{"name": "图片60尺寸(image60)", "value": "image60"},
 	{"name": "图片50尺寸(image50)", "value": "image50"},
 	{"name": "图片40尺寸(image60)", "value": "image40"},

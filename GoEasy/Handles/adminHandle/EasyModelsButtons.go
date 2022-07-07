@@ -62,7 +62,7 @@ func (that EasyModelsButtons) NodeForm(pageData *EasyApp.PageData, id int64) (er
 	pageData.FormFieldsAdd("button_key", "text", "按钮关键字", "系统内的唯一按钮识别标记", "btn_", true, nil, "", nil)
 	pageData.FormFieldsAdd("button_note", "text", "按钮备注信息", "按钮的备注信息", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("button_name", "text", "按钮名称", "按钮显示的文字", "", true, nil, "", nil)
-	pageData.FormFieldsAdd("button_icon", "text", "按钮图标", "按钮显示的图标 ri-xxx", "ri-radio-button-line", false, nil, "", nil)
+	pageData.FormFieldsAdd("button_icon", "icon", "按钮图标", "按钮显示的图标 ri-xxx", "ri-radio-button-line", false, nil, "", nil)
 	pageData.FormFieldsAdd("class_name", "select", "按钮样式", "按钮样式类", "", false, btnClasses, "", nil)
 	pageData.FormFieldsAdd("display", "text", "按钮显示条件", "按钮显示隐藏条件，根据列表项的字段信息自动判断", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("action_type", "radio", "按钮页面类型", "", "1", true, btnActionTypes, "", nil)

@@ -261,15 +261,15 @@
 
         {{/* 日期时间组件 */}}
         {{- if eq $field.Type "datetime"}}
-        <input type="text" class="layui-input" id="datetime_{{$field.Key}}" placeholder="{{$field.Title}}"
+        <input type="text" class="layui-input" id="datetime_{{$field.Key}}" placeholder="{{$field.Notice}}"
             style="{{$field.Style}}">
         {{- end -}}
         {{- if eq $field.Type "date"}}
-        <input type="text" class="layui-input" id="date_{{$field.Key}}" placeholder="{{$field.Title}}"
+        <input type="text" class="layui-input" id="date_{{$field.Key}}" placeholder="{{$field.Notice}}"
             style="{{$field.Style}}">
         {{- end -}}
         {{- if eq $field.Type "time"}}
-        <input type="text" class="layui-input" id="time_{{$field.Key}}" placeholder="{{$field.Title}}"
+        <input type="text" class="layui-input" id="time_{{$field.Key}}" placeholder="{{$field.Notice}}"
             style="{{$field.Style}}">
         {{- end -}}
 
