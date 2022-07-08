@@ -24,7 +24,7 @@ type PageData struct {
 	RequestID  string                //请求ID
 	ActivePage AppPage               //真实结构体对象
 	ActionList map[string]PageAction //页面的处理方法列表
-
+	
 	//http请求
 	httpW  http.ResponseWriter
 	httpR  *http.Request
@@ -56,39 +56,39 @@ type PageData struct {
 	pageTabs []pageTab
 	// pageTabSelect Tab选项卡选中第几个
 	pageTabSelect int
-
+	
 	// 列表查询字段，默认全查
 	listFields string
-
+	
 	// 列表数据中需要删除的字段
 	listFieldsRemove []string
-
+	
 	// 列表页排序
 	listOrder string
-
+	
 	// 列表页数据查询地址
 	listDataUrl string
-
+	
 	listPage int
-
+	
 	//隐藏分页组件
 	listPageHide bool
-
+	
 	// 列表页数据分页大小
 	listPageSize int
-
+	
 	// 列表页查询条件
 	listCondition [][]interface{}
-
+	
 	// 全部按钮列表
 	buttons map[string]Button
-
+	
 	// 列表页右侧按钮组
 	listRightBtns []string
-
+	
 	// 列表顶部按钮组
 	listTopBtns []string
-
+	
 	// 列表展示列列表
 	listColumns []ListColumn
 	//列表展示列样式
@@ -264,14 +264,14 @@ func (fd *PageData) DataReset() {
 	}
 	fd.listColumnsStyles = map[string]interface{}{}
 	fd.listSearchFields = []ListSearchField{}
-
+	
 	fd.addDataUrl = ""
 	fd.addTplName = "add.html"
-
+	
 	fd.findDataUrl = "find"
 	fd.editDataUrl = ""
 	fd.editTplName = "edit.html"
-
+	
 	fd.formFields = []FormField{}
 	fd.formFieldKeys = []interface{}{}
 	fd.formSubmitTitle = ""
@@ -431,6 +431,22 @@ func (fd *PageData) SetButtonIcon(btnName, icon string) {
 	}
 }
 
+//SetButtonActionUrl 设置按钮链接地址 是否是追加
+func (fd *PageData) SetButtonActionUrl(btnName, url string, isAddend bool) {
+	if btn, ok := fd.buttons[btnName]; ok {
+		if isAddend {
+			if strings.Contains(btn.ActionUrl, "?") {
+				btn.ActionUrl = btn.ActionUrl + "&" + url
+			} else {
+				btn.ActionUrl = btn.ActionUrl + "?" + url
+			}
+		} else {
+			btn.ActionUrl = url
+		}
+		fd.buttons[btnName] = btn
+	}
+}
+
 // ListRightBtnsAdd 右侧按钮新增
 func (fd *PageData) ListRightBtnsAdd(btns ...string) {
 	fd.listRightBtns = append(fd.listRightBtns, btns...)
@@ -473,7 +489,7 @@ func (fd *PageData) ListColumnAdd(FieldName, ColumnName, DataType string, Data [
 			MapData[dataK] = dataV
 		}
 	}
-
+	
 	//DataType参数支持::指令写法,可以设置组件参数
 	Options := map[string]interface{}{}
 	if strings.Contains(DataType, "::") {
@@ -514,13 +530,13 @@ func (fd *PageData) ListColumnClear() {
 func (fd *PageData) ListSearchFieldAdd(fkey, ftype, ftitle string, defvalue interface{}, value interface{}, data []map[string]interface{},
 	style string,
 	expand map[string]interface{}) {
-
+	
 	//数据自动转map
 	MapData := map[interface{}]interface{}{}
 	for _, v := range data {
 		MapData[v["value"]] = v["name"]
 	}
-
+	
 	fd.listSearchFields = append(fd.listSearchFields, ListSearchField{
 		Key:      fkey,
 		Type:     ftype,

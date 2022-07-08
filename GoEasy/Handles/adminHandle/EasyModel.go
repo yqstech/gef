@@ -76,6 +76,13 @@ func (that EasyModel) NodeList(pageData *EasyApp.PageData) (error, int) {
 			}
 		}
 		pageData.SetListTopBtns(topBtns...)
+		//!URL参数透传到顶部按钮上
+		for _, urlParam := range easyModel.UrlParams {
+			for _, btn := range topBtns {
+				urlAppend := urlParam.FieldKey + "=" + util.GetValue(pageData.GetHttpRequest(), urlParam.ParamKey)
+				pageData.SetButtonActionUrl(btn, urlAppend, true)
+			}
+		}
 		//!右侧按钮
 		rightBtns := easyModel.RightButtons
 		//修改
@@ -320,16 +327,24 @@ func (that EasyModel) NodeForm(pageData *EasyApp.PageData, id int64) (error, int
 
 // NodeFormData 表单显示前修改数据
 func (that EasyModel) NodeFormData(pageData *EasyApp.PageData, data gorose.Data, id int64) (gorose.Data, error, int) {
-	if id > 0 {
-		easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey)
-		if err != nil {
-			return data, nil, 0
-		} else {
+	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey)
+	if err != nil {
+		return data, nil, 0
+	} else {
+		if id > 0 {
+			//修改页
 			for _, field := range easyModel.Fields {
 				//当前键需要元和分互转
 				if field.SaveTransRule == "yuan2fen" {
 					data[field.FieldKey] = util.Money(data[field.FieldKey].(int64))
 				}
+			}
+		} else {
+			//新增页链接参数透传
+			for _, urlParam := range easyModel.UrlParams {
+				field := urlParam.FieldKey
+				value := util.GetValue(pageData.GetHttpRequest(), field)
+				data[field] = value
 			}
 		}
 	}
