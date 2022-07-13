@@ -156,32 +156,35 @@ func GetEasyModelInfo(modelKey string) (EasyModel, error) {
 			allButton = append(allButton, btn["text"])
 		}
 		//!获取自定义按钮列表
-		selfButtonList, err := db.New().Table("tb_easy_models_buttons").
-			Where("is_delete", 0).
-			Where("status", 1).
-			WhereIn("button_key", allButton).
-			Get()
-		if err != nil {
-			logger.Error(err.Error())
-			return EasyModel{}, errors.New("系统运行错误！")
-		}
-		for _, btnInfo := range selfButtonList {
-			easyModel.Buttons[btnInfo["button_key"].(string)] = EasyApp.Button{
-				ButtonName: btnInfo["button_name"].(string),
-				Action:     btnInfo["action"].(string),
-				ActionType: util.Int642Int(btnInfo["action_type"].(int64)),
-				ConfirmMsg: btnInfo["confirm_msg"].(string),
-				LayerTitle: btnInfo["layer_title"].(string),
-				ActionUrl:  btnInfo["action_url"].(string),
-				Class:      btnInfo["class_name"].(string),
-				Icon:       btnInfo["button_icon"].(string),
-				Display:    btnInfo["display"].(string),
-				Expand: map[string]string{
-					"w": btnInfo["layer_width"].(string),
-					"h": btnInfo["layer_height"].(string),
-				},
+		if len(allButton)>0{
+			selfButtonList, err := db.New().Table("tb_easy_models_buttons").
+				Where("is_delete", 0).
+				Where("status", 1).
+				WhereIn("button_key", allButton).
+				Get()
+			if err != nil {
+				logger.Error(err.Error())
+				return EasyModel{}, errors.New("系统运行错误！")
+			}
+			for _, btnInfo := range selfButtonList {
+				easyModel.Buttons[btnInfo["button_key"].(string)] = EasyApp.Button{
+					ButtonName: btnInfo["button_name"].(string),
+					Action:     btnInfo["action"].(string),
+					ActionType: util.Int642Int(btnInfo["action_type"].(int64)),
+					ConfirmMsg: btnInfo["confirm_msg"].(string),
+					LayerTitle: btnInfo["layer_title"].(string),
+					ActionUrl:  btnInfo["action_url"].(string),
+					Class:      btnInfo["class_name"].(string),
+					Icon:       btnInfo["button_icon"].(string),
+					Display:    btnInfo["display"].(string),
+					Expand: map[string]string{
+						"w": btnInfo["layer_width"].(string),
+						"h": btnInfo["layer_height"].(string),
+					},
+				}
 			}
 		}
+		
 		//!格式化url参数
 		urlParams := strings.Split(modelInfo["url_params"].(string), "\n")
 		for _, urlParam := range urlParams {
