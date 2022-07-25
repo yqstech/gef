@@ -39,6 +39,7 @@ type EasyModel struct {
 	TopButtons   []string                  //顶部按钮
 	RightButtons []string                  //右侧操作按钮
 	UrlParams    []UrlParam                //链接参数
+	LevelIndent  string                    //按级缩进
 }
 type Tab struct {
 	TabName         string //tab页名称
@@ -117,6 +118,7 @@ func GetEasyModelInfo(modelKey string) (EasyModel, error) {
 			TopButtons:   []string{},
 			RightButtons: []string{},
 			UrlParams:    []UrlParam{},
+			LevelIndent:  modelInfo["level_indent"].(string),
 		}
 		//格式化多tab页
 		if modelInfo["tabs_for_list"].(string) != "" {
@@ -156,7 +158,7 @@ func GetEasyModelInfo(modelKey string) (EasyModel, error) {
 			allButton = append(allButton, btn["text"])
 		}
 		//!获取自定义按钮列表
-		if len(allButton)>0{
+		if len(allButton) > 0 {
 			selfButtonList, err := db.New().Table("tb_easy_models_buttons").
 				Where("is_delete", 0).
 				Where("status", 1).

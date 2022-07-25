@@ -292,13 +292,14 @@ func (that EasyModelsFields) syncModelFields(easyModelId int) {
 	tableName := easyModelInfo["table_name"].(string)
 
 	//查询数据表实时字段信息
-	query, err := db.New().Query("select COLUMN_NAME,COLUMN_COMMENT,COLUMN_DEFAULT,COLUMN_TYPE from information_schema.COLUMNS where table_name = ? and table_schema = ?", tableName,
+	query, err := db.New().Query("select COLUMN_NAME,COLUMN_COMMENT,COLUMN_DEFAULT," +
+		"COLUMN_TYPE from information_schema.COLUMNS where table_name = ? and table_schema = ? order by ordinal_position",
+		tableName,
 		config.DbName)
 	if err != nil {
 		logger.Error(err.Error())
 		return
 	}
-	//logger.Debug(util.JsonEncode(query))
 
 	//查询模型字段列表
 	fields, err := db.New().Table("tb_easy_models_fields").

@@ -73,6 +73,9 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 	pageData.FormFieldsAdd("static_data", "textarea", "静态数据", "", "[{\"name\":\"是\",\"value\":\"1\"},{\"name\":\"否\",\"value\":\"0\"}]", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==0",
 	})
+	pageData.FormFieldsAdd("default_data", "textarea", "默认数据", "和静态数据格式相同", "", false, nil, "", map[string]interface{}{
+		"if": "formFields.data_type==1",
+	})
 	pageData.FormFieldsAdd("", "block", "配置数据表", "", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})

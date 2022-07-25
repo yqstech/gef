@@ -53,6 +53,9 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 				util.JsonDecode(data["static_data"].(string), &selectData)
 			}
 		} else {
+			if data["default_data"].(string) != "" {
+				util.JsonDecode(data["default_data"].(string), &selectData)
+			}
 			//数据表查询支持补充颜色和图标
 			colorArray := strings.Split(data["color_array"].(string), ",")
 			iconArray := strings.Split(data["icon_array"].(string), ",")
@@ -106,7 +109,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 					}
 				}
 			}
-			selectData = arrOptions
+			selectData = append(selectData, arrOptions...)
 		}
 		if beautify {
 			//静态数据渲染文本

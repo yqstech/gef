@@ -28,11 +28,9 @@ func (that Admin) GetAccountInfoByToken(token string) map[string]interface{} {
 		return nil
 	}
 	if tokenInfo == nil {
-		logger.Info("token记录为空")
 		return nil
 	}
 	if tokenInfo["account_id"].(int64) == 0 {
-		logger.Info("token记录账户ID为0")
 		return nil
 	}
 	//获取供货商信息

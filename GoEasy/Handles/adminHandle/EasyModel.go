@@ -171,6 +171,26 @@ func (that EasyModel) NodeListData(pageData *EasyApp.PageData, data []gorose.Dat
 	if err != nil {
 		return data, nil, 0
 	} else {
+		//按级缩进
+		if easyModel.LevelIndent != "" {
+			LevelIndent := strings.Split(easyModel.LevelIndent, ":")
+			if len(LevelIndent) == 2 {
+				data = Models.Model{}.GoroseDataLevelOrder(data, "id", LevelIndent[0], 0, 0)
+				for k, v := range data {
+					if v["level"] == int64(0) {
+						data[k][LevelIndent[1]] = "&nbsp;&nbsp;" + v[LevelIndent[1]].(string)
+					} else if v["level"] == int64(1) {
+						data[k][LevelIndent[1]] = "&nbsp;&nbsp;&nbsp;&nbsp;├─&nbsp;" + v[LevelIndent[1]].(string)
+					} else if v["level"] == int64(2) {
+						data[k][LevelIndent[1]] = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─&nbsp;" + v[LevelIndent[1]].(string)
+					} else if v["level"] == int64(3) {
+						data[k][LevelIndent[1]] = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─&nbsp;" + v[LevelIndent[1]].(string)
+					} else if v["level"] == int64(4) {
+						data[k][LevelIndent[1]] = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├&nbsp;&nbsp;&nbsp;&nbsp;├─&nbsp;" + v[LevelIndent[1]].(string)
+					}
+				}
+			}
+		}
 		//存储数据还原
 		//遍历所有键
 		for _, field := range easyModel.Fields {
@@ -316,7 +336,7 @@ func (that EasyModel) NodeForm(pageData *EasyApp.PageData, id int64) (error, int
 						}
 					}
 					//增加表单项
-					pageData.FormFieldsAdd(field.FieldKey, field.DataTypeOnCreate, field.FieldName, field.FieldNotice, field.DefaultValue, field.IsMust, FieldOptions, "", expand)
+					pageData.FormFieldsAdd(field.FieldKey, field.DataTypeOnUpdate, field.FieldName, field.FieldNotice, field.DefaultValue, field.IsMust, FieldOptions, "", expand)
 				}
 			}
 		}

@@ -13,7 +13,7 @@ import (
 	"errors"
 	"github.com/gef/GoEasy/Utils/db"
 	"github.com/gef/GoEasy/Utils/util"
-
+	
 	"github.com/gohouse/gorose/v2"
 	"github.com/wonderivan/logger"
 )
@@ -44,7 +44,7 @@ var DefaultIsOrNot = []map[string]interface{}{
 //  @return int
 //
 func (mod Model) SelectOptionsData(tbName string, keyTrans map[string]string, defValue, defName, where string, order string) ([]map[string]interface{}, error, int) {
-
+	
 	//设置默认值
 	var result []map[string]interface{}
 	if defValue != "" && defName != "" {
@@ -71,7 +71,7 @@ func (mod Model) SelectOptionsData(tbName string, keyTrans map[string]string, de
 	if gList != nil {
 		result = append(result, gList...)
 	}
-
+	
 	//返回数组
 	return result, nil, 0
 }
@@ -101,10 +101,12 @@ func (mod Model) GoroseArrayToMap(data []gorose.Data, keyTrans map[string]string
 // GoroseDataLevelOrder 将数据按上下级顺序排序并标记是第几级
 func (mod Model) GoroseDataLevelOrder(data []gorose.Data, idKey string, pidKey string, pid, level int64) []gorose.Data {
 	result := []gorose.Data{}
-	for _, v := range data {
+	for i, v := range data {
 		if v[pidKey] == pid {
 			v["level"] = level
 			result = append(result, v)
+			//删除已处理过的，可避免id=pid带来的无限迭代
+			data = append(data[:i], data[i+1:]...)
 			next := mod.GoroseDataLevelOrder(data, idKey, pidKey, v["id"].(int64), level+1)
 			for _, nextItem := range next {
 				result = append(result, nextItem)

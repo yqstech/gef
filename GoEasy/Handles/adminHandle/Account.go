@@ -42,8 +42,6 @@ func (ac Account) PageInit(pageData *EasyApp.PageData) {
 func (ac Account) Login(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	if r.Method == "POST" {
-		//登录
-		logger.Info("login")
 		//获取账户和密码
 		account := util.PostValue(r, "account")
 		pwd := util.PostValue(r, "pwd")
