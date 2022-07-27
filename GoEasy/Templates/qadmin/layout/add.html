@@ -217,6 +217,9 @@
         {{else if eq $field.Type "select"}}
         "{{$field.Key}}":`{{if $field.Value}}{{$field.Value}}{{end}}`,
         "_{{$field.Key}}_options":{{toString $field.Data}},
+        {{else if eq $field.Type "radio"}}
+        "{{$field.Key}}":`{{if $field.Value}}{{$field.Value}}{{end}}`,
+        "_{{$field.Key}}_options":{{toString $field.Data}},
         {{else if eq $field.Type "images"}}
         "{{$field.Key}}":{{if $field.Value}}{{$field.Value}}{{end}},
         {{else if eq $field.Type "checkbox"}}
@@ -251,8 +254,72 @@
         created: function () {
             this.formFields = formFields
         },
-
+        computed:{
+            formFieldsJson:function () {
+                //通过计算属性深拷贝，避免监听前后值相同的问题
+                return JSON.stringify(this.formFields)
+            }
+        },
+        watch:{
+            formFieldsJson: {
+                handler: function (newValue, oldValue) {
+                    const newData = JSON.parse(newValue)
+                    const oldData = JSON.parse(oldValue)
+                    let changed = false;//标记是否有变化
+                    let watch_fields = [];
+                    //select组件设置了监听哪些字段
+                    {{range $fieldIndex,$field:=.formFields}}
+                    {{- if $field.Expand.watch_fields}}
+                    {{- if $field.Expand.dynamic_option_model_id}}
+                    //监听字段
+                    watch_fields = '{{$field.Expand.watch_fields}}'.split(',');
+                    //是否变化
+                    changed = false
+                    if (oldValue == '{}'){
+                        //初次必查
+                        changed = true;
+                    }
+                    for (let i = 0; i < watch_fields.length; i++) {
+                        const watch_field = watch_fields[i] //监听字段
+                        if (watch_field != "") {
+                            //假如监听字段存在，且前后两次不一样
+                            if (newData[watch_field]!='undefined' && newData[watch_field] != oldData[watch_field]) {
+                                changed = true
+                            }
+                        }
+                    }
+                    if(changed){
+                        const postData = {}
+                        postData["_dynamic_option_model_id"] = '{{$field.Expand.dynamic_option_model_id}}';
+                        for (let i = 0; i < watch_fields.length; i++) {
+                            if (watch_fields[i] != "") {
+                                postData[watch_fields[i]] = newData[watch_fields[i]];
+                            }
+                        }
+                        this.DynamicOptions(postData, '_{{$field.Key}}_options');
+                    }
+                    {{- end -}}
+                    {{- end -}}
+                    {{- end -}}
+                }, deep: true
+            }
+        },
         methods: {
+            DynamicOptions:function (postData,optionsField){
+                const that = this;
+                $.ajax({
+                    url: "../option_models/dynamic",
+                    data: postData,
+                    type: "POST",
+                    dataType: "text",
+                    success: function (data) {
+                        var rst = eval('(' + data + ')');
+                        if (rst.code == 200 || rst.code == "200") {
+                            that.formFields[optionsField] = rst.data;
+                        }
+                    }
+                });
+            },
             formSubmit: function (LayerClose=false) {
                 if (this.posting == 1) {
                     layer.msg("重复提交！",{icon:2});

@@ -62,7 +62,7 @@
         <select v-model="formFields.{{$field.Key}}" lay-verify="required" class="layui-select"
             style="width:100%;color: #777777;{{$field.Style}}">
             <option value="">请选择</option>
-            <option v-for="(opt,optIndex) in formFields._{{$field.Key}}_options" :value="opt.value">${opt.name}</option>
+            <option v-for="(opt,optIndex) in formFields._{{$field.Key}}_options" :value="opt.value" v-html="opt.name"></option>
         </select>
         {{- end -}}
         {{- if eq $field.Type "select-disabled"}}
@@ -92,13 +92,11 @@
 
         {{/* 模拟单选框 */}}
         {{- if eq $field.Type "radio"}}
-        {{range $k,$v := $field.Data}}
-        <a class="layui-btn" :class="formFields.{{$field.Key}}=='{{$v.value}}'?'layui-btn-primary layui-btn-check':'layui-btn-primary'"
-            @click="formFields.{{$field.Key}}='{{$v.value}}'">
-            <i v-if="formFields.{{$field.Key}}=='{{$v.value}}'" class="radio-item ri-checkbox-circle-line"></i>
-            <i v-else class="radio-item ri-checkbox-blank-circle-line"></i>
-            {{$v.name}}</a>
-        {{- end -}}
+        <a class="layui-btn" v-for="(opt,optIndex) in formFields._{{$field.Key}}_options"
+           :class="formFields.{{$field.Key}}==opt.value?'layui-btn-primary layui-btn-check':'layui-btn-primary'"
+            @click="formFields.{{$field.Key}}=opt.value"
+           v-html="(formFields.{{$field.Key}}==opt.value?'<i class=\'radio-item ri-checkbox-circle-line\'></i>':'<i class=\'radio-item ri-checkbox-blank-circle-line\'></i>')+opt.name">
+        </a>
         {{- end -}}
 
         {{/* 图片预览 */}}

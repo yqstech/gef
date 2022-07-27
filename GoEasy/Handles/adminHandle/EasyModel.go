@@ -241,6 +241,10 @@ func (that EasyModel) NodeForm(pageData *EasyApp.PageData, id int64) (error, int
 					if field.ExpandIf != "" {
 						expand["if"] = field.ExpandIf
 					}
+					if field.ExpandWatchFields != "" && field.ExpandDynamicOptionModelsId != "" {
+						expand["watch_fields"] = field.ExpandWatchFields
+						expand["dynamic_option_model_id"] = field.ExpandDynamicOptionModelsId
+					}
 					if field.GroupTitle != "" {
 						pageData.FormFieldsAdd("", "block", field.GroupTitle, "", "", false, nil, "", nil)
 					}

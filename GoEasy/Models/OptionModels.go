@@ -156,6 +156,48 @@ func (that OptionModels) ById(id int, beautify bool) []map[string]interface{} {
 	return that.Select(id, "", beautify)
 }
 
+// OptionDynamicParam 选项动态参数
+type OptionDynamicParam struct {
+	ParamKey string
+	FieldKey string
+	DefValue string
+}
+
+// DynamicParams 获取选项集的动态参数
+func (that OptionModels) DynamicParams(id int) []OptionDynamicParam {
+	var DynamicParams []OptionDynamicParam
+	data, err := db.New().Table("tb_option_models").
+		Where("is_delete", 0).
+		Where("status", 1).
+		Where("id", id).First()
+	if err != nil {
+		logger.Error(err.Error())
+		return DynamicParams
+	}
+	if data == nil {
+		return DynamicParams
+	}
+	dp := data["dynamic_params"].(string)
+	Params := strings.Split(dp, "\n")
+	for _, Param := range Params {
+		ps := strings.Split(Param, ":")
+		if len(ps) == 3 {
+			DynamicParams = append(DynamicParams, OptionDynamicParam{
+				ParamKey: ps[0],
+				FieldKey: ps[1],
+				DefValue: ps[2],
+			})
+		} else if len(ps) == 2 {
+			DynamicParams = append(DynamicParams, OptionDynamicParam{
+				ParamKey: ps[0],
+				FieldKey: ps[1],
+				DefValue: "",
+			})
+		}
+	}
+	return DynamicParams
+}
+
 //定时更新标记
 var matchRuleValidity = false
 

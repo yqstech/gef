@@ -62,3 +62,16 @@ func (b Base) OptionModelsList() []map[string]interface{} {
 	}
 	return SelectData
 }
+
+func (b Base) DynamicOptionModelsList() []map[string]interface{} {
+	//获取列表
+	SelectData, err, _ := Models.Model{}.SelectOptionsData("tb_option_models", map[string]string{
+		"id":   "value",
+		"name": "name",
+	}, "", "", "data_type=1 and dynamic_params!=''", "")
+	if err != nil {
+		logger.Error(err.Error())
+		return nil
+	}
+	return SelectData
+}

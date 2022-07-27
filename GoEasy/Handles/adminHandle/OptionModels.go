@@ -11,10 +11,13 @@ package adminHandle
 
 import (
 	"github.com/gef/GoEasy/EasyApp"
+	"github.com/gef/GoEasy/Models"
 	"github.com/gef/GoEasy/Utils/db"
 	"github.com/gef/GoEasy/Utils/util"
 	"github.com/gohouse/gorose/v2"
+	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
+	"net/http"
 	"strings"
 )
 
@@ -25,6 +28,12 @@ type OptionModels struct {
 var dataTypes = []map[string]interface{}{
 	{"name": "静态json数据", "value": "0"},
 	{"name": "查询数据表", "value": "1"},
+}
+
+// PageInit 初始化
+func (that OptionModels) PageInit(pageData *EasyApp.PageData) {
+	//注册handle
+	pageData.ActionAdd("dynamic", that.Dynamic)
 }
 
 // NodeBegin 开始
@@ -91,9 +100,14 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 	pageData.FormFieldsAdd("select_order", "text", "查询排序", "数据表查询的排序方式", "id asc", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
-	pageData.FormFieldsAdd("select_where", "text", "查询条件", "补充数据表查询条件", "", false, nil, "", map[string]interface{}{
+	pageData.FormFieldsAdd("select_where", "text", "补充查询条件", "补充数据表查询条件", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
+	pageData.FormFieldsAdd("dynamic_params", "textarea", "支持的动态参数", "用来做数据联动的参数设置，程序根据设置的字段，查询post参数\n格式为 监听参数:选项集数据表字段:默认值，例如：group_id:group_id:0\n默认值为空自动忽略，每行一个转换规则", "", false, nil,
+		"",
+		map[string]interface{}{
+			"if": "formFields.data_type==1",
+		})
 	pageData.FormFieldsAdd("", "block", "选项图标、颜色、缩进", "", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
@@ -139,4 +153,24 @@ func (that OptionModels) NodeSaveData(pageData *EasyApp.PageData, oldData gorose
 		postData["static_data"] = ""
 	}
 	return postData, nil, 0
+}
+
+// Dynamic 动态获取选项集
+func (that OptionModels) Dynamic(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	optionModelId := util.PostValue(r, "_dynamic_option_model_id")
+	if optionModelId == "" {
+		return
+	}
+	DynamicParams := Models.OptionModels{}.DynamicParams(util.String2Int(optionModelId))
+	var wheres []string
+	for _, dp := range DynamicParams {
+		v := util.PostValue(r, dp.ParamKey)
+		if v == "" {
+			wheres = append(wheres, dp.FieldKey+" = '"+dp.DefValue+"'")
+		} else {
+			wheres = append(wheres, dp.FieldKey+" = '"+v+"'")
+		}
+	}
+	ops := Models.OptionModels{}.Select(util.String2Int(optionModelId), strings.Join(wheres, " and "), false)
+	that.ApiResult(w, 200, "success", ops)
 }

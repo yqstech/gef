@@ -125,6 +125,7 @@ func (that EasyModelsFields) NodeList(pageData *EasyApp.PageData) (error, int) {
 		pageData.ListColumnAdd("allow_update", "修改页", "switch::text=显示|隐藏", nil)
 		pageData.ListColumnAdd("is_must", "必填项", "switch::text=是|否", nil)
 		pageData.ListColumnAdd("option_models_id", "选项集", "array", that.OptionModelsList())
+		pageData.ListColumnAdd("dynamic_option_models_id", "联动选项集", "array", that.DynamicOptionModelsList())
 		pageData.ListColumnAdd("default_value", "默认值", "input::width=60px", nil)
 		pageData.ListColumnAdd("index_num", "排序值", "input::type=number&width=50px", nil)
 	} else if tabIndex == 1 {
@@ -145,6 +146,7 @@ func (that EasyModelsFields) NodeList(pageData *EasyApp.PageData) (error, int) {
 		pageData.ListColumnAdd("is_must", "必填项", "switch::text=是|否", nil)
 		pageData.ListColumnAdd("data_type_on_create", "数据类型", "array", formDataType)
 		pageData.ListColumnAdd("option_models_id", "选项集", "array", that.OptionModelsList())
+		pageData.ListColumnAdd("dynamic_option_models_id", "联动选项集", "array", that.DynamicOptionModelsList())
 		pageData.ListColumnAdd("default_value", "默认值", "input::width=60px", nil)
 		pageData.ListColumnAdd("index_num", "排序值", "input::type=number&width=50px", nil)
 
@@ -157,6 +159,7 @@ func (that EasyModelsFields) NodeList(pageData *EasyApp.PageData) (error, int) {
 		pageData.ListColumnAdd("is_must", "必填项", "switch::text=是|否", nil)
 		pageData.ListColumnAdd("data_type_on_update", "数据类型", "array", formDataType)
 		pageData.ListColumnAdd("option_models_id", "选项集", "array", that.OptionModelsList())
+		pageData.ListColumnAdd("dynamic_option_models_id", "联动选项集", "array", that.DynamicOptionModelsList())
 		pageData.ListColumnAdd("default_value", "默认值", "input::width=60px", nil)
 		pageData.ListColumnAdd("index_num", "排序值", "input::type=number&width=50px", nil)
 	}
@@ -211,7 +214,17 @@ func (that EasyModelsFields) NodeForm(pageData *EasyApp.PageData, id int64) (err
 	})
 	pageData.FormFieldsAdd("default_value", "text", "字段默认值", "", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("save_trans_rule", "select", "存储格式转换", "", "", false, dataTransRulesForDB, "", nil)
-
+	
+	pageData.FormFieldsAdd("", "block", "联动设置", "", "", false, nil, "", map[string]interface{}{
+		"if":"formFields.data_type_on_create=='select' || formFields.data_type_on_update=='select' || formFields.data_type_on_create=='radio' || formFields.data_type_on_update=='radio' ",
+	})
+	pageData.FormFieldsAdd("watch_fields", "text", "监听字段", "联动监听的字段，多个字段用英文逗号,分割", "", false, nil, "", map[string]interface{}{
+		"if":"formFields.data_type_on_create=='select' || formFields.data_type_on_update=='select' || formFields.data_type_on_create=='radio' || formFields.data_type_on_update=='radio' ",
+	})
+	pageData.FormFieldsAdd("dynamic_option_models_id", "select", "关联选项集", "", "", false, that.DynamicOptionModelsList(), "", map[string]interface{}{
+		"if":"formFields.data_type_on_create=='select' || formFields.data_type_on_update=='select' || formFields.data_type_on_create=='radio' || formFields.data_type_on_update=='radio' ",
+	})
+	
 	//列表列装饰
 	pageData.FormFieldsAdd("", "block", "列表页装饰", "", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("set_as_tabs", "radio", "选项集设为Tabs", "", "0", false, Models.OptionModels{}.ById(1, false), "", map[string]interface{}{
@@ -239,6 +252,9 @@ func (that EasyModelsFields) NodeFormData(pageData *EasyApp.PageData, data goros
 		if data["option_models_id"].(int64) == 0 {
 			data["option_models_id"] = ""
 		}
+		if data["dynamic_option_models_id"].(int64) == 0 {
+			data["dynamic_option_models_id"] = ""
+		}
 	}
 	return data, nil, 0
 }
@@ -247,6 +263,9 @@ func (that EasyModelsFields) NodeFormData(pageData *EasyApp.PageData, data goros
 func (that EasyModelsFields) NodeSaveData(pageData *EasyApp.PageData, oldData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
 	if postData["option_models_id"] == "" {
 		postData["option_models_id"] = 0
+	}
+	if postData["dynamic_option_models_id"] == "" {
+		postData["dynamic_option_models_id"] = 0
 	}
 	if postData["set_as_tabs"] == "1" {
 		_, err := db.New().Table("tb_easy_models_fields").
