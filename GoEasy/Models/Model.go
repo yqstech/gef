@@ -101,15 +101,15 @@ func (mod Model) GoroseArrayToMap(data []gorose.Data, keyTrans map[string]string
 // GoroseDataLevelOrder 将数据按上下级顺序排序并标记是第几级
 func (mod Model) GoroseDataLevelOrder(data []gorose.Data, idKey string, pidKey string, pid, level int64) []gorose.Data {
 	result := []gorose.Data{}
-	for i, v := range data {
-		if v[pidKey] == pid {
+	for _, v := range data {
+		if v[pidKey] == pid && level < 10 {
 			v["level"] = level
 			result = append(result, v)
-			//删除已处理过的，可避免id=pid带来的无限迭代
-			data = append(data[:i], data[i+1:]...)
-			next := mod.GoroseDataLevelOrder(data, idKey, pidKey, v["id"].(int64), level+1)
-			for _, nextItem := range next {
-				result = append(result, nextItem)
+			if pid != v["id"].(int64) {
+				next := mod.GoroseDataLevelOrder(data, idKey, pidKey, v["id"].(int64), level+1)
+				for _, nextItem := range next {
+					result = append(result, nextItem)
+				}
 			}
 		}
 	}

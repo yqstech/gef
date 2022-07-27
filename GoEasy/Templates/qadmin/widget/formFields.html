@@ -97,8 +97,8 @@
         {{range $k,$v := $field.Data}}
         <a class="layui-btn" :class="formFields.{{$field.Key}}=='{{$v.value}}'?'layui-btn-primary layui-btn-check':'layui-btn-primary'"
             @click="formFields.{{$field.Key}}='{{$v.value}}'">
-            <i v-if="formFields.{{$field.Key}}=='{{$v.value}}'" class="ri-checkbox-circle-line"></i>
-            <i v-else class="ri-checkbox-blank-circle-line"></i>
+            <i v-if="formFields.{{$field.Key}}=='{{$v.value}}'" class="radio-item ri-checkbox-circle-line"></i>
+            <i v-else class="radio-item ri-checkbox-blank-circle-line"></i>
             {{$v.name}}</a>
         {{- end -}}
         {{- end -}}

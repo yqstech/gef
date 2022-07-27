@@ -282,7 +282,7 @@ func GetSelectData(id int64) []map[string]interface{} {
 		selectDataListLock.Lock()
 		defer selectDataListLock.Unlock()
 		//通过数据库查询
-		data, err := db.New().Table("tb_easy_models_fields_select_data").
+		data, err := db.New().Table("tb_option_models").
 			Where("is_delete", 0).
 			Where("status", 1).
 			Where("id", id).First()
