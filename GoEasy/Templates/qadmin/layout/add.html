@@ -213,11 +213,10 @@
         {{- if eq $field.Type "tags"}}
         "{{$field.Key}}":{{if $field.Value}}{{$field.Value}}{{end}},
         "_{{$field.Key}}_input":'',
-        "_{{$field.Key}}_options":[
-            {{range $k,$v := $field.Data}}
-            {text:'{{$v.text}}'{{if $v.style}},style:'{{$v.style}}'{{end}}{{if $v.class}},classes:'{{$v.class}}'{{end}}},
-            {{- end -}}
-        ],
+        "_{{$field.Key}}_options":{{toString $field.Data}},
+        {{else if eq $field.Type "select"}}
+        "{{$field.Key}}":`{{if $field.Value}}{{$field.Value}}{{end}}`,
+        "_{{$field.Key}}_options":{{toString $field.Data}},
         {{else if eq $field.Type "images"}}
         "{{$field.Key}}":{{if $field.Value}}{{$field.Value}}{{end}},
         {{else if eq $field.Type "checkbox"}}
