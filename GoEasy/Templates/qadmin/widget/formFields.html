@@ -64,6 +64,9 @@
             <option value="">请选择</option>
             <option v-for="(opt,optIndex) in formFields._{{$field.Key}}_options" :value="opt.value" v-html="opt.name"></option>
         </select>
+        <div style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
         {{- end -}}
         {{- if eq $field.Type "select-disabled"}}
         <select v-model="formFields.{{$field.Key}}" lay-verify="required" class="layui-select"
@@ -73,6 +76,9 @@
             <option value="{{$v.value}}">{{$v.name}}</option>
             {{- end -}}
         </select>
+        <div style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
         {{- end -}}
 
         {{/* 图标选择器 */}}
@@ -88,6 +94,9 @@
             <button type="button" class="layui-btn layui-btn-normal" @click="iconSelect('{{$field.Key}}')">选择图标</button>
             <button type="button" class="layui-btn layui-btn-warm" @click="formFields.{{$field.Key}}=''">清除</button>
         </div>
+        <div style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
         {{- end -}}
 
         {{/* 模拟单选框 */}}
@@ -97,6 +106,9 @@
             @click="formFields.{{$field.Key}}=opt.value"
            v-html="(formFields.{{$field.Key}}==opt.value?'<i class=\'radio-item ri-checkbox-circle-line\'></i>':'<i class=\'radio-item ri-checkbox-blank-circle-line\'></i>')+opt.name">
         </a>
+        <div style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
         {{- end -}}
 
         {{/* 图片预览 */}}
@@ -108,6 +120,9 @@
             <div v-else class="upload_image_view">
                 <img :src="formFields.{{$field.Key}}" />
             </div>
+        </div>
+        <div style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
 

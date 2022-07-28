@@ -205,7 +205,7 @@
         },
         computed: {
             isAllChecked:function () {
-                return this.checkedTotal == this.data_total;
+                return this.checkedTotal == this.data_total && this.data_total>0;
             },
             checkedTotal:function () {
                 let total = 0
