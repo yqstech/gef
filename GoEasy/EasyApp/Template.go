@@ -96,6 +96,8 @@ func (t *Template) PageData2Display(pageData *PageData) {
 	//分页
 	data["listPageHide"] = pageData.listPageHide //是否隐藏分页
 	data["listPageSize"] = pageData.listPageSize //分页
+	//批量操作
+	data["listBatchAction"] = pageData.listBatchAction //批量操作
 	
 	//表单
 	//提交地址

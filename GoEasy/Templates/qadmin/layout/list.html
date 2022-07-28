@@ -11,6 +11,18 @@
     <script src="/static/js/jquery-3.3.1.min.js"></script>
     <script src="/static/js/vue.min.js"></script>
     <style>
+        .ri-checkbox-line:before{color:#05b96b}
+        .batchActionButtons{
+            position: fixed;
+            top: 0px;
+            left: 50%;
+            margin-left: -200px;
+            background: #fcead2;
+            padding: 10px 20px;
+            border-radius: 0 0 8px 8px;
+            border: 1px solid #f1f1f1;
+        }
+        .column_check{width:18px;}
         {{.pageStyle}}
     </style>
 </head>
@@ -88,10 +100,12 @@
         </div>
     </div>
     {{end}}
+
     <div class="list_table" style="width:100%;overflow-x: auto;">
         <table class="layui-table layui-form">
             <thead>
             <tr>
+                <th v-if="batchAction" class="column column_check"><i v-if="isAllChecked" class="ri-checkbox-line" @click="checkAll(false)"></i><i v-else class="ri-checkbox-blank-line" @click="checkAll(true)"></i></th>
                 {{range .listColumns}}<th class="column column_{{.FieldName}} title" {{if $style := index $.listColumnsStyles .FieldName}} style="{{$style}}" {{end}}>{{.ColumnName}}</th>{{end}}
                 {{if .rightBtns}}
                 <th class="column column_action title " {{if $style := index $.listColumnsStyles "action"}} style="{{$style}}" {{end}}>操作</th>
@@ -100,6 +114,7 @@
             </thead>
             <tbody>
             <tr v-for="(item,index) in data_list" :key="item.id">
+                <td v-if="batchAction" class="column column_check"><i v-if="item._checked" class="ri-checkbox-line" @click="item._checked = false;"></i><i v-else class="ri-checkbox-blank-line" @click="item._checked = true;"></i></td>
                 {{range $columnIndex,$column :=.listColumns}}
                 <td class="column column_{{.FieldName}}" {{if $style := index $.listColumnsStyles .FieldName}} style="{{$style}}" {{end}} >
                     {{ template "listColumn" $column}}
@@ -135,7 +150,21 @@
             </tbody>
         </table>
     </div>
-
+    <div v-if="checkedTotal>0" class="batchActionButtons">
+        {{range $index,$button := .rightBtns}}
+        {{if eq $button.ActionType 1}}
+        {{- if $button.BatchAction -}}
+        <a {{if $button.ConfirmMsg }}
+           @click="confirm(0,'{{$button.ActionUrl}}','{{$button.ConfirmMsg}}')"
+           {{else}}
+           @click="confirm(0,'{{$button.ActionUrl}}','确定要批量操作？')"
+           {{end}}
+           class="layui-btn layui-btn-xs {{$button.Class}}"
+        >{{template "icon" $button.Icon}} {{$button.ButtonName}}</a>
+        {{- end -}}
+        {{- end -}}
+        {{- end -}}
+    </div>
     {{if eq .listPageHide false}}
     <div class="layui-row" style="display: flex">
         <div class="layui-col-lg6" style="padding-top: 20px;width: 50%">
@@ -156,160 +185,200 @@
     var searchFormDefault = {
     {{range $fieldIndex,$field:=.listSearchFields}}"{{$field.Key}}":"{{if $field.Value}}{{$field.Value}}{{end}}", {{end}}
     }
+    var listPageSize = {{.listPageSize}};
+    var batchAction = {{.listBatchAction}};
     var vue = new Vue({
         el: '#app',
         delimiters: ['${', '}'],//修改模板语法
         data: {
-            searchForm:{},
+            searchForm: {},
             data_list: [],
             data_total: 0,
             page: 1,
-            page_size: {{.listPageSize}},
-    },
-
-    created: function () {
-        this.searchForm = searchFormDefault
-        //直接查询数据
-        this.search(1);
-    },
-    mounted: function (e) {
-    },
-    methods: {
-        search: function (is_laypage) {
-            var that = this
-            $.ajax({
-                url: "{{.listDataUrl}}",
-                data: {
-                    "page": this.page,
-                    "page_size": this.page_size,
-                    "search":JSON.stringify(this.searchForm)
-                },
-                type: "POST",
-                dataType: "text",
-                success: function (r) {
-                    var data = api_data(r)
-                    if(!!data){
-                        layer.msg("列表已加载",{time:1000,offset:'t',icon:6});
-                        that.data_list = data.data;
-                        that.data_total = data.total;
-                        laypage.render({
-                            elem: 'pages',
-                            count: data.total,
-                            curr: that.page,
-                            limit: that.page_size,
-                            jump: function (obj, first) {
-                                that.page = obj.curr
-                                that.page_size = obj.limit
-                                if (!first) {
-                                    that.search(0)
-                                }
+            page_size: listPageSize,
+            batchAction:batchAction,//是否支持批量操作
+        },
+        created: function () {
+            this.searchForm = searchFormDefault
+            //直接查询数据
+            this.search(1);
+        },
+        computed: {
+            isAllChecked:function () {
+                return this.checkedTotal == this.data_total;
+            },
+            checkedTotal:function () {
+                let total = 0
+                for (let i = 0;i <this.data_list.length;i++){
+                    if(this.data_list[i]['_checked']) total++
+                }
+                return total
+            },
+            checkedIds:function () {
+                let ids = []
+                for (let i = 0;i <this.data_list.length;i++){
+                    if(this.data_list[i]['_checked']){
+                        ids.push(this.data_list[i].id)
+                    }
+                }
+                return ids
+            }
+        },
+        mounted: function (e) {
+        },
+        methods: {
+            checkAll:function (check){
+                for (let i = 0;i <this.data_list.length;i++){
+                    this.data_list[i]['_checked'] = check
+                }
+            },
+            search: function (is_laypage) {
+                var that = this
+                $.ajax({
+                    url: "{{.listDataUrl}}",
+                    data: {
+                        "page": this.page,
+                        "page_size": this.page_size,
+                        "search": JSON.stringify(this.searchForm)
+                    },
+                    type: "POST",
+                    dataType: "text",
+                    success: function (r) {
+                        var data = api_data(r)
+                        if (!!data) {
+                            layer.msg("列表已加载", {time: 1000, offset: 't', icon: 6});
+                            for (let i = 0; i < data.data.length; i++) {
+                                data.data[i]['_checked'] = false;
                             }
-                        });
-                        setTimeout(function() {
-                            LaySwitch();
-                        },50)
-                    }
+                            that.data_list = data.data;
+                            that.data_total = data.total;
+                            laypage.render({
+                                elem: 'pages',
+                                count: data.total,
+                                curr: that.page,
+                                limit: that.page_size,
+                                jump: function (obj, first) {
+                                    that.page = obj.curr
+                                    that.page_size = obj.limit
+                                    if (!first) {
+                                        that.search(0)
+                                    }
+                                }
+                            });
+                            setTimeout(function () {
+                                LaySwitch();
+                            }, 50)
+                        }
 
-                }
-            });
-        },
-        //弹出层操作
-        layer: function (id = 0,action="",title,layerTitle,expand0,expand1) {
-            var that = this;
-            if(id != 0){
-                if(action.indexOf("?")===-1){
-                    action = action+"?id="+id
-                }else{
-                    action = action+"&id="+id
-                }
-            }
-            if(!layerTitle){
-                layerTitle = title+"{{.pageName}}"
-            }
-            layer.open({
-                type: 2,
-                title:layerTitle,
-                maxmin:true,
-                content: action,
-                area: [expand0, expand1],
-                cancel: function (index, layero) {
-                    that.search();
-                }
-            });
-        },
-        ajax: function (id, action){ //角色状态
-            var that = this
-            $.ajax({
-                url: action,
-                data: {
-                    "id":id,
-                },
-                type: "POST",
-                dataType: "text",
-                success: function (r) {
-                    var data = api_data(r)
-                    if(!!data){
-                        layer.msg("操作成功！",{time:1000,icon:1,offset:'t'});
-                        that.search();
                     }
-                }
-            });
-        },
-        confirm:function(id, action,msg){
-            if(confirm(msg)){
-                this.ajax(id,action)
-            }
-        },
-        switchClick:function (index, field, value) {
-            var id = this.data_list[index].id;
-            var that = this;
-            $.ajax({
-                url: "",//提交到列表
-                data: {
-                    "formFields": '{"id":"'+id+'","'+field+'":"'+value+'"}',
-                    "action":"fastUpdate",//快速修改标记
-                },
-                type: "POST",
-                dataType: "text",
-                success: function (data) {
-                    var data = api_data(data)
-                    if (data == "success") {
-                        layer.msg("修改成功！",{time:2000,icon:1,offset:'t'});
+                });
+            },
+            //弹出层操作
+            layer: function (id = 0, action = "", title, layerTitle, expand0, expand1) {
+                var that = this;
+                if (id != 0) {
+                    if (action.indexOf("?") === -1) {
+                        action = action + "?id=" + id
                     } else {
-                        layer.msg("修改失败！",{time:2000,icon:2,offset:'t'})
+                        action = action + "&id=" + id
                     }
-                    setTimeout(function() {
-                        that.search();
-                    },1200)
                 }
-            });
-        },
-        inputChange:function(index,field) {
-            var id = this.data_list[index].id;
-            var that = this;
-            var value = this.data_list[index][field];
-            $.ajax({
-                url: "",//提交到列表
-                data: {
-                    "formFields": '{"id":"'+id+'","'+field+'":"'+value+'"}',
-                    "action":"fastUpdate",//快速修改标记
-                },
-                type: "POST",
-                dataType: "text",
-                success: function (data) {
-                    var data = api_data(data)
-                    if (data == "success") {
-                        layer.msg("修改成功！",{time:2000,icon:1,offset:'t'});
-                    } else {
-                        layer.msg("修改失败！",{time:2000,icon:2,offset:'t'})
+                if (!layerTitle) {
+                    layerTitle = title + "{{.pageName}}"
+                }
+                layer.open({
+                    type: 2,
+                    title: layerTitle,
+                    maxmin: true,
+                    content: action,
+                    area: [expand0, expand1],
+                    cancel: function (index, layero) {
+                        that.search();
                     }
-                    setTimeout(function() {
-                        that.search();
-                    },1200)
+                });
+            },
+            ajax: function (id, action) { //角色状态
+                const that = this
+                let ids = []
+                if(id==0){
+                    ids = this.checkedIds;
+                    if(ids.length===0){
+                        alert("请选择需要批量操作的项目！")
+                        return false
+                    }
                 }
-            });
+                $.ajax({
+                    url: action,
+                    data: {
+                        "id": id,
+                        "ids": JSON.stringify(ids)
+                    },
+                    type: "POST",
+                    dataType: "text",
+                    success: function (r) {
+                        const data = api_data(r)
+                        if (!!data) {
+                            layer.msg("操作成功！", {time: 1000, icon: 1, offset: 't'});
+                            that.search();
+                        }
+                    }
+                });
+            },
+            confirm: function (id, action, msg) {
+                if (confirm(msg)) {
+                    this.ajax(id, action)
+                }
+            },
+            switchClick: function (index, field, value) {
+                var id = this.data_list[index].id;
+                var that = this;
+                $.ajax({
+                    url: "",//提交到列表
+                    data: {
+                        "formFields": '{"id":"' + id + '","' + field + '":"' + value + '"}',
+                        "action": "fastUpdate",//快速修改标记
+                    },
+                    type: "POST",
+                    dataType: "text",
+                    success: function (data) {
+                        var data = api_data(data)
+                        if (data == "success") {
+                            layer.msg("修改成功！", {time: 2000, icon: 1, offset: 't'});
+                        } else {
+                            layer.msg("修改失败！", {time: 2000, icon: 2, offset: 't'})
+                        }
+                        setTimeout(function () {
+                            that.search();
+                        }, 1200)
+                    }
+                });
+            },
+            inputChange: function (index, field) {
+                var id = this.data_list[index].id;
+                var that = this;
+                var value = this.data_list[index][field];
+                $.ajax({
+                    url: "",//提交到列表
+                    data: {
+                        "formFields": '{"id":"' + id + '","' + field + '":"' + value + '"}',
+                        "action": "fastUpdate",//快速修改标记
+                    },
+                    type: "POST",
+                    dataType: "text",
+                    success: function (data) {
+                        var data = api_data(data)
+                        if (data == "success") {
+                            layer.msg("修改成功！", {time: 2000, icon: 1, offset: 't'});
+                        } else {
+                            layer.msg("修改失败！", {time: 2000, icon: 2, offset: 't'})
+                        }
+                        setTimeout(function () {
+                            that.search();
+                        }, 1200)
+                    }
+                });
+            }
         }
-    }
     })
 
     setTimeout(function() {

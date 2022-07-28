@@ -40,6 +40,7 @@ type EasyModel struct {
 	RightButtons []string                  //右侧操作按钮
 	UrlParams    []UrlParam                //链接参数
 	LevelIndent  string                    //按级缩进
+	BatchAction bool //是否支持批量操作
 }
 type Tab struct {
 	TabName         string //tab页名称
@@ -121,6 +122,7 @@ func GetEasyModelInfo(modelKey string) (EasyModel, error) {
 			RightButtons: []string{},
 			UrlParams:    []UrlParam{},
 			LevelIndent:  modelInfo["level_indent"].(string),
+			BatchAction: util.Is(modelInfo["batch_action"].(int64) == 1, true, false).(bool),
 		}
 		//格式化多tab页
 		if modelInfo["tabs_for_list"].(string) != "" {
@@ -185,6 +187,7 @@ func GetEasyModelInfo(modelKey string) (EasyModel, error) {
 						"w": btnInfo["layer_width"].(string),
 						"h": btnInfo["layer_height"].(string),
 					},
+					BatchAction: util.Is(btnInfo["batch_action"].(int64) == 1, true, false).(bool),
 				}
 			}
 		}

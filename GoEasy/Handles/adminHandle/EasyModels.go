@@ -122,6 +122,7 @@ func (that EasyModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, in
 	pageData.FormFieldsAdd("table_name", "text", "关联数据表名", "关联操作的数据表名称", "", true, nil, "", nil)
 	pageData.FormFieldsAdd("order_type", "text", "排序方式", "列表页默认排序方式", "id desc", true, nil, "", nil)
 	pageData.FormFieldsAdd("page_size", "number", "分页大小", "列表页每页的数据条数，最小值为1", "20", true, nil, "", nil)
+	pageData.FormFieldsAdd("batch_action", "radio", "支持批量操作", "", "0", true, Models.OptionModels{}.ById(1,false), "", nil)
 	pageData.FormFieldsAdd("note", "text", "模型备注", "", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("", "block", "页面元素", "", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("top_buttons", "tags", "顶部按钮", "", "[{'classes':'tag-3','text':'add'}]", false, buttonList, "", nil)

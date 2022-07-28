@@ -59,7 +59,7 @@ func (nf Page) Index(pageData *PageData, w http.ResponseWriter, r *http.Request,
 		nf.ErrResult(w, r, code, err.Error(), nil)
 		return
 	}
-
+	
 	//! 校验权限隐藏不可用按钮
 	pageName := ps.ByName("pageName")                     //结构名
 	accountID := util.String2Int(ps.ByName("account_id")) //账户ID
@@ -133,7 +133,7 @@ func (nf Page) Index(pageData *PageData, w http.ResponseWriter, r *http.Request,
 								nf.ErrResult(w, r, code, err.Error(), nil)
 								return
 							}
-
+							
 							ok, err, code = pageData.ActivePage.NodeSaveSuccess(pageData, PostData, int64(util.String2Int(util.Interface2String(setId))))
 							if err != nil {
 								nf.ErrResult(w, r, code, err.Error(), nil)
@@ -144,7 +144,7 @@ func (nf Page) Index(pageData *PageData, w http.ResponseWriter, r *http.Request,
 							}
 							return
 						}
-
+						
 					}
 				}
 			}
@@ -194,7 +194,7 @@ func (nf Page) Index(pageData *PageData, w http.ResponseWriter, r *http.Request,
 		if page != "" {
 			pageData.listPage = util.String2Int(page)
 		}
-
+		
 		data, err := conn.Fields(pageData.listFields).Limit(pageData.listPageSize).Page(pageData.listPage).Order(pageData.listOrder).Get()
 		if err != nil {
 			logger.Error(err.Error())
@@ -211,7 +211,7 @@ func (nf Page) Index(pageData *PageData, w http.ResponseWriter, r *http.Request,
 				}
 			}
 		}
-
+		
 		//!自定义列表数据操作
 		data, err, code = pageData.ActivePage.NodeListData(pageData, data)
 		if err != nil {
@@ -243,7 +243,7 @@ func (nf Page) Index(pageData *PageData, w http.ResponseWriter, r *http.Request,
 //  @Description: 默认新增方法
 //
 func (nf Page) Add(pageData *PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
+	
 	pageData.httpW = w
 	pageData.httpR = r
 	pageData.httpPS = ps
@@ -259,14 +259,14 @@ func (nf Page) Add(pageData *PageData, w http.ResponseWriter, r *http.Request, p
 		nf.ErrResult(w, r, code, err.Error(), nil)
 		return
 	}
-
+	
 	//! NodeForm() 节点
 	err, code = pageData.ActivePage.NodeForm(pageData, 0)
 	if err != nil {
 		nf.ErrResult(w, r, code, err.Error(), nil)
 		return
 	}
-
+	
 	//! NodeFormData() 数据转换节点
 	pageData.formData, err, code = pageData.ActivePage.NodeFormData(pageData, gorose.Data{"id": int64(0)}, 0)
 	if err != nil {
@@ -325,13 +325,13 @@ func (nf Page) Add(pageData *PageData, w http.ResponseWriter, r *http.Request, p
 			nf.ApiResult(w, 500, "插入数据失败！", "")
 			return
 		}
-
+		
 		ok, err, code := pageData.ActivePage.NodeAddSuccess(pageData, PostData, insertId)
 		if err != nil {
 			nf.ErrResult(w, r, code, err.Error(), nil)
 			return
 		}
-
+		
 		ok, err, code = pageData.ActivePage.NodeSaveSuccess(pageData, PostData, insertId)
 		if err != nil {
 			nf.ErrResult(w, r, code, err.Error(), nil)
@@ -384,7 +384,7 @@ func (nf Page) postDataCheckMust(pageData *PageData, PostData map[string]interfa
 			} else {
 				//有待选数据，判断必是其一
 				mustFieldVlues[formField.Key] = []interface{}{}
-
+				
 				//传入数据的格式修改为[]map[string]interface{} {name:"",value:""}
 				for _, dvalue := range formField.Data {
 					mustFieldVlues[formField.Key] = append(mustFieldVlues[formField.Key],
@@ -393,7 +393,7 @@ func (nf Page) postDataCheckMust(pageData *PageData, PostData map[string]interfa
 			}
 		}
 	}
-
+	
 	for postKey, postValue := range PostData {
 		if options, ok := mustFieldVlues[postKey]; ok {
 			//没有待选数据的，判断不可为空
@@ -422,39 +422,39 @@ func (nf Page) postDataCheckMust(pageData *PageData, PostData map[string]interfa
 //  @Description: 默认编辑数据方法
 //
 func (nf Page) Edit(pageData *PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
+	
 	pageData.httpW = w
 	pageData.httpR = r
 	pageData.httpPS = ps
-
+	
 	pageData.actionName = "修改"
 	//! pageData.ActivePage
 	if pageData.ActivePage == nil {
 		logger.Error("运行出错请刷新页面！")
 		return
 	}
-
+	
 	//获取ID
 	id := int64(util.String2Int(util.GetValue(r, "id")))
 	if id <= 0 {
 		nf.ErrResult(w, r, 103, "页面获取ID失败！", nil)
 		return
 	}
-
+	
 	//! NodeBegin()
 	err, code := pageData.ActivePage.NodeBegin(pageData)
 	if err != nil {
 		nf.ErrResult(w, r, code, err.Error(), nil)
 		return
 	}
-
+	
 	//!NodeForm 初始化字段
 	err, code = pageData.ActivePage.NodeForm(pageData, id)
 	if err != nil {
 		nf.ErrResult(w, r, code, err.Error(), nil)
 		return
 	}
-
+	
 	//!查询数据信息
 	editCondition := [][]interface{}{}
 	editCondition, err, code = pageData.ActivePage.NodeAutoCondition(pageData, editCondition)
@@ -477,7 +477,7 @@ func (nf Page) Edit(pageData *PageData, w http.ResponseWriter, r *http.Request, 
 		return
 	}
 	//logger.Alert("Edit查询数据", conn.LastSql())
-
+	
 	//原始表信息转换
 	pageData.formData, err, code = pageData.ActivePage.NodeFormData(pageData, info, id)
 	if err != nil {
@@ -530,7 +530,7 @@ func (nf Page) Edit(pageData *PageData, w http.ResponseWriter, r *http.Request, 
 			nf.ErrResult(w, r, code, err.Error(), nil)
 			return
 		}
-
+		
 		ok, err, code = pageData.ActivePage.NodeSaveSuccess(pageData, PostData, id)
 		if err != nil {
 			nf.ErrResult(w, r, code, err.Error(), nil)
@@ -541,16 +541,16 @@ func (nf Page) Edit(pageData *PageData, w http.ResponseWriter, r *http.Request, 
 		}
 		return
 	}
-
+	
 	//POST地址 含有链接内含有id
 	if pageData.editDataUrl == "" {
 		pageData.editDataUrl = r.RequestURI
 	}
-
+	
 	nf.ActShow(w, Template{
 		TplName: pageData.editTplName,
 	}, pageData)
-
+	
 }
 
 //
@@ -558,7 +558,7 @@ func (nf Page) Edit(pageData *PageData, w http.ResponseWriter, r *http.Request, 
 //  @Description: 默认设置状态方法
 //
 func (nf Page) Status(pageData *PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
+	
 	pageData.httpW = w
 	pageData.httpR = r
 	pageData.httpPS = ps
@@ -569,19 +569,27 @@ func (nf Page) Status(pageData *PageData, w http.ResponseWriter, r *http.Request
 	}
 	status := int64(util.String2Int(util.GetValue(r, "status")))
 	id := int64(util.String2Int(util.PostValue(r, "id")))
-
+	
+	//批量操作
+	var ids []int64
 	if id <= 0 {
-		nf.ApiResult(w, 103, "页面获取ID失败！", nil)
-		return
+		idsJson := r.PostFormValue("ids")
+		util.JsonDecode(idsJson, &ids)
+		if len(ids) == 0 {
+			nf.ApiResult(w, 103, "页面获取ID失败！", nil)
+			return
+		}
+	} else {
+		ids = append(ids, id)
 	}
-
+	
 	//! NodeBegin()
 	err, code := pageData.ActivePage.NodeBegin(pageData)
 	if err != nil {
 		nf.ErrResult(w, r, code, err.Error(), nil)
 		return
 	}
-
+	
 	if status != 1 {
 		status = 0
 	}
@@ -596,10 +604,17 @@ func (nf Page) Status(pageData *PageData, w http.ResponseWriter, r *http.Request
 	for _, v := range editCondition {
 		conn = conn.Where(v...)
 	}
-	rst, err := conn.Where(pageData.tbPK, id).Update(map[string]interface{}{
+	
+	//!转一下格式
+	var Ids []interface{}
+	for _, v := range ids {
+		Ids = append(Ids, v)
+	}
+	
+	rst, err := conn.WhereIn(pageData.tbPK, Ids).Update(map[string]interface{}{
 		"status": status,
 	})
-
+	
 	if err != nil {
 		logger.Error(err.Error())
 		nf.ApiResult(w, 500, "修改数据出错！", nil)
@@ -617,8 +632,8 @@ func (nf Page) Status(pageData *PageData, w http.ResponseWriter, r *http.Request
 	if code == -1 {
 		return
 	}
-	nf.ApiResult(w, 200, "数据修改成功！", id)
-
+	nf.ApiResult(w, 200, "数据修改成功！", util.JsonEncode(ids))
+	
 }
 
 //
@@ -626,28 +641,37 @@ func (nf Page) Status(pageData *PageData, w http.ResponseWriter, r *http.Request
 //  @Description: 默认删除方法
 //
 func (nf Page) Delete(pageData *PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
+	
 	pageData.httpW = w
 	pageData.httpR = r
 	pageData.httpPS = ps
-
+	
 	if pageData.ActivePage == nil {
 		logger.Error("运行出错请刷新页面！")
 		return
 	}
 	id := int64(util.String2Int(util.PostValue(r, "id")))
+	
+	//批量操作
+	var ids []int64
 	if id <= 0 {
-		nf.ApiResult(w, 103, "页面获取ID失败！", nil)
-		return
+		idsJson := r.PostFormValue("ids")
+		util.JsonDecode(idsJson, &ids)
+		if len(ids) == 0 {
+			nf.ApiResult(w, 103, "页面获取ID失败！", nil)
+			return
+		}
+	} else {
+		ids = append(ids, id)
 	}
-
+	
 	//! NodeBegin()
 	err, code := pageData.ActivePage.NodeBegin(pageData)
 	if err != nil {
 		nf.ErrResult(w, r, code, err.Error(), nil)
 		return
 	}
-
+	
 	editCondition := [][]interface{}{}
 	editCondition, err, code = pageData.ActivePage.NodeAutoCondition(pageData, editCondition)
 	if err != nil {
@@ -658,7 +682,7 @@ func (nf Page) Delete(pageData *PageData, w http.ResponseWriter, r *http.Request
 	for _, v := range editCondition {
 		conn = conn.Where(v...)
 	}
-
+	
 	err, code = pageData.ActivePage.NodeDeleteBefore(pageData, id)
 	if err != nil {
 		nf.ErrResult(w, r, code, err.Error(), nil)
@@ -667,9 +691,15 @@ func (nf Page) Delete(pageData *PageData, w http.ResponseWriter, r *http.Request
 	if code == -1 {
 		return
 	}
-
+	
+	//!转一下格式
+	var Ids []interface{}
+	for _, v := range ids {
+		Ids = append(Ids, v)
+	}
+	
 	if pageData.deleteField == "" {
-		rst, err := conn.Where(pageData.tbPK, id).Delete()
+		rst, err := conn.WhereIn(pageData.tbPK, Ids).Delete()
 		if err != nil {
 			logger.Error(err.Error())
 			nf.ApiResult(w, 500, "操作失败！", nil)
@@ -686,7 +716,7 @@ func (nf Page) Delete(pageData *PageData, w http.ResponseWriter, r *http.Request
 		}
 		nf.ApiResult(w, 200, "操作成功！", "1")
 	} else {
-		rst, err := conn.Where(pageData.tbPK, id).Update(map[string]interface{}{
+		rst, err := conn.WhereIn(pageData.tbPK, Ids).Update(map[string]interface{}{
 			pageData.deleteField: 1,
 		})
 		if err != nil {
@@ -705,12 +735,12 @@ func (nf Page) Delete(pageData *PageData, w http.ResponseWriter, r *http.Request
 		}
 		nf.ApiResult(w, 200, "操作成功！", "1")
 	}
-
+	
 }
 
 // Upload 默认上传图片处理
 func (nf Page) Upload(pageData *PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
+	
 	pageData.httpW = w
 	pageData.httpR = r
 	pageData.httpPS = ps
@@ -727,7 +757,7 @@ func (nf Page) Upload(pageData *PageData, w http.ResponseWriter, r *http.Request
 	nf.ApiResult(w, 100, "未知错误！", nil)
 }
 func (nf Page) WangEditorUpload(pageData *PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
+	
 	pageData.httpW = w
 	pageData.httpR = r
 	pageData.httpPS = ps
@@ -767,21 +797,21 @@ func (nf Page) WangEditorUpload(pageData *PageData, w http.ResponseWriter, r *ht
 //  @Description: 默认处理图片上传
 //
 func (nf Page) doUpload(pageData *PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) (map[string]string, error) {
-
+	
 	//!接受文件
 	file, fileHeader, err := r.FormFile("file")
 	if err != nil {
 		return nil, errors.New("文件上传失败(1)！")
 	}
 	defer file.Close()
-
+	
 	//获取文件后缀
 	uploadFileName := fileHeader.Filename
 	fileExt := path.Ext(uploadFileName)
 	fileExt = strings.ToLower(fileExt)
 	//获取文件大小
 	fileSize := fileHeader.Size
-
+	
 	//允许上传的文件后缀,以.开头
 	var uploadAllowExts []interface{}
 	uploadExt := Models.AppConfigs{}.Value("upload_extension")
@@ -794,7 +824,7 @@ func (nf Page) doUpload(pageData *PageData, w http.ResponseWriter, r *http.Reque
 	if !util.IsInArray(fileExt, uploadAllowExts) {
 		return nil, errors.New("不支持的文件类型！")
 	}
-
+	
 	buf := bytes.NewBuffer(nil)
 	if _, err := io.Copy(buf, file); err != nil {
 		return nil, errors.New("拷贝文件出错！")
@@ -803,7 +833,7 @@ func (nf Page) doUpload(pageData *PageData, w http.ResponseWriter, r *http.Reque
 	md5er := md5.New()
 	md5er.Write(buf.Bytes())
 	md5value := hex.EncodeToString(md5er.Sum(nil))
-
+	
 	//!路径数据
 	//上传文件记录数据库
 	uploadDBName := config.UploadTableName
@@ -820,7 +850,7 @@ func (nf Page) doUpload(pageData *PageData, w http.ResponseWriter, r *http.Reque
 	uploadGroupID := ps.ByName("uploadGroupID")
 	//用户id
 	uploadUserID := ps.ByName("uploadUserID")
-
+	
 	//重复文件截停
 	oldfile, err := db.New().Table(uploadDBName).
 		Where("md5", md5value).
@@ -835,19 +865,19 @@ func (nf Page) doUpload(pageData *PageData, w http.ResponseWriter, r *http.Reque
 			"id":  util.Int642String(oldfile["id"].(int64)),
 		}, nil
 	}
-
+	
 	//定义文件名称
 	fileName := util.MD5(util.TimeNow() + util.GenValidateCode(6))
-
+	
 	//!创建目录
 	savePath := uploadPath + uploadSubPath
 	os.MkdirAll(savePath, os.ModePerm)
-
+	
 	//src
 	fileSrc := uploadUrl + uploadSubPath + "/" + fileName + fileExt
 	//文件目录
 	saveFile := uploadPath + uploadSubPath + "/" + fileName + fileExt
-
+	
 	//创建图片资源文件
 	dst, err := os.Create(saveFile)
 	if err != nil {
@@ -881,7 +911,7 @@ func (nf Page) doUpload(pageData *PageData, w http.ResponseWriter, r *http.Reque
 	}
 	//返回图片ID
 	return map[string]string{"url": fileSrc, "id": util.Int642String(insertId)}, nil
-
+	
 }
 
 // StructApiResult 前台接口标准结构

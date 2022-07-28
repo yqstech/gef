@@ -74,6 +74,9 @@ type PageData struct {
 	//隐藏分页组件
 	listPageHide bool
 	
+	//列表是否支持批量操作
+	listBatchAction bool
+	
 	// 列表页数据分页大小
 	listPageSize int
 	
@@ -119,16 +122,17 @@ type pageTab struct {
 
 // Button 定义按钮结构体
 type Button struct {
-	ButtonName string //按钮名称
-	Action     string //权限校验规则,add 或 a/b
-	ActionType int    //操作类型 1、ajax操作 2、弹出页面 3、javascript
-	ConfirmMsg string //确认对话框信息，ActionType=1有效
-	LayerTitle string //弹出窗口标题
-	ActionUrl  string //操作地址
-	Class      string //样式-类
-	Icon       string //icon class
-	Display    string //展示条件
-	Expand     map[string]string
+	ButtonName  string //按钮名称
+	Action      string //权限校验规则,add 或 a/b
+	ActionType  int    //操作类型 1、ajax操作 2、弹出页面 3、javascript
+	ConfirmMsg  string //确认对话框信息，ActionType=1有效
+	LayerTitle  string //弹出窗口标题
+	ActionUrl   string //操作地址
+	Class       string //样式-类
+	Icon        string //icon class
+	Display     string //展示条件
+	Expand      map[string]string
+	BatchAction bool //是否支持批量操作
 }
 
 // ListColumn 列表展示列数据结构
@@ -233,6 +237,7 @@ func (fd *PageData) DataReset() {
 			Class:      "layui-btn-warm",
 			Icon:       "ri-forbid-line",
 			Display:    "(!item.btn_status || item.btn_status!='hide') && item.status==1",
+			BatchAction: true,
 		},
 		"enable": {
 			ButtonName: "启用",
@@ -242,6 +247,7 @@ func (fd *PageData) DataReset() {
 			Class:      "",
 			Icon:       "ri-checkbox-circle-line",
 			Display:    "(!item.btn_status || item.btn_status!='hide') && item.status==0",
+			BatchAction: true,
 		},
 		"delete": {
 			ButtonName: "删除",
@@ -252,6 +258,7 @@ func (fd *PageData) DataReset() {
 			Class:      "layui-btn-danger",
 			Icon:       "ri-delete-bin-2-line",
 			Display:    "!item.btn_delete || item.btn_delete!='hide'",
+			BatchAction: true,
 		},
 	}
 	fd.listRightBtns = []string{"edit", "disable", "enable", "delete"}
@@ -264,6 +271,7 @@ func (fd *PageData) DataReset() {
 	}
 	fd.listColumnsStyles = map[string]interface{}{}
 	fd.listSearchFields = []ListSearchField{}
+	fd.listBatchAction = false
 	
 	fd.addDataUrl = ""
 	fd.addTplName = "add.html"
@@ -387,6 +395,11 @@ func (fd *PageData) SetListPage(page int) {
 // SetListPageHide 隐藏分页
 func (fd *PageData) SetListPageHide() {
 	fd.listPageHide = true
+}
+
+// SetListBatchAction 开启批量操作
+func (fd *PageData) SetListBatchAction(isOpen bool) {
+	fd.listBatchAction = isOpen
 }
 
 // SetListCondition 设置列表页查询条件

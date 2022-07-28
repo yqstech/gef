@@ -112,6 +112,9 @@ func (that EasyModel) NodeList(pageData *EasyApp.PageData) (error, int) {
 		pageData.SetListRightBtns(rightBtns...)
 		//ID列同步到字段管理了，统一不显示默认id列了
 		pageData.ListColumnClear()
+		if easyModel.BatchAction{
+			pageData.SetListBatchAction(true)
+		}
 		//增加列表列
 		for _, field := range easyModel.Fields {
 			if field.IsShowOnList {

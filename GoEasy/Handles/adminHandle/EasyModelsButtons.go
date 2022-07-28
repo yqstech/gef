@@ -65,12 +65,24 @@ func (that EasyModelsButtons) NodeForm(pageData *EasyApp.PageData, id int64) (er
 	pageData.FormFieldsAdd("button_icon", "icon", "按钮图标", "按钮显示的图标 ri-xxx", "ri-radio-button-line", false, nil, "", nil)
 	pageData.FormFieldsAdd("class_name", "select", "按钮样式", "按钮样式类", "", false, btnClasses, "", nil)
 	pageData.FormFieldsAdd("display", "text", "按钮显示条件", "按钮显示隐藏条件，根据列表项的字段信息自动判断", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("action_type", "radio", "按钮页面类型", "", "1", true, btnActionTypes, "", nil)
 	pageData.FormFieldsAdd("action", "text", "链接权限", "用来校验权限，不要以/开头，例如： add 或 user/add", "", true, nil, "", nil)
 	pageData.FormFieldsAdd("action_url", "text", "链接地址", "相对路径或绝对路径,/开头会自动补全后台地址", "", true, nil, "", nil)
-	pageData.FormFieldsAdd("confirm_msg", "text", "确认信息", "填入值，则点击按钮，弹出确认对话框", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("layer_title", "text", "弹窗标题", "弹窗类按钮，在此定义弹窗标题", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("layer_width", "text", "弹窗宽度", "设置弹窗尺寸，支持px和%", "90%", false, nil, "", nil)
-	pageData.FormFieldsAdd("layer_height", "text", "弹窗高度", "设置弹窗尺寸，支持px和%", "86%", false, nil, "", nil)
+	pageData.FormFieldsAdd("action_type", "radio", "按钮页面类型", "", "1", true, btnActionTypes, "", nil)
+	pageData.FormFieldsAdd("confirm_msg", "text", "确认信息", "填入值，则点击按钮，弹出确认对话框", "", false, nil, "", map[string]interface{}{
+		"if":"formFields.action_type==1",
+	})
+	pageData.FormFieldsAdd("batch_action", "radio", "支持批量操作", "", "0", true, Models.OptionModels{}.ById(1,false), "", map[string]interface{}{
+		"if":"formFields.action_type==1",
+	})
+	pageData.FormFieldsAdd("layer_title", "text", "弹窗标题", "弹窗类按钮，在此定义弹窗标题", "", false, nil, "", map[string]interface{}{
+		"if":"formFields.action_type==2",
+	})
+	pageData.FormFieldsAdd("layer_width", "text", "弹窗宽度", "设置弹窗尺寸，支持px和%", "90%", false, nil, "", map[string]interface{}{
+		"if":"formFields.action_type==2",
+	})
+	pageData.FormFieldsAdd("layer_height", "text", "弹窗高度", "设置弹窗尺寸，支持px和%", "86%", false, nil, "", map[string]interface{}{
+		"if":"formFields.action_type==2",
+	})
+	
 	return nil, 0
 }
