@@ -40,7 +40,7 @@ type EasyModel struct {
 	RightButtons []string                  //右侧操作按钮
 	UrlParams    []UrlParam                //链接参数
 	LevelIndent  string                    //按级缩进
-	BatchAction bool //是否支持批量操作
+	BatchAction  bool                      //是否支持批量操作
 }
 type Tab struct {
 	TabName         string //tab页名称
@@ -84,8 +84,9 @@ var easyModelList = map[string]EasyModel{}
 var easyModelListLock sync.Mutex
 
 // GetEasyModelInfo 获取模型信息
-func GetEasyModelInfo(modelKey string) (EasyModel, error) {
-	if easyModel, ok := easyModelList[modelKey]; ok {
+func GetEasyModelInfo(modelKey string, actionName string) (EasyModel, error) {
+	saveKey := modelKey + "_" + actionName
+	if easyModel, ok := easyModelList[saveKey]; ok {
 		return easyModel, nil
 	} else {
 		easyModelListLock.Lock()
@@ -122,7 +123,7 @@ func GetEasyModelInfo(modelKey string) (EasyModel, error) {
 			RightButtons: []string{},
 			UrlParams:    []UrlParam{},
 			LevelIndent:  modelInfo["level_indent"].(string),
-			BatchAction: util.Is(modelInfo["batch_action"].(int64) == 1, true, false).(bool),
+			BatchAction:  util.Is(modelInfo["batch_action"].(int64) == 1, true, false).(bool),
 		}
 		//格式化多tab页
 		if modelInfo["tabs_for_list"].(string) != "" {
@@ -248,7 +249,11 @@ func GetEasyModelInfo(modelKey string) (EasyModel, error) {
 				SaveTransRule:               field["save_trans_rule"].(string),
 			}
 			if field["option_models_id"].(int64) > 0 {
-				modelField.FieldOptions = Models.OptionModels{}.ById(util.Int642Int(field["option_models_id"].(int64)), field["option_beautify"].(int64) == 1)
+				if actionName == "list" {
+					modelField.FieldOptions = Models.OptionModels{}.ById(util.Int642Int(field["option_models_id"].(int64)), field["option_beautify"].(int64) > 0)
+				} else {
+					modelField.FieldOptions = Models.OptionModels{}.ById(util.Int642Int(field["option_models_id"].(int64)), field["option_beautify"].(int64) == 1)
+				}
 				if field["set_as_tabs"].(int64) == 1 {
 					//!!!!!!!! 将某个字段和字段的选项集设置为列表tab页 !!!!!!!!!!!
 					for _, options := range modelField.FieldOptions {
@@ -264,7 +269,7 @@ func GetEasyModelInfo(modelKey string) (EasyModel, error) {
 		}
 		
 		//!保存并返回
-		easyModelList[modelKey] = easyModel
+		easyModelList[saveKey] = easyModel
 		//!定时删除数据
 		go func() {
 			t := time.After(time.Second * 10) //十秒钟后删除
@@ -272,7 +277,7 @@ func GetEasyModelInfo(modelKey string) (EasyModel, error) {
 			//logger.Info("推迟一分钟，删除EasyModelList 的" + modelKey)
 			easyModelListLock.Lock()
 			defer easyModelListLock.Unlock()
-			delete(easyModelList, modelKey)
+			delete(easyModelList, saveKey)
 		}()
 		return easyModel, nil
 	}

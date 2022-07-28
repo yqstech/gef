@@ -26,7 +26,7 @@ type EasyModel struct {
 
 // NodeBegin 开始
 func (that EasyModel) NodeBegin(pageData *EasyApp.PageData) (error, int) {
-	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey)
+	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey, "begin")
 	if err != nil {
 		return err, 500
 	} else {
@@ -39,7 +39,7 @@ func (that EasyModel) NodeBegin(pageData *EasyApp.PageData) (error, int) {
 
 // NodeList 初始化列表
 func (that EasyModel) NodeList(pageData *EasyApp.PageData) (error, int) {
-	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey)
+	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey, "list")
 	if err != nil {
 		return err, 500
 	} else {
@@ -112,7 +112,7 @@ func (that EasyModel) NodeList(pageData *EasyApp.PageData) (error, int) {
 		pageData.SetListRightBtns(rightBtns...)
 		//ID列同步到字段管理了，统一不显示默认id列了
 		pageData.ListColumnClear()
-		if easyModel.BatchAction{
+		if easyModel.BatchAction {
 			pageData.SetListBatchAction(true)
 		}
 		//增加列表列
@@ -135,7 +135,7 @@ func (that EasyModel) NodeList(pageData *EasyApp.PageData) (error, int) {
 
 // NodeListCondition 修改查询条件
 func (that EasyModel) NodeListCondition(pageData *EasyApp.PageData, condition [][]interface{}) ([][]interface{}, error, int) {
-	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey)
+	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey, "list")
 	if err != nil {
 		return condition, nil, 0
 	} else {
@@ -170,7 +170,7 @@ func (that EasyModel) NodeListCondition(pageData *EasyApp.PageData, condition []
 
 // NodeListData 重写列表数据
 func (that EasyModel) NodeListData(pageData *EasyApp.PageData, data []gorose.Data) ([]gorose.Data, error, int) {
-	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey)
+	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey, "list")
 	if err != nil {
 		return data, nil, 0
 	} else {
@@ -231,7 +231,7 @@ func (that EasyModel) NodeListData(pageData *EasyApp.PageData, data []gorose.Dat
 
 // NodeForm 初始化表单
 func (that EasyModel) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
-	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey)
+	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey, util.Is(id == 0, "add", "edit").(string))
 	if err != nil {
 		return err, 500
 	} else {
@@ -358,7 +358,7 @@ func (that EasyModel) NodeForm(pageData *EasyApp.PageData, id int64) (error, int
 
 // NodeFormData 表单显示前修改数据
 func (that EasyModel) NodeFormData(pageData *EasyApp.PageData, data gorose.Data, id int64) (gorose.Data, error, int) {
-	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey)
+	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey, util.Is(id == 0, "add", "edit").(string))
 	if err != nil {
 		return data, nil, 0
 	} else {
@@ -384,7 +384,7 @@ func (that EasyModel) NodeFormData(pageData *EasyApp.PageData, data gorose.Data,
 
 // NodeSaveData 表单保存数据前使用
 func (that EasyModel) NodeSaveData(pageData *EasyApp.PageData, oldData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
-	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey)
+	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey, util.Is(oldData["id"].(int64) == 0, "add", "edit").(string))
 	if err != nil {
 		return postData, nil, 0
 	} else {

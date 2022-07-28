@@ -209,7 +209,11 @@ func (that EasyModelsFields) NodeForm(pageData *EasyApp.PageData, id int64) (err
 	pageData.FormFieldsAdd("data_type_on_create", "select", "新增页数据类型", "新增页的数据类型", "text", false, formDataType, "", nil)
 	pageData.FormFieldsAdd("data_type_on_update", "select", "编辑页数据类型", "修改页的数据类型", "text", false, formDataType, "", nil)
 	pageData.FormFieldsAdd("option_models_id", "select", "关联选项集", "", "", false, that.OptionModelsList(), "", nil)
-	pageData.FormFieldsAdd("option_beautify", "radio", "选项集美化", "", "1", false, Models.OptionModels{}.ById(1, false), "", map[string]interface{}{
+	pageData.FormFieldsAdd("option_beautify", "radio", "选项集美化", "", "1", false, []map[string]interface{}{
+		{"name":"是","value":"1"},
+		{"name":"否","value":"0"},
+		{"name":"仅列表美化","value":"2"},
+	}, "", map[string]interface{}{
 		"if": "formFields.option_models_id!=''",
 	})
 	pageData.FormFieldsAdd("default_value", "text", "字段默认值", "", "", false, nil, "", nil)
