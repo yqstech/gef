@@ -159,6 +159,7 @@ func (that OptionModels) NodeSaveData(pageData *EasyApp.PageData, oldData gorose
 func (that OptionModels) Dynamic(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	optionModelId := util.PostValue(r, "_dynamic_option_model_id")
 	if optionModelId == "" {
+		that.ApiResult(w, 201, "参数不全", nil)
 		return
 	}
 	DynamicParams := Models.OptionModels{}.DynamicParams(util.String2Int(optionModelId))

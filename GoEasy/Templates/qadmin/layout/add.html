@@ -296,7 +296,7 @@
                                 postData[watch_fields[i]] = newData[watch_fields[i]];
                             }
                         }
-                        this.DynamicOptions(postData, '_{{$field.Key}}_options');
+                        this.DynamicOptions(postData, '{{$field.Key}}');
                     }
                     {{- end -}}
                     {{- end -}}
@@ -305,7 +305,8 @@
             }
         },
         methods: {
-            DynamicOptions:function (postData,optionsField){
+            DynamicOptions:function (postData,FieldKey){
+                let optionsField = '_' + FieldKey + '_options';
                 const that = this;
                 $.ajax({
                     url: "../option_models/dynamic",
@@ -316,6 +317,16 @@
                         var rst = eval('(' + data + ')');
                         if (rst.code == 200 || rst.code == "200") {
                             that.formFields[optionsField] = rst.data;
+                            //假如选项中没有一致的，设置为空
+                            var hadOptions = false;
+                            for (let i = 0; i < rst.data.length; i++) {
+                                if(rst.data[i].value == that.formFields[FieldKey]){
+                                    hadOptions = true;
+                                }
+                            }
+                            if(!hadOptions){
+                                that.formFields[FieldKey] = "";
+                            }
                         }
                     }
                 });
