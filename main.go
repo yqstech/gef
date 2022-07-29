@@ -11,7 +11,6 @@ package gef
 
 import (
 	"embed"
-	"encoding/gob"
 	"errors"
 	"github.com/gef/GoEasy/EasyApp"
 	"github.com/gef/GoEasy/Event"
@@ -23,7 +22,6 @@ import (
 	"github.com/gef/GoEasy/Utils/serv"
 	"github.com/gef/config"
 	"github.com/gef/routers"
-	"github.com/gef/rpcPlugins"
 	"github.com/gef/static"
 	"github.com/gorilla/mux"
 	"github.com/julienschmidt/httprouter"
@@ -53,8 +51,6 @@ func init() {
 	pool.RedisInit()
 	//! 初始化GoCache
 	pool.GocacheInit()
-	//! rpc插件需要注册一个类型
-	gob.Register(map[string]interface{}{})
 }
 
 // New 创建新的Gef应用
@@ -138,9 +134,6 @@ func (g *Gef) Run() {
 	for _, server := range g.selfServers {
 		g.Servers = append(g.Servers, server)
 	}
-	
-	//!退出web服务清除RPC链接
-	defer rpcPlugins.RpcPluginClientsKill()
 	
 	//!启动web服务组
 	HttpServers := serv.Server{}

@@ -13,7 +13,6 @@ import (
 	"errors"
 	"github.com/gef/GoEasy/Utils/db"
 	"github.com/gef/GoEasy/Utils/util"
-	"github.com/gef/rpcPlugins"
 	"github.com/wonderivan/logger"
 )
 
@@ -22,7 +21,7 @@ type SmsSend struct {
 
 func (that SmsSend) Do(eventName string, data ...interface{}) (error, int) {
 	ps := data[0].(map[string]interface{})
-
+	//通道列表
 	SmsUpstreams, err := db.New().Table("tb_sms_upstream").
 		Where("is_delete", 0).
 		Where("status", 1).Get()
@@ -34,13 +33,13 @@ func (that SmsSend) Do(eventName string, data ...interface{}) (error, int) {
 		return errors.New("系统未开启短信通道！"), 501
 	}
 	var UpstreamIds []interface{}
-	UpstreamPlugins := map[int64]string{}
+	UpstreamEvents := map[int64]string{}
 	for _, v := range SmsUpstreams {
-		UpstreamPlugins[v["id"].(int64)] = v["plugin_name"].(string)
+		UpstreamEvents[v["id"].(int64)] = v["event_name"].(string)
 		UpstreamIds = append(UpstreamIds, v["id"])
 	}
-
-	//查找可用的通道列表
+	
+	//应用通道列表
 	appSmsUpstreams, err := db.New().Table("tb_app_sms_upstream").
 		Where("is_delete", 0).
 		Where("status", 1).
@@ -53,6 +52,8 @@ func (that SmsSend) Do(eventName string, data ...interface{}) (error, int) {
 	if len(appSmsUpstreams) == 0 {
 		return errors.New("应用未开启短信通道！"), 503
 	}
+	
+	//应用短信通道循环
 	for _, item := range appSmsUpstreams {
 		//短信设置项
 		upstreamId := item["upstream_id"].(int64)
@@ -66,7 +67,7 @@ func (that SmsSend) Do(eventName string, data ...interface{}) (error, int) {
 		configs["params"] = ps["params"]
 		//手机号码
 		configs["tel"] = ps["tel"]
-
+		
 		//保存短信记录
 		recordId, err := db.New().Table("tb_app_sms_record").
 			InsertGetId(map[string]interface{}{
@@ -84,47 +85,39 @@ func (that SmsSend) Do(eventName string, data ...interface{}) (error, int) {
 			logger.Error(err.Error())
 			return errors.New("系统运行错误"), 500
 		}
-
+		
 		//短信记录ID
 		configs["record_id"] = recordId
-
-		//查找通道插件
-		if pluginName, ok := UpstreamPlugins[upstreamId]; ok {
-			if pluginName == "" {
-				return errors.New("短信通道未指定插件！"), 503
+		
+		//查找查找通道事件
+		if upstreamEventName, ok := UpstreamEvents[upstreamId]; ok {
+			if upstreamEventName == "" {
+				return errors.New("短信通道未指定事件！"), 503
 			}
-			//获取插件对象
-			Plugin, err := rpcPlugins.GetSmsPlugin(pluginName)
+			err, errCode := Trigger(upstreamEventName, configs)
 			if err != nil {
-				logger.Error(err.Error())
-				//!短信发送标记失败
+				//!其他错误标记失败
 				db.New().Table("tb_app_sms_record").
 					Where("id", recordId).
 					Update(map[string]interface{}{
-						"status": 4, "msg": "加载短信插件失败！",
+						"status": 4, "msg": err.Error(),
 					})
-				return errors.New("加载短信插件失败！"), 503
+				continue
 			}
-			//code, err := Plugin.SendFunc.(func(map[string]interface{}) (int64, error))(configs)
-			code, errMsg := Plugin.SendSms(configs)
-			if code == 200 {
+			if errCode == 200 {
 				//!标记成功!
 				db.New().Table("tb_app_sms_record").
 					Where("id", recordId).
 					Update(map[string]interface{}{
 						"status": 3,
-						"msg":    errMsg,
+						"msg":    "短信发送成功！",
 					})
 				return nil, 200
 			}
-			if errMsg != "" {
-				logger.Error(errMsg)
-			}
-			//!其他错误标记失败
 			db.New().Table("tb_app_sms_record").
 				Where("id", recordId).
 				Update(map[string]interface{}{
-					"status": 4, "msg": errMsg,
+					"status": 4, "msg": "未知的错误！",
 				})
 		}
 	}
