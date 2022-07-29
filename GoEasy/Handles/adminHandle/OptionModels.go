@@ -53,8 +53,8 @@ func (that OptionModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 	pageData.ListColumnAdd("table_name", "数据表", "text", nil)
 	pageData.ListColumnAdd("value_field", "值字段", "text", nil)
 	pageData.ListColumnAdd("name_field", "名称字段", "text", nil)
-	//pageData.ListColumnAdd("color_field", "颜色字段", "text", nil)
-	//pageData.ListColumnAdd("icon_field", "图标字段", "text", nil)
+	pageData.ListColumnAdd("parent_field", "上级字段", "text", nil)
+	pageData.ListColumnAdd("children_option_model_id", "下级选项集", "array", that.ChildrenOptionModelsList(0))
 	pageData.ListColumnAdd("index_num", "排序", "input::type=number&width=50px", nil)
 	return nil, 0
 }
@@ -85,6 +85,7 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 	pageData.FormFieldsAdd("default_data", "textarea", "默认数据", "和静态数据格式相同", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
+	//配置数据表
 	pageData.FormFieldsAdd("", "block", "配置数据表", "", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
@@ -103,15 +104,28 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 	pageData.FormFieldsAdd("select_where", "text", "补充查询条件", "补充数据表查询条件", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
-	pageData.FormFieldsAdd("dynamic_params", "textarea", "支持的动态参数", "用来做数据联动的参数设置，程序根据设置的字段，查询post参数\n格式为 监听参数:选项集数据表字段:默认值，例如：group_id:group_id:0\n默认值为空自动忽略，每行一个转换规则", "", false, nil,
-		"",
-		map[string]interface{}{
+	
+	//联动设置
+	pageData.FormFieldsAdd("", "block", "选项集联动", "", "", false, nil, "", nil)
+	pageData.FormFieldsAdd("dynamic_params", "textarea", "联动配置", "用来做数据联动的参数设置，程序根据设置的字段，查询post参数\n格式为 监听参数:选项集数据表字段:默认值，例如：group_id:group_id:0\n默认值为空自动忽略，每行一个转换规则", "", false,
+		nil, "", map[string]interface{}{
 			"if": "formFields.data_type==1",
 		})
-	pageData.FormFieldsAdd("", "block", "选项图标、颜色、缩进", "", "", false, nil, "", map[string]interface{}{
-		"if": "formFields.data_type==1",
+	
+	//多级、数据转换
+	pageData.FormFieldsAdd("", "block", "多级、数据转换", "", "", false, nil, "", nil)
+	pageData.FormFieldsAdd("parent_field", "text", "上级字段", "设置上级，选项集中会多pid一项数据，值就是上级字段的值。", "", false, nil, "", nil)
+	pageData.FormFieldsAdd("to_tree_array", "radio", "选项集转多维", "将选项集根据pid转为树形结构（多维数组）", "0", false, Models.OptionModels{}.ById(1, false), "", map[string]interface{}{
+		"if": "formFields.parent_field!=''",
 	})
-	pageData.FormFieldsAdd("parent_field", "text", "上级字段", "设置上级字段会查询原数据库上级字段信息，并在数据中增加pid一项", "", false, nil, "", map[string]interface{}{
+	pageData.FormFieldsAdd("children_option_model_id", "select", "下级选项集", "下级选项集必须查询数据表类型，必须设置上级字段", "", false, that.ChildrenOptionModelsList(id), "", nil)
+	//pageData.FormFieldsAdd("options_disable", "radio", "当前选项禁选", "设置此项后，选项只能选择下级的选项集。当前选项集自动添加字段disabled=disabled", "0", false, Models.OptionModels{}.ById(1, false), "",
+	//	map[string]interface{}{
+	//		"if": "!!formFields.children_option_model_id",
+	//	})
+	//
+	//选项图标、颜色、缩进
+	pageData.FormFieldsAdd("", "block", "选项图标、颜色、缩进", "", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
 	pageData.FormFieldsAdd("color_field", "text", "颜色字段", "设置某字段值作为颜色值", "", false, nil, "", map[string]interface{}{
@@ -126,6 +140,7 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 	pageData.FormFieldsAdd("icon_array", "textarea", "Icon图标组", "选项列表对应的图标列表，使用英文逗号分割，例如:ri-send-plane-line,ri-chat-3-line", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
+	//自动匹配与排序
 	pageData.FormFieldsAdd("", "block", "自动匹配与排序", "", "", false, nil, "", nil)
 	//默认排序值
 	indexNum := 1

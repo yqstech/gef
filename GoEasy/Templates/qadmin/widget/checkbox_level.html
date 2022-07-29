@@ -4,28 +4,28 @@
     <!--第1级-->
     <div class="checkbox_level_1">
         <label class="checkbox-label" >
-            <input @change="formFieldsValueBind('{{$.Key}}','{{$v.id}}','{{json_encode $v._children}}')" class="layui-form-checkbox" type="checkbox" name="{{$.Key}}" v-model="formFields.{{$.Key}}" :value="{{$v.id}}"/> {{$v.name}}
+            <input @change="formFieldsValueBind('{{$.Key}}',{{jsValue $v.value}},'{{json_encode $v._children true}}')" class="layui-form-checkbox" type="checkbox" name="{{$.Key}}" v-model="formFields.{{$.Key}}" :value="{{jsValue $v.value}}"/> {{$v.name}}
         </label>
         <!--第2级-->
         <div class="checkbox_level_2">
             {{range $k2,$v2 := $v._child}}
             <div class="{{if eq $v._lastLevel 1}}last_level{{end}}">
                 <label class="checkbox-label" >
-                    <input @change="formFieldsValueBind('{{$.Key}}','{{$v2.id}}','{{json_encode $v2._children}}')" class="layui-form-checkbox" type="checkbox" name="{{$.Key}}" v-model="formFields.{{$.Key}}" :value="{{$v2.id}}"/> {{$v2.name}}
+                    <input @change="formFieldsValueBind('{{$.Key}}',{{jsValue $v2.value}},'{{json_encode $v2._children true}}')" class="layui-form-checkbox" type="checkbox" name="{{$.Key}}" v-model="formFields.{{$.Key}}" :value="{{jsValue $v2.value}}"/> {{$v2.name}}
                 </label>
                 <!--第3级-->
                 <div class="checkbox_level_3 ">
                     {{range $k3,$v3 := $v2._child}}
                     <div class="{{if eq $v2._lastLevel 1}}last_level{{end}}">
                         <label class="checkbox-label" >
-                            <input @change="formFieldsValueBind('{{$.Key}}','{{$v3.id}}','{{json_encode $v3._children}}')" class="layui-form-checkbox" type="checkbox" name="{{$.Key}}" v-model="formFields.{{$.Key}}" :value="{{$v3.id}}"/> {{$v3.name}}
+                            <input @change="formFieldsValueBind('{{$.Key}}',{{jsValue $v3.value}},'{{json_encode $v3._children true}}')" class="layui-form-checkbox" type="checkbox" name="{{$.Key}}" v-model="formFields.{{$.Key}}" :value="{{jsValue $v3.value}}"/> {{$v3.name}}
                         </label>
                         <!--第4级-->
                         <div class="checkbox_level_4 ">
                             {{range $k4,$v4 := $v3._child}}
                             <div class="{{if eq $v3._lastLevel 1}}last_level{{end}}">
                                 <label class="checkbox-label" >
-                                    <input class="layui-form-checkbox" type="checkbox" name="{{$.Key}}" v-model="formFields.{{$.Key}}" :value="{{$v4.id}}"/> {{$v4.name}}
+                                    <input class="layui-form-checkbox" type="checkbox" name="{{$.Key}}" v-model="formFields.{{$.Key}}" :value="{{jsValue $v4.value}}"/> {{$v4.name}}
                                 </label>
                             </div>
                             {{end}}

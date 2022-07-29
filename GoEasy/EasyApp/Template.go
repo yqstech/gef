@@ -211,7 +211,14 @@ func (t *Template) Functions() template.FuncMap {
 			}
 			return nil
 		},
-		"json_encode": util.JsonEncode,
+		"json_encode": func(data interface{}, trans bool) string {
+			str := util.JsonEncode(data)
+			if trans {
+				//模板里使用需要转义
+				str = strings.Replace(str, "\"", "&#34;", -1)
+			}
+			return str
+		},
 		"hasType": func(formFields []FormField, types string) bool {
 			if types == "" {
 				return false
@@ -225,6 +232,14 @@ func (t *Template) Functions() template.FuncMap {
 				}
 			}
 			return false
+		},
+		"jsValue": func(value interface{}) interface{} {
+			s := util.Interface2String(value)
+			if util.IsNum(s) {
+				return s
+			} else {
+				return "'" + s + "'"
+			}
 		},
 	}
 }

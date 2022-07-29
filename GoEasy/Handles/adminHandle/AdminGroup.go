@@ -14,7 +14,7 @@ import (
 	"github.com/gef/GoEasy/Models"
 	"github.com/gef/GoEasy/Utils/db"
 	"github.com/gef/GoEasy/Utils/util"
-
+	
 	"github.com/gohouse/gorose/v2"
 	"github.com/wonderivan/logger"
 )
@@ -48,7 +48,7 @@ func (ad AdminGroup) NodeForm(pageData *EasyApp.PageData, id int64) (error, int)
 		logger.Error(err.Error())
 		return errors.New("出错了"), 500
 	}
-
+	
 	//goroseData 转成 []map
 	var data []map[string]interface{}
 	for _, v := range rules {
@@ -59,15 +59,15 @@ func (ad AdminGroup) NodeForm(pageData *EasyApp.PageData, id int64) (error, int)
 			v["name"] = v["name"].(string) + "[权限]"
 		}
 		data = append(data, map[string]interface{}{
-			"id":        v["id"],
-			"pid":       v["pid"],
 			"name":      v["name"],
+			"value":     v["id"],
+			"pid":       v["pid"],
 			"type":      v["type"],
 			"is_compel": v["is_compel"],
 		})
 	}
 	//[]map转成上下级结构
-	data, _, _ = util.ArrayMap2Tree(data, 0, "id", "pid", "_child")
+	data, _, _ = util.ArrayMap2Tree(data, 0, "value", "pid", "_child")
 	//表单信息
 	pageData.FormFieldsAdd("group_name", "text", "角色名称", "", "", true, nil, "", nil)
 	pageData.FormFieldsAdd("rules", "checkbox_level", "配置权限", "", "", false, data, "", nil)

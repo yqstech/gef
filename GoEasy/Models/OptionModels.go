@@ -33,8 +33,8 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 	if selectData, ok := OptionModelsList[cacheKey]; ok {
 		return selectData
 	} else {
-		OptionModelsListLock.Lock()
-		defer OptionModelsListLock.Unlock()
+		//OptionModelsListLock.Lock()
+		//defer OptionModelsListLock.Unlock()
 		//通过数据库查询
 		data, err := db.New().Table("tb_option_models").
 			Where("is_delete", 0).
@@ -47,6 +47,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 		if data == nil {
 			return nil
 		}
+		
 		if data["data_type"].(int64) == 0 {
 			//解析json格式的静态数据
 			if data["static_data"].(string) != "" {
@@ -76,21 +77,22 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 			if data["color_field"].(string) != "" {
 				keyTrans[data["color_field"].(string)] = "color"
 			}
-			//设置了上级字段，获取上级字段
+			//设置了上级字段，获取上级字段,上级字段统一格式化成pid
 			if data["parent_field"].(string) != "" {
 				keyTrans[data["parent_field"].(string)] = "pid"
-				//如果value不是id，那么直接查询一下
-				if data["value_field"].(string) != "id" {
-					keyTrans["id"] = "id"
-				}
 			}
+			//如果value不是id，那么也需要查询一下id
+			if data["value_field"].(string) != "id" {
+				keyTrans["id"] = "id"
+			}
+			
 			arrOptions, err, _ := Model{}.SelectOptionsData(data["table_name"].(string), keyTrans, "", "", where, data["select_order"].(string))
 			if err != nil {
 				logger.Error(err.Error())
 				return nil
 			}
-			if data["value_field"].(string) == "id" && data["parent_field"].(string) != "" {
-				//假如value就是ID，需要拷贝一下
+			//假如value就是ID，需要将value字段值 恢复 到id字段上
+			if data["value_field"].(string) == "id" {
 				for index, options := range arrOptions {
 					arrOptions[index]["id"] = options["value"]
 				}
@@ -138,13 +140,60 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 				selectData[index]["name"] = optionName
 			}
 		}
+		logger.Alert("美化后的数据集",selectData)
+		//!设置了禁用
+		if data["options_disable"].(int64) == 1 {
+			for thisIndex, _ := range selectData {
+				selectData[thisIndex]["disabled"] = "disabled"
+			}
+		}
+		//! 合并下级选项集
+		if data["children_option_model_id"].(int64) > 0 {
+			nextOptionModels := that.ById(util.Int642Int(data["children_option_model_id"].(int64)), false)
+			for _, nextOption := range nextOptionModels {
+				//下级必须存在pid字段
+				if pid, ok := nextOption["pid"]; ok {
+					//循环当前选项
+					for thisIndex, thisOption := range selectData {
+						//获取值
+						if thisId, ok2 := thisOption[data["value_field"].(string)]; ok2 {
+							//当前选项集选项ID 和 下级选项集选项的PID相同
+							if util.Interface2String(thisId) == util.Interface2String(pid) {
+								if _, ok3 := selectData[thisIndex]["_child"]; !ok3 {
+									selectData[thisIndex]["_child"] = []map[string]interface{}{}
+								}
+								selectData[thisIndex]["_child"] = append(selectData[thisIndex]["_child"].([]map[string]interface{}), nextOption)
+							}
+						}
+					}
+				}
+			}
+			logger.Alert("合并下级以后",selectData)
+			//! 跨表会造成value值重复，需要修改一下value值，且需要在补充完下级以后修改
+			//!取数据表名最后一个字段作为新ID的前缀
+			tbName := strings.Split(data["table_name"].(string), "_")
+			Prefix := tbName[len(tbName)-1]
+			for thisIndex, thisOption := range selectData {
+				selectData[thisIndex]["value"] = Prefix + "_" + util.Interface2String(thisOption["value"])
+			}
+			logger.Alert("修改value值以后",selectData)
+		}
+		//!转多维数组
+		if data["to_tree_array"].(int64) == 1 {
+			selectData, _, _ = util.ArrayMap2Tree(selectData, 0, data["value_field"].(string), "pid", "_child")
+		}
+		//!迭代更新一下标记值
+		selectData, _, _ = TreeArrayExtendField(selectData)
+		//
+		//logger.Info(id, util.JsonEncode(selectData))
+		
 		//!定时删除
 		go func() {
 			t := time.After(time.Second * 10) //十秒钟后删除
 			_, _ = <-t
 			OptionModelsListLock.Lock()
-			defer OptionModelsListLock.Unlock()
-			delete(OptionModelsList, cacheKey)
+			//defer OptionModelsListLock.Unlock()
+			//delete(OptionModelsList, cacheKey)
 		}()
 		OptionModelsList[cacheKey] = selectData
 		return selectData
@@ -281,4 +330,61 @@ func FieldMatchOptionModelsId(fieldKey string) int64 {
 		}
 	}
 	return selectId
+}
+
+// TreeArrayExtendField 多维数据补充数组的附加信息
+//多维数组查询出子级的层级，遇到选项有_lastLevel值，就直接返回
+func TreeArrayExtendField(data []map[string]interface{}) ([]map[string]interface{}, []interface{}, int64) {
+	//迭代数组
+	//最多有几级子项
+	childMaxLevel := int64(0)
+	var childrenIds []interface{}
+	//循环数组
+	for k, v := range data {
+		//明确判断值是数字还是字符串
+		valueStr := util.Interface2String(v["value"])
+		if util.IsNum(valueStr) {
+			childrenIds = append(childrenIds, int64(util.String2Int(valueStr)))
+		} else {
+			childrenIds = append(childrenIds, valueStr)
+		}
+		//逐项判断，是否含有下级
+		if _child, ok := v["_child"]; ok {
+			if len(_child.([]map[string]interface{})) > 0 {
+				//如果当前项，已经计算出了下级信息，就不用继续去处理了
+				if _children, ok2 := v["_children"]; ok2 {
+					childrenIds = append(childrenIds, _children.([]interface{})...)
+					if _lastLevel, ok2 := v["_lastLevel"]; ok2 {
+						if _lastLevel.(int64)+1 > childMaxLevel {
+							childMaxLevel = _lastLevel.(int64)+1
+						}
+					}
+					continue
+				}
+				//下级返回信息
+				newChild, childrenIds2, childMaxLevel2 := TreeArrayExtendField(_child.([]map[string]interface{}))
+				//判断子项有几层下级，如果就子集自己，则返回0
+				if childMaxLevel2+1 > childMaxLevel {
+					childMaxLevel = childMaxLevel2 + 1
+				}
+				data[k]["_child"] = newChild
+				data[k]["_children"] = childrenIds2
+				data[k]["_lastLevel"] = childMaxLevel2 + 1 //后面还有几级
+				
+				childrenIds = append(childrenIds, childrenIds2...)
+				
+				//处理完毕，跳转到下次循环
+				continue
+			} else {
+				//下级列表为空
+			}
+		} else {
+			data[k]["_child"] = []map[string]interface{}{}
+		}
+		
+		//获取下级失败或者下级为空
+		data[k]["_children"] = []interface{}{}
+		data[k]["_lastLevel"] = int64(0)
+	}
+	return data, childrenIds, childMaxLevel
 }
