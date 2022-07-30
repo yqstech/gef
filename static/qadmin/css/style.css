@@ -500,11 +500,50 @@ header .topMenus a.on {
     color: #8f4b14;
     font-weight: bold;
 }
-
+.checkbox_level .checkbox-label{
+    margin-top: 5px;
+    margin-bottom: 0px;
+}
+.checkbox_level_1{
+    margin-bottom: 10px;
+}
 .checkbox_level .checkbox_level_2,
 .checkbox_level .checkbox_level_3,
 .checkbox_level .checkbox_level_4 {
-    padding-left: 40px;
+    padding-left: 20px;
+    margin-left: 20px;
+    border-left:1px solid #dddddd;
+    margin-bottom: 5px;
+}
+.last_items{
+    margin: 10px 10px 10px 30px!important;
+    padding:10px;
+    border:1px dotted #dddddd!important;
+    border-radius: 4px;
+    position: relative;
+}
+.last_items:before{
+    content: '';
+    position:absolute;
+    width:18px;
+    height: 50px;
+    border-left: 1px solid #dddddd;
+    border-bottom: 1px solid #dddddd;
+    top:-10px;
+    left:-20px;
+}
+
+.checkbox_level .h-line{
+    position:relative;
+}
+.checkbox_level .h-line:before{
+    content: '';
+    position:absolute;
+    width:20px;
+    height: 1px;
+    background-color: #dddddd;
+    top:23px;
+    left:-20px;
 }
 
 .checkbox_level .last_level {
