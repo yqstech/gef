@@ -19,6 +19,8 @@
         <span v-html="item.{{.FieldName}}"></span>
     {{else if eq .DataType "icon"}}
         {{ template "listIcon" .FieldName}}
+    {{else if eq .DataType "color"}}
+        {{ template "color" .FieldName}}
     {{else if eq .DataType "image"}}
         <img style="max-width:160px;max-height:160px;" :src="item.{{.FieldName}}?item.{{.FieldName}}:'/static/images/image_null.png'"></img>
     {{else if eq .DataType "image100"}}

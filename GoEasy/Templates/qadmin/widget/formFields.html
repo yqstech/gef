@@ -262,6 +262,20 @@
         {{template "checkbox_level" $field}}
         {{- end -}}
 
+        {{/* 颜色选择器 */}}
+        {{- if eq $field.Type "color"}}
+        <div class="layui-col-sm6" style="max-width:200px;padding-right: 10px">
+            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="请选择颜色..."
+                   autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-col-sm6" style="line-height:28px">
+            <div class="color_picker_{{$field.Key}}"></div>
+        </div>
+        <div class="layui-col-sm12" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+
         {{/* 富文本编辑 */}}
         {{- if eq $field.Type "wangEditor"}}
         <div style="border: 1px solid #ccc;">

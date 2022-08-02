@@ -92,6 +92,10 @@
     </div>
 </div>
 
+{{if hasType .formFields "color" -}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.es5.min.js"></script>
+{{end}}
 {{if hasType .formFields "codeEditor,code" -}}
 <!--html编辑器-->
 <link rel="stylesheet" href="/static/codemirror/lib/codemirror.css">
@@ -869,6 +873,33 @@
     {{- end -}}
     {{- end -}}
 
+    {{range $fieldIndex,$field:=.formFields}}
+    {{- if eq $field.Type "color"}}
+    const pickr_{{$field.Key}} = Pickr.create({
+        el: '.color_picker_{{$field.Key}}',
+        theme: 'classic',
+        default:"#91D482",
+        components: {
+            // Main components
+            preview: true,
+            opacity: true,
+            hue: true,
+            // Input / output Options
+            interaction: {
+                hex: true,
+                rgba: true,
+                cmyk: true,
+                input: true,
+                save: true
+            }
+        }
+    });
+    pickr_{{$field.Key}}.on('save', (color, instance) => {
+        console.log('Event: "save"', color, instance);
+        vue.formFields.{{$field.Key}} = color.toHEXA().toString();
+    })
+    {{- end -}}
+    {{- end -}}
 </script>
 <style type="text/css">
     input.file {
