@@ -23,7 +23,7 @@ type EasyModels struct {
 
 // NodeBegin 开始
 func (that EasyModels) NodeBegin(pageData *EasyApp.PageData) (error, int) {
-	pageData.SetTitle("EasyModel 后台模型")
+	pageData.SetTitle("后台模型 EasyModel")
 	pageData.SetPageName("模型")
 	pageData.SetTbName("tb_easy_models")
 	return nil, 0

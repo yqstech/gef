@@ -45,8 +45,8 @@ func (that EasyCurdModelsFields) NodeList(pageData *EasyApp.PageData) (error, in
 	pageData.ListColumnAdd("field_name", "字段名称", "text", nil)
 	pageData.ListColumnAdd("field_note", "字段备注", "text", nil)
 	pageData.ListColumnAdd("option_models_id", "关联选项集", "array", that.OptionModelsList())
-	pageData.ListColumnAdd("is_private", "私有数据", "switch::text=是|否", nil)
-	pageData.ListColumnAdd("is_lock", "锁定数据", "switch::text=是|否", nil)
+	pageData.ListColumnAdd("is_private", "私密数据", "switch::text=私密|公开", nil)
+	pageData.ListColumnAdd("is_lock", "锁定数据", "switch::text=锁定|可改", nil)
 	pageData.ListColumnAdd("update_time", "最后同步", "text", nil)
 	pageData.SetListRightBtns("edit")
 	return nil, 0

@@ -17,7 +17,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
 	"net/http"
-	"reflect"
 	"strings"
 )
 
@@ -148,7 +147,7 @@ func (that *EasyCurd) Find(w http.ResponseWriter, r *http.Request, ps httprouter
 		"_extend": that.DbModel.ResultExtend,
 	}
 	if that.DbModel.CompleteResultData != nil {
-		that.ApiResult(w, 200, "success", that.DbModel.CompleteResultData(resultData, SelectAction))
+		that.ApiResult(w, 200, "success", that.DbModel.CompleteResultData(resultData, FindAction))
 		return
 	}
 	that.ApiResult(w, 200, "success", resultData)
@@ -277,12 +276,11 @@ func (that *EasyCurd) getOrm(ps httprouter.Params) gorose.IOrm {
 	conn := db.New()
 	conn = conn.Table(that.DbModel.TableName)
 	for key, value := range that.DbModel.Condition {
-		logger.Alert("类型是:", reflect.TypeOf(value))
 		switch value.(type) {
 		//数组
 		case []interface{}:
 			if key[0:1] == "_" {
-				//key是or 则 value 是二级数组
+				//下划线开头 则 value 是二级数组
 				var orps [][]interface{}
 				for _, p := range value.([]interface{}) {
 					switch p.(type) {

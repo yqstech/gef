@@ -21,7 +21,7 @@ type EasyCurdModels struct {
 
 // NodeBegin 开始
 func (that EasyCurdModels) NodeBegin(pageData *EasyApp.PageData) (error, int) {
-	pageData.SetTitle("EasyCurdModel 接口模型")
+	pageData.SetTitle("接口模型 EasyCurdModel")
 	pageData.SetPageName("接口模型")
 	pageData.SetTbName("tb_easy_curd_models")
 	return nil, 0
