@@ -74,6 +74,7 @@ func (that EasyCurdModels) NodeForm(pageData *EasyApp.PageData, id int64) (error
 	pageData.FormFieldsAdd("allow_delete", "radio", "允许删除", "", "0", true, Models.DefaultIsOrNot, "", nil)
 	pageData.FormFieldsAdd("soft_delete_disable", "radio", "禁用软删除", "", "0", true, Models.DefaultIsOrNot, "", nil)
 	pageData.FormFieldsAdd("check_login", "radio", "校验登录", "", "0", true, Models.DefaultIsOrNot, "", nil)
+	pageData.FormFieldsAdd("select_with_disabled", "radio", "禁用数据可查", "已经禁用的数据，是否可以查询", "0", true, Models.DefaultIsOrNot, "", nil)
 	pageData.FormFieldsAdd("uk_name", "text", "用户字段名", "代表用户id的字段名称", "user_id", true, nil, "", nil)
 	pageData.FormFieldsAdd("pk_name", "text", "主键字段名", "代表用主键的字段名称", "id", true, nil, "", nil)
 	return nil, 0

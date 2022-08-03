@@ -29,31 +29,32 @@ const DeleteAction = "delete"
 
 // DbModel 数据库模型
 type DbModel struct {
-	TableName         string //数据库名称
-	Select            bool   //查询权限
-	Create            bool   //新增权限
-	Update            bool   //更新权限
-	Delete            bool   //删除权限
-	InsertId          bool   //允许插入Id
-	SoftDeleteDisable bool   //软删除是否禁用，禁用标识真删除
-	CheckLogin        bool   //是否校验登录
-
+	TableName          string //数据库名称
+	Select             bool   //查询权限
+	Create             bool   //新增权限
+	Update             bool   //更新权限
+	Delete             bool   //删除权限
+	InsertId           bool   //允许插入Id
+	SoftDeleteDisable  bool   //软删除是否禁用，禁用标识真删除
+	CheckLogin         bool   //是否校验登录
+	SelectWithDisabled bool   //是否校验登录
+	
 	Condition map[string]interface{} //查询或更新的sql条件
 	Data      map[string]interface{} //新增或更新数据
 	UkName    string                 //用户键字段
 	PkName    string                 //主键
 	Order     string                 //排序 默认id desc
-
+	
 	Fields        string   //公开查询字段，不填为*
 	PrivateFields []string //私密的数据库字段，不对外展示，查询出的数据做删除处理
 	LockFields    []string //锁定字段，锁定的字段不许修改，假如是更新操作，删除此字段
-
+	
 	FmtRule map[string]FmtRuleFunc //对定义某个键的数据值进行格式化
-
+	
 	ResultExtend map[string]interface{} //返回数据拓展数据
-
+	
 	CompleteData CompleteDataFunc //完善select单项或者find单项数据
-
+	
 	CompleteResultData CompleteResultDataFunc //对查询结果进行转换
 }
 
@@ -100,7 +101,7 @@ func (that *EasyCurd) Select(w http.ResponseWriter, r *http.Request, ps httprout
 			data[k] = that.DbModel.CompleteData(data[k])
 		}
 	}
-
+	
 	resultData := map[string]interface{}{
 		"data":    data,
 		"total":   total,
@@ -161,7 +162,7 @@ func (that *EasyCurd) Create(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	//确认数据
 	that.verifyData(false)
-
+	
 	//插入数据
 	conn := that.getOrm(ps)
 	insertId, err := conn.InsertGetId(that.DbModel.Data)
@@ -174,14 +175,14 @@ func (that *EasyCurd) Create(w http.ResponseWriter, r *http.Request, ps httprout
 		that.ApiResult(w, 500, "插入数据失败！", nil)
 		return
 	}
-
+	
 	//返回结果
 	resultData := map[string]interface{}{
 		"id":      insertId,
 		"_extend": that.DbModel.ResultExtend,
 	}
 	that.ApiResult(w, 200, "success", resultData)
-
+	
 }
 func (that *EasyCurd) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	that.Action = UpdateAction
@@ -190,10 +191,10 @@ func (that *EasyCurd) Update(w http.ResponseWriter, r *http.Request, ps httprout
 		that.ApiResult(w, 101, "无权操作！", nil)
 		return
 	}
-
+	
 	//格式化要更新的数据
 	that.verifyData(true)
-
+	
 	//更新数据
 	conn := that.getOrm(ps)
 	update, err := conn.Update(that.DbModel.Data)
@@ -211,9 +212,9 @@ func (that *EasyCurd) Update(w http.ResponseWriter, r *http.Request, ps httprout
 		"update":  update,
 		"_extend": that.DbModel.ResultExtend,
 	}
-
+	
 	that.ApiResult(w, 200, "success", resultData)
-
+	
 }
 func (that *EasyCurd) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	that.Action = DeleteAction
@@ -244,7 +245,7 @@ func (that *EasyCurd) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 			"delete":  update, //数量
 			"_extend": that.DbModel.ResultExtend,
 		}
-
+		
 		that.ApiResult(w, 200, "success", resultData)
 	} else {
 		delete, err := conn.Delete()
