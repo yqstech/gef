@@ -20,6 +20,21 @@ func TimeNowFormat(fmt string, y, m, d int) string {
 	return time.Now().AddDate(y, m, d).In(cstSh).Format(fmt)
 }
 
+func TimeNowWeek(y, m, d int) (string, string) {
+	var WeekDayMap = map[string]string{
+		"Monday":    "周一",
+		"Tuesday":   "周二",
+		"Wednesday": "周三",
+		"Thursday":  "周四",
+		"Friday":    "周五",
+		"Saturday":  "周六",
+		"Sunday":    "周日",
+	}
+	var cstSh, _ = time.LoadLocation("Asia/Shanghai") //上海
+	var week = time.Now().AddDate(y, m, d).In(cstSh).Weekday().String()
+	return week, WeekDayMap[week]
+}
+
 func Str2UnixTime(t string) int64 {
 	stamp, _ := time.ParseInLocation("2006-01-02 15:04:05", t, time.Local)
 	return stamp.Unix()

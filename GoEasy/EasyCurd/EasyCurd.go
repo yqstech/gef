@@ -83,14 +83,14 @@ func (that *EasyCurd) Select(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	data, err := conn.Fields(that.DbModel.Fields).Limit(that.PageSize).Page(that.Page).Order(that.DbModel.Order).Get()
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error(err.Error(),conn.LastSql())
 		that.ApiResult(w, 500, "数据库操作错误！", nil)
 		return
 	}
-	//logger.Debug(conn.LastSql())
+	//logger.Debug(conn.LastSql(),data)
 	total, err := that.getOrm(ps).Count()
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error(err.Error(),conn.LastSql())
 		that.ApiResult(w, 500, "数据库操作错误！", nil)
 		return
 	}
@@ -204,7 +204,7 @@ func (that *EasyCurd) Update(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 	if update == 0 {
-		that.ApiResult(w, 500, "更新失败！", nil)
+		that.ApiResult(w, 201, "数据未修改！", nil)
 		return
 	}
 	//返回结果
@@ -250,11 +250,10 @@ func (that *EasyCurd) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 	} else {
 		delete, err := conn.Delete()
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error(err.Error(),conn.LastSql())
 			that.ApiResult(w, 500, "删除出错！", nil)
 			return
 		}
-		logger.Alert(conn.LastSql())
 		if delete == 0 {
 			that.ApiResult(w, 500, "删除失败！", nil)
 			return
