@@ -44,8 +44,14 @@ var listDataType = []map[string]interface{}{
 //表单数据类型
 var formDataType = []map[string]interface{}{
 	{"name": "文字输入框(text)", "value": "text"},
+	{"name": "文字输入框(短)(text-sm)", "value": "text-sm"},
+	{"name": "文字输入框(很短)(text-xs)", "value": "text-xs"},
+	{"name": "文字输入框(超短)(text-xxs)", "value": "text-xxs"},
 	{"name": "文字输入框(禁用状态)(text-disabled)", "value": "text-disabled"},
 	{"name": "数字输入框(number)", "value": "number"},
+	{"name": "数字输入框(短)(number-sm)", "value": "number-sm"},
+	{"name": "数字输入框(很短)(number-xs)", "value": "number-xs"},
+	{"name": "数字输入框(超短)(number-xxs)", "value": "number-xxs"},
 	{"name": "密码输入框(password)", "value": "password"},
 	{"name": "文本域(textarea)", "value": "textarea"},
 	{"name": "文本域(禁用状态)(textarea-disabled)", "value": "textarea-disabled"},

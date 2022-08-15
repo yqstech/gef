@@ -106,7 +106,10 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 	})
 	
 	//联动设置
-	pageData.FormFieldsAdd("", "block", "选项集联动", "", "", false, nil, "", nil)
+	pageData.FormFieldsAdd("", "block", "选项集联动", "", "", false, nil, "", map[string]interface{}{
+		"if": "formFields.data_type==1",
+	})
+	
 	pageData.FormFieldsAdd("dynamic_params", "textarea", "联动配置", "用来做数据联动的参数设置，程序根据设置的字段，查询post参数\n格式为 监听参数:选项集数据表字段:默认值，例如：group_id:group_id:0\n默认值为空自动忽略，每行一个转换规则", "", false,
 		nil, "", map[string]interface{}{
 			"if": "formFields.data_type==1",
@@ -158,6 +161,16 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 	return nil, 0
 }
 
+// NodeFormData 表单显示前修改数据
+func (that OptionModels) NodeFormData(pageData *EasyApp.PageData, data gorose.Data, id int64) (gorose.Data, error, int) {
+	if id > 0 {
+		if data["children_option_model_id"] == 0 {
+			data["children_option_model_id"] = ""
+		}
+	}
+	return data, nil, 0
+}
+
 // NodeSaveData 表单保存数据前使用
 func (that OptionModels) NodeSaveData(pageData *EasyApp.PageData, oldData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
 	if postData["data_type"].(string) == "0" {
@@ -166,6 +179,9 @@ func (that OptionModels) NodeSaveData(pageData *EasyApp.PageData, oldData gorose
 		postData["name_field"] = ""
 	} else {
 		postData["static_data"] = ""
+	}
+	if postData["children_option_model_id"] == ""{
+		postData["children_option_model_id"] = 0
 	}
 	return postData, nil, 0
 }

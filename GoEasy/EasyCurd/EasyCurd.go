@@ -146,6 +146,8 @@ func (that *EasyCurd) Find(w http.ResponseWriter, r *http.Request, ps httprouter
 	resultData := map[string]interface{}{
 		"data":    data,
 		"_extend": that.DbModel.ResultExtend,
+		"_time":util.TimeNow(),
+		"_unix_time":util.Str2UnixTime(util.TimeNow()),
 	}
 	if that.DbModel.CompleteResultData != nil {
 		that.ApiResult(w, 200, "success", that.DbModel.CompleteResultData(resultData, FindAction))
@@ -180,6 +182,8 @@ func (that *EasyCurd) Create(w http.ResponseWriter, r *http.Request, ps httprout
 	resultData := map[string]interface{}{
 		"id":      insertId,
 		"_extend": that.DbModel.ResultExtend,
+		"_time":util.TimeNow(),
+		"_unix_time":util.Str2UnixTime(util.TimeNow()),
 	}
 	that.ApiResult(w, 200, "success", resultData)
 	
@@ -211,6 +215,8 @@ func (that *EasyCurd) Update(w http.ResponseWriter, r *http.Request, ps httprout
 	resultData := map[string]interface{}{
 		"update":  update,
 		"_extend": that.DbModel.ResultExtend,
+		"_time":util.TimeNow(),
+		"_unix_time":util.Str2UnixTime(util.TimeNow()),
 	}
 	
 	that.ApiResult(w, 200, "success", resultData)
@@ -244,6 +250,8 @@ func (that *EasyCurd) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 		resultData := map[string]interface{}{
 			"delete":  update, //数量
 			"_extend": that.DbModel.ResultExtend,
+			"_time":util.TimeNow(),
+			"_unix_time":util.Str2UnixTime(util.TimeNow()),
 		}
 		
 		that.ApiResult(w, 200, "success", resultData)
@@ -262,6 +270,8 @@ func (that *EasyCurd) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 		resultData := map[string]interface{}{
 			"delete":  delete, //数量
 			"_extend": that.DbModel.ResultExtend,
+			"_time":util.TimeNow(),
+			"_unix_time":util.Str2UnixTime(util.TimeNow()),
 		}
 		that.ApiResult(w, 200, "success", resultData)
 	}

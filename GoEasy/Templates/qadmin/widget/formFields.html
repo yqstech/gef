@@ -17,7 +17,7 @@
 {{else}}
 <div {{if $field.Expand.if}}v-show="{{$field.Expand.if}}"{{end}} class="layui-form-item form-group">
     <label class="layui-form-label">{{if $field.IsMust}}<span style="color:red">*</span>{{end}}{{$field.Title}}</label>
-    <div class="layui-input-block">
+    <div class="layui-input-block layui-col-space10">
         {{/* 提示框 */}}
         {{- if eq $field.Type "notice"}}
         <blockquote class="layui-elem-quote">{{$field.Notice}}</blockquote>
@@ -31,6 +31,36 @@
         {{- if eq $field.Type "text"}}
         <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
             autocomplete="off" class="layui-input">
+        <div style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+        {{- if eq $field.Type "text-sm"}}
+        <div class="layui-col-sm6">
+            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
+                   autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+        {{- if eq $field.Type "text-xs"}}
+        <div class="layui-col-sm3">
+            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
+                   autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+        {{- if eq $field.Type "text-xxs"}}
+        <div class="layui-col-sm2 layui-col-xs3">
+            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
+                   autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-col-sm10 layui-col-xs9" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
         {{- end -}}
         {{- if eq $field.Type "text-disabled"}}
         <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
@@ -41,17 +71,52 @@
         {{- if eq $field.Type "number"}}
         <input @keyup.enter="formSubmit" type="number" v-model="formFields.{{$field.Key}}"
             placeholder="{{$field.Notice}}" autocomplete="off" class="layui-input">
+        <div style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
         {{- end -}}
-
+        {{- if eq $field.Type "number-sm"}}
+        <div class="layui-col-sm6">
+            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
+                   autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+        {{- if eq $field.Type "number-xs"}}
+        <div class="layui-col-sm3">
+            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
+                   autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+        {{- if eq $field.Type "number-xxs"}}
+        <div class="layui-col-sm2 layui-col-xs3">
+            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
+                   autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-col-sm10 layui-col-xs9" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
         {{/* 密码 */}}
         {{- if eq $field.Type "password"}}
         <input @keyup.enter="formSubmit" type="password" v-model="formFields.{{$field.Key}}"
             placeholder="{{$field.Notice}}" autocomplete="off" class="layui-input" >
+        <div style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
         {{- end -}}
 
         {{/* 文本域 */}}
         {{- if eq $field.Type "textarea"}}
         <textarea v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}" class="layui-textarea"></textarea>
+        <div style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
         {{- end -}}
         {{- if eq $field.Type "textarea-disabled"}}
         <textarea v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}" class="layui-textarea" disabled="disabled"></textarea>
@@ -76,9 +141,6 @@
             <option value="{{$v.value}}">{{$v.name}}</option>
             {{- end -}}
         </select>
-        <div style="line-height: 36px;text-align: left;color:#999">
-            <span>{{$field.Notice}}</span>
-        </div>
         {{- end -}}
 
         {{/* 图标选择器 */}}

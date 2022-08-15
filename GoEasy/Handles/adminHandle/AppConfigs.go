@@ -59,8 +59,10 @@ func (that AppConfigs) NodeList(pageData *EasyApp.PageData) (error, int) {
 	pageData.ListColumnClear()
 	//添加两列信息
 	pageData.ListColumnAdd("name", "名称", "text", nil)
+	pageData.ListColumnAdd("key", "关键字", "text", nil)
 	pageData.ListColumnAdd("value", "内容", "html", nil)
 	pageData.SetListColumnStyle("name", "width:150px")
+	pageData.SetListColumnStyle("key", "width:150px")
 	//隐藏分页
 	pageData.SetListPageHide()
 
@@ -126,6 +128,7 @@ func (that AppConfigs) NodeListData(pageData *EasyApp.PageData, data []gorose.Da
 			//数据添加
 			result = append(result, gorose.Data{
 				"name":  config["title"].(string),
+				"key":  config["name"].(string),
 				"value": value,
 			})
 		}

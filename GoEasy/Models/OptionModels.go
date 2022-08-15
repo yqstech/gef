@@ -132,7 +132,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 					}
 				}
 				optionIcon := ""
-				if icon, ok := option["icon"].(string); ok {
+				if icon, ok := option["icon"].(string); ok && icon != "" {
 					optionIcon = "<i class=\"" + icon + "\"></i>"
 				}
 				optionName := "<div class=\"option-tag\" style=\"" + optionColor + "\">" + optionIcon + util.Interface2String(
@@ -140,7 +140,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 				selectData[index]["name"] = optionName
 			}
 		}
-		logger.Alert("美化后的数据集",selectData)
+		logger.Alert("美化后的数据集", selectData)
 		//!设置了禁用
 		if data["options_disable"].(int64) == 1 {
 			for thisIndex, _ := range selectData {
@@ -168,7 +168,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 					}
 				}
 			}
-			logger.Alert("合并下级以后",selectData)
+			logger.Alert("合并下级以后", selectData)
 			//! 跨表会造成value值重复，需要修改一下value值，且需要在补充完下级以后修改
 			//!取数据表名最后一个字段作为新ID的前缀
 			tbName := strings.Split(data["table_name"].(string), "_")
@@ -176,7 +176,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 			for thisIndex, thisOption := range selectData {
 				selectData[thisIndex]["value"] = Prefix + "_" + util.Interface2String(thisOption["value"])
 			}
-			logger.Alert("修改value值以后",selectData)
+			logger.Alert("修改value值以后", selectData)
 		}
 		//!转多维数组
 		if data["to_tree_array"].(int64) == 1 {
@@ -356,7 +356,7 @@ func TreeArrayExtendField(data []map[string]interface{}) ([]map[string]interface
 					childrenIds = append(childrenIds, _children.([]interface{})...)
 					if _lastLevel, ok2 := v["_lastLevel"]; ok2 {
 						if _lastLevel.(int64)+1 > childMaxLevel {
-							childMaxLevel = _lastLevel.(int64)+1
+							childMaxLevel = _lastLevel.(int64) + 1
 						}
 					}
 					continue

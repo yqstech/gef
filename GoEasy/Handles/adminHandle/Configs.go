@@ -31,8 +31,39 @@ var ConfigFieldTypes = []map[string]interface{}{
 		"name":  "文本输入",
 	},
 	{
+		"value": "text-sm",
+		"name":  "文本输入(短)",
+	},
+	{
+		"value": "text-xs",
+		"name":  "文本输入(更短)",
+	},
+	{
+		"value": "text-xxs",
+		"name":  "文本输入(超短)",
+	},{
+		"value": "number",
+		"name":  "数字输入",
+	},
+	{
+		"value": "number-sm",
+		"name":  "数字输入(短)",
+	},
+	{
+		"value": "number-xs",
+		"name":  "数字输入(更短)",
+	},
+	{
+		"value": "number-xxs",
+		"name":  "数字输入(超短)",
+	},
+	{
 		"value": "textarea",
 		"name":  "文本域",
+	},
+	{
+		"value": "radio",
+		"name":  "单选",
 	},
 	{
 		"value": "select",
