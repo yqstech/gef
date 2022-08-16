@@ -22,7 +22,6 @@ import (
 	"github.com/gef/GoEasy/Utils/pool"
 	"github.com/gef/GoEasy/Utils/serv"
 	"github.com/gef/config"
-	"github.com/gef/database"
 	"github.com/gef/routers"
 	"github.com/gef/static"
 	"github.com/gorilla/mux"
@@ -50,17 +49,17 @@ func init() {
 	//! 初始化数据库
 	db.Init()
 	gdb.Init()
-	//! 自动维护框架表结构
-	database.AutoMigrate()
-	//! 自动创建表数据
-	database.DataInit()
+	
+	//! 自动维护数据库
+	dbm := DbManager{}
+	dbm.AutoTable(tables)
+	dbm.AutoAdminRules(adminRules)
+	dbm.AutoInsideData(insideData)
 	
 	//! 初始化Redis
 	pool.RedisInit()
 	//! 初始化GoCache
 	pool.GocacheInit()
-	
-	
 }
 
 // New 创建新的Gef应用

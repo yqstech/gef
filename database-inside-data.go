@@ -2,45 +2,14 @@
  * @Author: 云起时
  * @Email: limingxiang@yqstech.com
  * @Description:
- * @File: DefaultData
+ * @File: database-inside-data
  * @Version: 1.0.0
- * @Date: 2022/8/16 17:32
+ * @Date: 2022/8/16 22:20
  */
 
-package database
+package gef
 
-import "github.com/gef/GoEasy/Utils/db"
-
-func DefaultData(data []AutoData) {
-	for _, d := range data {
-		if d.TableName != "" && len(d.Condition) > 0 {
-			conn := db.New().Table(d.TableName)
-			for _, c := range d.Condition {
-				conn.Where(c...)
-			}
-			first, err := conn.First()
-			if err != nil {
-				panic(err.Error())
-				return
-			}
-			if first == nil {
-				_, err := db.New().Table(d.TableName).Insert(d.Data)
-				if err != nil {
-					panic(err.Error())
-					return
-				}
-			}
-		}
-	}
-}
-
-type AutoData struct {
-	TableName string                 //数据表
-	Condition [][]interface{}        //查询条件
-	Data      map[string]interface{} //存储数据
-}
-
-var defaultData = []AutoData{
+var insideData = []InsideData{
 	{TableName: "tb_admin", Condition: [][]interface{}{{"id", "1"}}, Data: map[string]interface{}{
 		"group_id": 0,
 		"name":     "系统管理员",

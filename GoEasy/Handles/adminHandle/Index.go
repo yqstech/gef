@@ -16,7 +16,7 @@ import (
 	"github.com/gef/GoEasy/Utils/util"
 	"github.com/gef/config"
 	"net/http"
-
+	
 	"github.com/gohouse/gorose/v2"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
@@ -63,11 +63,11 @@ func (index Index) GetMenus(pageData *EasyApp.PageData, w http.ResponseWriter, r
 	account := ps.ByName("account")
 	//当前账户所属分组角色
 	group_id := ps.ByName("group_id")
-
+	
 	//定义权限表
 	var rules interface{}
 	var err error
-
+	
 	userMenus := []map[string]interface{}{
 		{
 			"name":   "退出",
@@ -88,7 +88,7 @@ func (index Index) GetMenus(pageData *EasyApp.PageData, w http.ResponseWriter, r
 			"target": "main_area",
 		},
 	}
-
+	
 	if account_id == main_account_id {
 		//当为主账户时，获取所有菜单
 		rules, err = db.New().Table("tb_admin_rules").
@@ -141,7 +141,7 @@ func (index Index) GetMenus(pageData *EasyApp.PageData, w http.ResponseWriter, r
 				return
 			}
 			logger.Info(rules)
-
+			
 		} else {
 			//未分配角色，获取默认菜单
 			conn := db.New().Table("tb_admin_rules")
@@ -159,14 +159,14 @@ func (index Index) GetMenus(pageData *EasyApp.PageData, w http.ResponseWriter, r
 			}
 		}
 	}
-
+	
 	//!cookie 获取menuGroupID
 	menuGroupID := int64(0)
 	menuGroup, err := r.Cookie("menuGroupID")
 	if err == nil {
 		menuGroupID = int64(util.String2Int(menuGroup.Value))
 	}
-
+	
 	//获取顶部一级菜单，并确定选中的菜单ID =》topMenuActiveID
 	//topMenus
 	topMenus := []map[string]interface{}{}
@@ -177,6 +177,10 @@ func (index Index) GetMenus(pageData *EasyApp.PageData, w http.ResponseWriter, r
 			if menuGroupID == rule["id"].(int64) {
 				active = true
 				topMenuActiveID = rule["id"].(int64)
+			}
+			//#开头的路径不对外显示
+			if rule["route"].(string) != "" && rule["route"].(string)[0:1] == "#" {
+				rule["route"] = ""
 			}
 			topMenus = append(topMenus, map[string]interface{}{
 				"id":     rule["id"],
@@ -194,7 +198,7 @@ func (index Index) GetMenus(pageData *EasyApp.PageData, w http.ResponseWriter, r
 			break
 		}
 	}
-
+	
 	//菜单结构
 	ruleMap := map[int64]map[string]interface{}{}
 	//记录一级菜单顺序，map是无序的
@@ -202,7 +206,11 @@ func (index Index) GetMenus(pageData *EasyApp.PageData, w http.ResponseWriter, r
 	for _, rule := range rules.([]gorose.Data) {
 		if rule["pid"].(int64) == topMenuActiveID {
 			ruleIndex = append(ruleIndex, rule["id"].(int64))
-			if rule["route"].(string) != "" {
+			
+			//#开头的路径不对外显示
+			if rule["route"].(string) != "" && rule["route"].(string)[0:1] == "#" {
+				rule["route"] = ""
+			}else if rule["route"].(string) != "" {
 				rule["route"] = config.AdminPath + rule["route"].(string)
 			}
 			ruleMap[rule["id"].(int64)] = map[string]interface{}{
@@ -218,6 +226,10 @@ func (index Index) GetMenus(pageData *EasyApp.PageData, w http.ResponseWriter, r
 	for _, rule := range rules.([]gorose.Data) {
 		if rule["pid"].(int64) > 0 {
 			if _, ok := ruleMap[rule["pid"].(int64)]; ok {
+				//#开头的路径不对外显示
+				if rule["route"].(string) != "" && rule["route"].(string)[0:1] == "#" {
+					rule["route"] = ""
+				}
 				if rule["route"].(string) != "" {
 					rule["route"] = config.AdminPath + rule["route"].(string)
 				}
@@ -234,7 +246,7 @@ func (index Index) GetMenus(pageData *EasyApp.PageData, w http.ResponseWriter, r
 	for _, Index := range ruleIndex {
 		menuArr = append(menuArr, ruleMap[Index])
 	}
-
+	
 	index.ApiResult(w, 200, "success", map[string]interface{}{
 		"menus":        menuArr,
 		"topMenus":     topMenus,

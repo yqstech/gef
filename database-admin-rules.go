@@ -2,88 +2,12 @@
  * @Author: 云起时
  * @Email: limingxiang@yqstech.com
  * @Description:
- * @File: adminRules
+ * @File: database-admin-rules
  * @Version: 1.0.0
- * @Date: 2022/8/16 16:33
+ * @Date: 2022/8/16 22:19
  */
 
-package database
-
-import (
-	"github.com/gef/GoEasy/Utils/db"
-	"github.com/gef/GoEasy/Utils/util"
-)
-
-// AutoAdminRules 自动维护后台字段
-func AutoAdminRules(rules []map[string]interface{}) {
-	setAdminRules(0, rules)
-}
-
-func setAdminRules(pid int64, rules []map[string]interface{}) {
-	for index, rule := range rules {
-		//route参数必填
-		if rule["route"].(string) == "" {
-			continue
-		}
-		ruleId := int64(0)
-		//查找已经插入的数据
-		ruleInfo, err := db.New().Table("tb_admin_rules").
-			Where("is_delete", 0).
-			Where("pid", pid). //同一个pid下不能有重复的route
-			Where("route", rule["route"].(string)).
-			First()
-		if err != nil {
-			panic("权限更新失败！" + err.Error())
-			return
-		}
-		//否则新增这个数据
-		if ruleInfo == nil {
-			insertId, err := db.New().Table("tb_admin_rules").InsertGetId(map[string]interface{}{
-				"pid":         pid,
-				"name":        rule["name"],
-				"type":        rule["type"],
-				"is_compel":   rule["is_compel"],
-				"icon":        rule["icon"],
-				"route":       rule["route"],
-				"index_num":   index + 1,
-				"create_time": util.TimeNow(),
-				"update_time": util.TimeNow(),
-			})
-			if err != nil {
-				panic("权限更新失败！" + err.Error())
-				return
-			}
-			ruleId = insertId
-		} else {
-			ruleId = ruleInfo["id"].(int64)
-			//值不全，不更新
-			if _, ok := rule["name"]; !ok {
-				goto EndUpdate
-			}
-			if _, ok := rule["type"]; !ok {
-				goto EndUpdate
-			}
-			if _, ok := rule["is_compel"]; !ok {
-				goto EndUpdate
-			}
-			if _, ok := rule["icon"]; !ok {
-				goto EndUpdate
-			}
-			//更新一下
-			db.New().Table("tb_admin_rules").Where("id", ruleId).Update(map[string]interface{}{
-				"name":        rule["name"],
-				"type":        rule["type"],
-				"is_compel":   rule["is_compel"],
-				"icon":        rule["icon"],
-				"update_time": util.TimeNow(),
-			})
-			EndUpdate:
-		}
-		if children, ok := rule["children"]; ok && len(children.([]map[string]interface{})) > 0 {
-			setAdminRules(ruleId, children.([]map[string]interface{}))
-		}
-	}
-}
+package gef
 
 var adminRules = []map[string]interface{}{
 	{
@@ -91,7 +15,7 @@ var adminRules = []map[string]interface{}{
 		"type":      1,
 		"is_compel": 0,
 		"icon":      "icon-slideshow-3-line",
-		"route":     "home",
+		"route":     "#home",
 		"children": []map[string]interface{}{
 			{
 				"name":      "仪表盘",
@@ -122,7 +46,7 @@ var adminRules = []map[string]interface{}{
 				"type":      1,
 				"is_compel": 0,
 				"icon":      "ri-shield-user-line",
-				"route":     "admin",
+				"route":     "#admin",
 				"children": []map[string]interface{}{
 					{
 						"name":      "角色管理",
@@ -145,7 +69,7 @@ var adminRules = []map[string]interface{}{
 				"type":      1,
 				"is_compel": 0,
 				"icon":      "ri-time-line",
-				"route":     "log",
+				"route":     "#log",
 				"children": []map[string]interface{}{
 					{
 						"name":      "操作日志",
@@ -161,7 +85,7 @@ var adminRules = []map[string]interface{}{
 				"type":      1,
 				"is_compel": 0,
 				"icon":      "ri-gallery-upload-line",
-				"route":     "attachment",
+				"route":     "#attachment",
 				"children": []map[string]interface{}{
 					{
 						"name":      "图片管理",
@@ -209,7 +133,7 @@ var adminRules = []map[string]interface{}{
 		"type":      1,
 		"is_compel": 0,
 		"icon":      "ri-apps-line",
-		"route":     "app",
+		"route":     "#app",
 		"children":  []map[string]interface{}{},
 	},
 	{
@@ -217,14 +141,14 @@ var adminRules = []map[string]interface{}{
 		"type":      1,
 		"is_compel": 0,
 		"icon":      "icon-settings-6-line",
-		"route":     "config",
+		"route":     "#config",
 		"children": []map[string]interface{}{
 			{
 				"name":      "通用设置",
 				"type":      1,
 				"is_compel": 0,
 				"icon":      "ri-settings-4-line",
-				"route":     "common",
+				"route":     "#common",
 				"children": []map[string]interface{}{
 					{
 						"name":      "系统设置",
@@ -243,14 +167,14 @@ var adminRules = []map[string]interface{}{
 		"type":      1,
 		"is_compel": 0,
 		"icon":      "icon-code-box-line",
-		"route":     "dev",
+		"route":     "#dev",
 		"children": []map[string]interface{}{
 			{
 				"name":      "高级设置",
 				"type":      1,
 				"is_compel": 0,
 				"icon":      "ri-tools-fill",
-				"route":     "common",
+				"route":     "#common",
 				"children": []map[string]interface{}{
 					{
 						"name":      "后台权限管理",
@@ -320,7 +244,7 @@ var adminRules = []map[string]interface{}{
 				"type":      1,
 				"is_compel": 0,
 				"icon":      "ri-stack-fill",
-				"route":     "em",
+				"route":     "#em",
 				"children": []map[string]interface{}{
 					{
 						"name":      "后台模型",
