@@ -376,7 +376,7 @@ func (that *EasyCurd) FmtData(data gorose.Data) gorose.Data {
 		//删除私有字段，不对外展示
 		for _, f := range that.DbModel.PrivateFields {
 			if key == f {
-				logger.Alert("删除字段", key)
+				//logger.Alert("删除字段", key)
 				delete(data, key)
 				//结束本次最外层循环
 				goto Eed
