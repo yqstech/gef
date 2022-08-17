@@ -21,12 +21,14 @@ import (
 	"github.com/gef/GoEasy/Utils/gdb"
 	"github.com/gef/GoEasy/Utils/pool"
 	"github.com/gef/GoEasy/Utils/serv"
+	"github.com/gef/GoEasy/Utils/util"
 	"github.com/gef/config"
 	"github.com/gef/routers"
 	"github.com/gef/static"
 	"github.com/gorilla/mux"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
+	"net/http"
 	"os"
 )
 
@@ -99,6 +101,43 @@ func (g *Gef) SetFrontRouters(FrontRouters interface{}) {
 // SetFrontRouterType 设置前台路由
 func (g *Gef) SetFrontRouterType(routerType int) {
 	routers.FrontRouterType = routerType
+}
+
+type FrontRouter struct {
+	Method             string //GET POST ServeFiles
+	Url                string //访问路径
+	HandleOrFileSystem interface{}
+}
+
+// AddFrontRouters 追加前台路由
+func (g *Gef) AddFrontRouters(FrontRouters []FrontRouter) {
+	//判断前台路由类型
+	if routers.FrontRouterType == 0 {
+		if routers.FrontRouters == nil {
+			//假如前台路由为空，则设置
+			routers.FrontRouters = httprouter.New()
+		}
+		for _, fr := range FrontRouters {
+			if fr.Method == "ServeFiles" {
+				routers.FrontRouters.(*httprouter.Router).ServeFiles(fr.Url, fr.HandleOrFileSystem.(http.FileSystem))
+			}
+			if fr.Method == "GET" || fr.Method == "POST" {
+				routers.FrontRouters.(*httprouter.Router).Handle(fr.Method, fr.Url, fr.HandleOrFileSystem.(httprouter.Handle))
+			}
+		}
+	} else {
+		if routers.FrontRouters == nil {
+			//假如前台路由为空，则设置
+			routers.FrontRouters = mux.NewRouter()
+		}
+		for _, fr := range FrontRouters {
+			if fr.Method == "ServeFiles" {
+				routers.FrontRouters.(*mux.Router).PathPrefix(fr.Url).Handler(http.StripPrefix(fr.Url, http.FileServer(fr.HandleOrFileSystem.(http.FileSystem))))
+			} else {
+				routers.FrontRouters.(*mux.Router).HandleFunc(fr.Url, util.ToMux(fr.HandleOrFileSystem.(func(http.ResponseWriter, *http.Request, httprouter.Params))))
+			}
+		}
+	}
 }
 
 // SetEvent 补充监听事件
