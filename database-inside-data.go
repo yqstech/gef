@@ -30,6 +30,26 @@ var insideData = []InsideData{
 		"field_type": "text",
 		"index_num":  1,
 	}},
+	//设置项
+	{TableName: "tb_configs_group", Condition: [][]interface{}{{"id", "2"}}, Data: map[string]interface{}{
+		"id":         2,
+		"group_name": "应用配置",
+		"note":       "应用配置项",
+	}},
+	{TableName: "tb_configs", Condition: [][]interface{}{{"name", "app_name"}}, Data: map[string]interface{}{
+		"group_id":   2,
+		"name":       "app_name",
+		"value":      "Gef开发框架",
+		"title":      "应用名称",
+		"notice":     "多个地方会显示，勿删！",
+		"field_type": "text-sm",
+		"index_num":  1,
+	}},
+	{TableName: "tb_app_configs", Condition: [][]interface{}{{"name", "app_name"}}, Data: map[string]interface{}{
+		"group_id": 2,
+		"name":     "app_name",
+		"value":    "Gef开发框架",
+	}},
 	{TableName: "tb_app_configs", Condition: [][]interface{}{{"name", "upload_extension"}}, Data: map[string]interface{}{
 		"group_id": 1,
 		"name":     "upload_extension",
