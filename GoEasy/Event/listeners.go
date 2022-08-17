@@ -14,22 +14,4 @@ var Listeners = map[string][]Listener{
 	"AppInit": []Listener{
 		ListenAppInit{},
 	},
-	//发送短信
-	"SmsSend": []Listener{
-		//#Map tel(string) ip(string) content(string) template_out_id(string)
-		SmsSend{}, //发送短信
-	},
-	//发送短信通道
-	"SmsAli": []Listener{
-		SmsAli{}, //阿里短信
-	},
-	"SmsAm": []Listener{
-		SmsAm{}, //云市场
-	},
-	"SmsJdcx": []Listener{
-		SmsJdcx{}, //京东万象
-	},
-	"SmsMock": []Listener{
-		SmsMock{}, //模拟短信
-	},
 }

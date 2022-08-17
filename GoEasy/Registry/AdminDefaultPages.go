@@ -36,15 +36,6 @@ var AdminPages = map[string]EasyApp.AppPage{
 	"app_configs_g7": adminHandle.AppConfigs{GroupId: 7}, //设置分组管理页
 	"app_configs_g8": adminHandle.AppConfigs{GroupId: 8}, //设置分组管理页
 	"app_configs_g9": adminHandle.AppConfigs{GroupId: 9}, //设置分组管理页
-	//!------------ 短信相关 -------------------------
-	"sms_upstream":        adminHandle.SmsUpstream{},       //短信通道管理
-	"sms_upstream_params": adminHandle.SmsUpstreamParams{}, //短信通道配置项
-	"sms_template":        adminHandle.SmsTemplate{},       //短信模板管理
-	"app_sms_upstream":    adminHandle.AppSmsUpstream{},    //应用短信通道
-	"app_sms_template":    adminHandle.AppSmsTemplate{},    //应用短信模板
-	"app_sms_black_white": adminHandle.AppSmsBlackWhite{},  //应用短信黑白名单
-	"app_sms_record":      adminHandle.AppSmsRecord{},      //应用短信记录
-	"app_sms_hold_back":   adminHandle.AppSmsHoldBack{},    //应用短信防火墙
 	//!------------ EasyModel 简单模型 -------------------------
 	"easy_models":             adminHandle.EasyModels{},           //模型管理
 	"easy_models_fields":      adminHandle.EasyModelsFields{},     //模型字段管理
