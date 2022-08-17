@@ -47,6 +47,7 @@ func (that OptionModels) NodeBegin(pageData *EasyApp.PageData) (error, int) {
 // NodeList 初始化列表
 func (that OptionModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 	pageData.SetListOrder("index_num,id asc")
+	pageData.ListColumnAdd("unique_key", "KEY", "text", nil)
 	pageData.ListColumnAdd("name", "名称", "text", nil)
 	pageData.ListColumnAdd("data_type", "数据类型", "array", dataTypes)
 	pageData.ListColumnAdd("static_data", "静态数据", "html", nil)
@@ -77,7 +78,8 @@ func (that OptionModels) NodeListData(pageData *EasyApp.PageData, data []gorose.
 
 // NodeForm 初始化表单
 func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
-	pageData.FormFieldsAdd("name", "text", "名称", "", "", true, nil, "", nil)
+	pageData.FormFieldsAdd("unique_key", "text-sm", "唯一Key", "选项集支持ID和key两种方式，key可留空", "", false, nil, "", nil)
+	pageData.FormFieldsAdd("name", "text-sm", "名称", "", "", true, nil, "", nil)
 	pageData.FormFieldsAdd("data_type", "radio", "数据类型", "", "0", true, dataTypes, "", nil)
 	pageData.FormFieldsAdd("static_data", "textarea", "静态数据", "", "[{\"name\":\"是\",\"value\":\"1\"},{\"name\":\"否\",\"value\":\"0\"}]", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==0",
@@ -89,19 +91,19 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 	pageData.FormFieldsAdd("", "block", "配置数据表", "", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
-	pageData.FormFieldsAdd("table_name", "text", "数据表名称", "tb_", "tb_", false, nil, "", map[string]interface{}{
+	pageData.FormFieldsAdd("table_name", "text-xs", "数据表名称", "tb_", "tb_", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
-	pageData.FormFieldsAdd("value_field", "text", "值字段", "查询到的数据作为值", "id", false, nil, "", map[string]interface{}{
+	pageData.FormFieldsAdd("value_field", "text-xs", "值字段", "查询到的数据作为值", "id", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
-	pageData.FormFieldsAdd("name_field", "text", "名称字段", "查询到的数据作为名称", "name", false, nil, "", map[string]interface{}{
+	pageData.FormFieldsAdd("name_field", "text-xs", "名称字段", "查询到的数据作为名称", "name", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
-	pageData.FormFieldsAdd("select_order", "text", "查询排序", "数据表查询的排序方式", "id asc", false, nil, "", map[string]interface{}{
+	pageData.FormFieldsAdd("select_order", "text-xs", "查询排序", "数据表查询的排序方式", "id asc", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
-	pageData.FormFieldsAdd("select_where", "text", "补充查询条件", "补充数据表查询条件", "", false, nil, "", map[string]interface{}{
+	pageData.FormFieldsAdd("select_where", "text-sm", "补充查询条件", "补充数据表查询条件", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
 	
@@ -117,7 +119,7 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 	
 	//多级、数据转换
 	pageData.FormFieldsAdd("", "block", "多级、数据转换", "", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("parent_field", "text", "上级字段", "设置上级，选项集中会多pid一项数据，值就是上级字段的值。", "", false, nil, "", nil)
+	pageData.FormFieldsAdd("parent_field", "text-xs", "上级字段", "设置上级，选项集中会多pid一项数据，值就是上级字段的值。", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("to_tree_array", "radio", "选项集转多维", "将选项集根据pid转为树形结构（多维数组）", "0", false, Models.OptionModels{}.ById(1, false), "", map[string]interface{}{
 		"if": "formFields.parent_field!=''",
 	})
@@ -156,7 +158,7 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 		indexNum = util.Int642Int(num) + 1
 	}
 	pageData.FormFieldsAdd("match_fields", "textarea", "自动匹配字段", "每个字段占一行，支持全匹配字段和半匹配字段,例如is_*", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("index_num", "text", "排序", "", util.Int2String(indexNum), true, nil, "", nil)
+	pageData.FormFieldsAdd("index_num", "text-xs", "排序", "", util.Int2String(indexNum), true, nil, "", nil)
 	
 	return nil, 0
 }
@@ -180,7 +182,7 @@ func (that OptionModels) NodeSaveData(pageData *EasyApp.PageData, oldData gorose
 	} else {
 		postData["static_data"] = ""
 	}
-	if postData["children_option_model_id"] == ""{
+	if postData["children_option_model_id"] == "" {
 		postData["children_option_model_id"] = 0
 	}
 	return postData, nil, 0

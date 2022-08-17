@@ -17,7 +17,7 @@
 {{else}}
 <div {{if $field.Expand.if}}v-show="{{$field.Expand.if}}"{{end}} class="layui-form-item form-group">
     <label class="layui-form-label">{{if $field.IsMust}}<span style="color:red">*</span>{{end}}{{$field.Title}}</label>
-    <div class="layui-input-block layui-col-space10">
+    <div class="layui-input-block">
         {{/* 提示框 */}}
         {{- if eq $field.Type "notice"}}
         <blockquote class="layui-elem-quote">{{$field.Notice}}</blockquote>
@@ -46,7 +46,7 @@
         {{- end -}}
         {{- if eq $field.Type "text-xs"}}
         <div class="layui-col-sm3">
-            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
+            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}"
                    autocomplete="off" class="layui-input">
         </div>
         <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
@@ -55,7 +55,7 @@
         {{- end -}}
         {{- if eq $field.Type "text-xxs"}}
         <div class="layui-col-sm2 layui-col-xs3">
-            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
+            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}"
                    autocomplete="off" class="layui-input">
         </div>
         <div class="layui-col-sm10 layui-col-xs9" style="line-height: 36px;text-align: left;color:#999">
@@ -86,7 +86,7 @@
         {{- end -}}
         {{- if eq $field.Type "number-xs"}}
         <div class="layui-col-sm3">
-            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
+            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}"
                    autocomplete="off" class="layui-input">
         </div>
         <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
@@ -95,7 +95,7 @@
         {{- end -}}
         {{- if eq $field.Type "number-xxs"}}
         <div class="layui-col-sm2 layui-col-xs3">
-            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
+            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}"
                    autocomplete="off" class="layui-input">
         </div>
         <div class="layui-col-sm10 layui-col-xs9" style="line-height: 36px;text-align: left;color:#999">

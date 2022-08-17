@@ -36,10 +36,24 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 		//OptionModelsListLock.Lock()
 		//defer OptionModelsListLock.Unlock()
 		//通过数据库查询
-		data, err := db.New().Table("tb_option_models").
+		conn := db.New().Table("tb_option_models")
+		data, err := conn.
 			Where("is_delete", 0).
 			Where("status", 1).
-			Where("id", id).First()
+			Where(func() {
+				if id == 0 {
+					conn.Where("1=1")
+				} else {
+					conn.Where("id", id)
+				}
+			}).
+			Where(func() {
+				if where == "" {
+					conn.Where("1=1")
+				} else {
+					conn.Where(where)
+				}
+			}).First()
 		if err != nil {
 			logger.Error(err.Error())
 			return nil
@@ -203,6 +217,11 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 // ById 获取选项集数据（可选择美化数据）
 func (that OptionModels) ById(id int, beautify bool) []map[string]interface{} {
 	return that.Select(id, "", beautify)
+}
+
+// ByKey 获取选项集数据（可选择美化数据）
+func (that OptionModels) ByKey(uniqueKey string, beautify bool) []map[string]interface{} {
+	return that.Select(0, "unique_key = '"+uniqueKey+"'", beautify)
 }
 
 // OptionDynamicParam 选项动态参数
