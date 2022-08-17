@@ -12,7 +12,7 @@ package gef
 import "time"
 
 type ID struct {
-	ID int `gorm:"column:id;type:int(11);AUTO_INCREMENT;primary_key" json:"id"`
+	ID int64 `gorm:"column:id;type:int(10);comment:ID;AUTO_INCREMENT;primaryKey" json:"id"`
 }
 type CUSD struct {
 	CreateTime time.Time `gorm:"column:create_time;type:DATETIME;default:CURRENT_TIMESTAMP;NOT NULL;comment:创建时间" json:"create_time"`

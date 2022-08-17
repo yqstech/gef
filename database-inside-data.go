@@ -36,28 +36,32 @@ var insideData = []InsideData{
 		"value":    "jpg,png,gif,jpeg,JPG,PNG,GIF,JPEG,xml,XML",
 	}},
 	{TableName: "tb_option_models", Condition: [][]interface{}{{"id", 1}}, Data: map[string]interface{}{
-		"id":          1,
-		"name":        "是|否",
-		"static_data": "[{\"name\":\"是\",\"value\":\"1\",\"color\":\"#66CC00\",\"icon\":\"ri-checkbox-circle-fill\"},{\"name\":\"否\",\"value\":\"0\",\"color\":\"#FF6666\",\"icon\":\"ri-forbid-fill\"}]",
+		"id":           1,
+		"name":         "是|否",
+		"static_data":  "[{\"name\":\"是\",\"value\":\"1\",\"color\":\"#66CC00\",\"icon\":\"ri-checkbox-circle-fill\"},{\"name\":\"否\",\"value\":\"0\",\"color\":\"#FF6666\",\"icon\":\"ri-forbid-fill\"}]",
+		"match_fields": "is_*\nallow_*",
 	}},
 	{TableName: "tb_option_models", Condition: [][]interface{}{{"id", 2}}, Data: map[string]interface{}{
 		"id":          2,
 		"name":        "启用|禁用",
 		"static_data": "[{\"name\":\"启用\",\"value\":\"1\",\"color\":\"#66CC00\",\"icon\":\"ri-checkbox-circle-fill\"},{\"name\":\"禁用\",\"value\":\"0\",\"color\":\"#FF6666\",\"icon\":\"ri-forbid-fill\"}]",
+		"match_fields": "status",
 	}},
 	{TableName: "tb_option_models", Condition: [][]interface{}{{"id", 3}}, Data: map[string]interface{}{
 		"id":          3,
 		"name":        "显示|隐藏",
 		"static_data": "[{\"name\":\"显示\",\"value\":\"1\"},{\"name\":\"隐藏\",\"value\":\"0\"}]",
+		"match_fields": "is_show",
 	}},
 	{TableName: "tb_option_models", Condition: [][]interface{}{{"id", 4}}, Data: map[string]interface{}{
 		"id":          4,
-		"name":        "启用|禁用",
+		"name":        "开|关",
 		"static_data": "[{\"name\":\"开\",\"value\":\"1\",\"color\":\"#66CC00\",\"icon\":\"ri-checkbox-circle-fill\"},{\"name\":\"关\",\"value\":\"0\",\"color\":\"#FF6666\",\"icon\":\"ri-forbid-fill\"}]",
+		"match_fields": "is_open",
 	}},
 	{TableName: "tb_option_models", Condition: [][]interface{}{{"id", 5}}, Data: map[string]interface{}{
 		"id":          5,
-		"name":        "启用|禁用",
+		"name":        "后台权限类型",
 		"static_data": "[{\"name\":\"菜单\",\"value\":\"1\",\"icon\":\"ri-menu-fill\",\"color\":\"#0099CC\"},{\"name\":\"操作\",\"value\":\"2\",\"icon\":\"ri-cursor-line\",\"color\":\"#CC6699\"}]",
 	}},
 }
