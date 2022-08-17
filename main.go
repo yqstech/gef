@@ -86,19 +86,19 @@ type Server struct {
 	RouterType int         //路由类型 0httprouter 1 mux
 }
 
-// SetAdminPages 设置后台页面
+// SetAdminPages 设置后台页面，支持追加
 func (g *Gef) SetAdminPages(pages map[string]EasyApp.AppPage) {
 	for k, v := range pages {
 		Registry.AdminPages[k] = v
 	}
 }
 
-// SetFrontRouters 设置前台路由
+// SetFrontRouters 设置前台路由，追加使用【AddFrontRouters】方法
 func (g *Gef) SetFrontRouters(FrontRouters interface{}) {
 	routers.FrontRouters = FrontRouters
 }
 
-// SetFrontRouterType 设置前台路由
+// SetFrontRouterType 设置前台路由类型 0 httprouter 1 mux
 func (g *Gef) SetFrontRouterType(routerType int) {
 	routers.FrontRouterType = routerType
 }
@@ -140,22 +140,22 @@ func (g *Gef) AddFrontRouters(FrontRouters []FrontRouter) {
 	}
 }
 
-// SetEvent 补充监听事件
+// SetEvent 设置 监听事件 ，支持追加
 func (g *Gef) SetEvent(EventAdd map[string][]Event.Listener) {
 	Event.BindEvents(EventAdd)
 }
 
-// SetAdminStatic 设置静态文件
+// SetAdminStatic 设置静态文件，支持追加
 func (g *Gef) SetAdminStatic(f embed.FS) {
-	static.FilesAdd = f
+	static.FileSystems = append(static.FileSystems, http.FS(f))
 }
 
-// SetAdminTemplate 设置静态文件
+// SetAdminTemplate 设置后台静态文件，支持追加
 func (g *Gef) SetAdminTemplate(f embed.FS) {
-	Templates.FilesAdd = f
+	Templates.FilesAdds = append(Templates.FilesAdds, f)
 }
 
-// SetServer 设置服务器
+// SetServer 设置服务器，支持追加
 func (g *Gef) SetServer(serv Server) {
 	g.selfServers = append(g.selfServers, serv)
 }

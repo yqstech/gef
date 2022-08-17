@@ -158,17 +158,21 @@ func (t *Template) Display() (string, error) {
 		template.New(t.TplName).Funcs(t.Functions()).
 			ParseFS(Templates.Files, "qadmin/layout/*.html"),
 	)
-	fd, err := fs.ReadDir(Templates.FilesAdd, "admin")
-	if err == nil {
-		if len(fd) > 0 {
-			//加载替换页面
-			tpl, err = tpl.ParseFS(Templates.FilesAdd, "admin/*.html")
-			if err != nil {
-				logger.Error(err.Error())
-				return "", err
+	//加载自定义文件集合,仅读取admin目录下的文件
+	for _, FilesAdd := range Templates.FilesAdds {
+		fd, err := fs.ReadDir(FilesAdd, "admin")
+		if err == nil {
+			if len(fd) > 0 {
+				//加载替换页面
+				tpl, err = tpl.ParseFS(FilesAdd, "admin/*.html")
+				if err != nil {
+					logger.Error(err.Error())
+					return "", err
+				}
 			}
 		}
 	}
+	
 	//加载自定义页面
 	if len(t.TemplateSelf) > 0 {
 		tpl, err = tpl.ParseFS(Templates.FilesSelf, t.TemplateSelf...)

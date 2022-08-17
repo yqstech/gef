@@ -9,10 +9,12 @@
 
 package static
 
-import "embed"
+import (
+	"embed"
+	"net/http"
+)
 
 //go:embed *
 var Files embed.FS
 
-// FilesAdd 自定义文件
-var FilesAdd embed.FS
+var FileSystems []http.FileSystem

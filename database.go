@@ -50,8 +50,14 @@ func setAdminRules(pid int64, rules []map[string]interface{}) {
 			panic("权限更新失败！" + err.Error())
 			return
 		}
+		
 		//否则新增这个数据
 		if ruleInfo == nil {
+			IndexNum := index + 1
+			if indexNum, ok := rule["index_num"]; ok {
+				IndexNum = indexNum.(int)
+			}
+			
 			insertId, err := db.New().Table("tb_admin_rules").InsertGetId(map[string]interface{}{
 				"pid":         pid,
 				"name":        rule["name"],
@@ -59,7 +65,7 @@ func setAdminRules(pid int64, rules []map[string]interface{}) {
 				"is_compel":   rule["is_compel"],
 				"icon":        rule["icon"],
 				"route":       rule["route"],
-				"index_num":   index + 1,
+				"index_num":   IndexNum,
 				"create_time": util.TimeNow(),
 				"update_time": util.TimeNow(),
 			})

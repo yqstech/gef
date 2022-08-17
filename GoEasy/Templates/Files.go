@@ -14,8 +14,8 @@ import "embed"
 //go:embed *
 var Files embed.FS
 
-// FilesAdd 自定义文件
-var FilesAdd embed.FS
+// FilesAdds 自定义文件集
+var FilesAdds []embed.FS
 
 // FilesSelf 自定义文件
 var FilesSelf embed.FS

@@ -142,6 +142,7 @@ var adminRules = []map[string]interface{}{
 		"is_compel": 0,
 		"icon":      "icon-settings-6-line",
 		"route":     "#config",
+		"index_num": 99,
 		"children": []map[string]interface{}{
 			{
 				"name":      "通用设置",
@@ -168,6 +169,7 @@ var adminRules = []map[string]interface{}{
 		"is_compel": 0,
 		"icon":      "icon-code-box-line",
 		"route":     "#dev",
+		"index_num": 999,
 		"children": []map[string]interface{}{
 			{
 				"name":      "高级设置",
