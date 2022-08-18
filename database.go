@@ -50,13 +50,12 @@ func setAdminRules(pid int64, rules []map[string]interface{}) {
 			panic("权限更新失败！" + err.Error())
 			return
 		}
-		
+		IndexNum := index + 1
+		if indexNum, ok := rule["index_num"]; ok {
+			IndexNum = indexNum.(int)
+		}
 		//否则新增这个数据
 		if ruleInfo == nil {
-			IndexNum := index + 1
-			if indexNum, ok := rule["index_num"]; ok {
-				IndexNum = indexNum.(int)
-			}
 			newData := map[string]interface{}{
 				"pid":         pid,
 				"name":        rule["name"],
@@ -69,7 +68,7 @@ func setAdminRules(pid int64, rules []map[string]interface{}) {
 				"update_time": util.TimeNow(),
 			}
 			//存在状态字段，则设置状态，否则是默认的1
-			if ruleStatus, ok := rule["status"]; !ok {
+			if ruleStatus, ok := rule["status"]; ok {
 				newData["status"] = ruleStatus
 			}
 			insertId, err := db.New().Table("tb_admin_rules").InsertGetId(newData)
@@ -85,10 +84,11 @@ func setAdminRules(pid int64, rules []map[string]interface{}) {
 				"type":        rule["type"],
 				"is_compel":   rule["is_compel"],
 				"icon":        rule["icon"],
+				"index_num":   IndexNum,
 				"update_time": util.TimeNow(),
 			}
 			//存在状态字段，则更新状态
-			if ruleStatus, ok := rule["status"]; !ok {
+			if ruleStatus, ok := rule["status"]; ok {
 				updateData["status"] = ruleStatus
 			}
 			//值不全，不更新
