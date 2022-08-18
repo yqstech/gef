@@ -77,7 +77,7 @@
         {{- end -}}
         {{- if eq $field.Type "number-sm"}}
         <div class="layui-col-sm6">
-            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
+            <input @keyup.enter="formSubmit" type="number" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
                    autocomplete="off" class="layui-input">
         </div>
         <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#999">
@@ -86,7 +86,7 @@
         {{- end -}}
         {{- if eq $field.Type "number-xs"}}
         <div class="layui-col-sm3">
-            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}"
+            <input @keyup.enter="formSubmit" type="number" v-model="formFields.{{$field.Key}}"
                    autocomplete="off" class="layui-input">
         </div>
         <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
@@ -95,7 +95,7 @@
         {{- end -}}
         {{- if eq $field.Type "number-xxs"}}
         <div class="layui-col-sm2 layui-col-xs3">
-            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}"
+            <input @keyup.enter="formSubmit" type="number" v-model="formFields.{{$field.Key}}"
                    autocomplete="off" class="layui-input">
         </div>
         <div class="layui-col-sm10 layui-col-xs9" style="line-height: 36px;text-align: left;color:#999">
@@ -104,9 +104,11 @@
         {{- end -}}
         {{/* 密码 */}}
         {{- if eq $field.Type "password"}}
-        <input @keyup.enter="formSubmit" type="password" v-model="formFields.{{$field.Key}}"
-            placeholder="{{$field.Notice}}" autocomplete="off" class="layui-input" >
-        <div style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm6">
+            <input @keyup.enter="formSubmit" type="password" v-model="formFields.{{$field.Key}}"
+                placeholder="请输入密码..." autocomplete="off" class="layui-input" >
+        </div>
+        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#999">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
