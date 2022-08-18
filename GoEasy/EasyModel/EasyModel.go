@@ -287,7 +287,7 @@ func GetEasyModelInfo(modelKey string, actionName string) (EasyModel, error) {
 var optionModelList = map[int64][]map[string]interface{}{}
 var optionModelListLock sync.Mutex
 
-func GetSelectData(id int64) []map[string]interface{} {
+func GetOptionModels(id int64) []map[string]interface{} {
 	if optionModel, ok := optionModelList[id]; ok {
 		return optionModel
 	} else {
