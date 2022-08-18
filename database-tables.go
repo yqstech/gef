@@ -104,6 +104,7 @@ type TbAdminRules struct {
 	Name     string `gorm:"column:name;type:varchar(50);default:'';NOT NULL;comment:权限名称" json:"name"`         // 权限名称
 	Type     int    `gorm:"column:type;type:tinyint(4);default:1;NOT NULL;comment:权限类型1菜单2按钮" json:"type"`     // 权限类型1菜单2按钮
 	IsCompel int    `gorm:"column:is_compel;type:tinyint(1);default:0;NOT NULL;comment:是否必选" json:"is_compel"` // 是否必选
+	IsLock   int    `gorm:"column:is_lock;type:tinyint(1);default:0;NOT NULL;comment:是否锁定" json:"is_lock"`     // 是否锁定|后台手动修改后即锁定，不再让程序自动更新
 	Icon     string `gorm:"column:icon;type:varchar(30);default:'';NOT NULL;comment:图标字体" json:"icon"`         // 图标字体
 	Route    string `gorm:"column:route;type:varchar(100);default:'';NOT NULL;comment:路由" json:"route"`        // 路由
 	IndexNum int    `gorm:"column:index_num;type:int(11);default:200;NOT NULL;comment:排序" json:"index_num"`    // 排序

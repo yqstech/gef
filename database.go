@@ -57,8 +57,7 @@ func setAdminRules(pid int64, rules []map[string]interface{}) {
 			if indexNum, ok := rule["index_num"]; ok {
 				IndexNum = indexNum.(int)
 			}
-			
-			insertId, err := db.New().Table("tb_admin_rules").InsertGetId(map[string]interface{}{
+			newData := map[string]interface{}{
 				"pid":         pid,
 				"name":        rule["name"],
 				"type":        rule["type"],
@@ -68,7 +67,12 @@ func setAdminRules(pid int64, rules []map[string]interface{}) {
 				"index_num":   IndexNum,
 				"create_time": util.TimeNow(),
 				"update_time": util.TimeNow(),
-			})
+			}
+			//存在状态字段，则设置状态，否则是默认的1
+			if ruleStatus, ok := rule["status"]; !ok {
+				newData["status"] = ruleStatus
+			}
+			insertId, err := db.New().Table("tb_admin_rules").InsertGetId(newData)
 			if err != nil {
 				panic("权限更新失败！" + err.Error())
 				return
@@ -76,6 +80,17 @@ func setAdminRules(pid int64, rules []map[string]interface{}) {
 			ruleId = insertId
 		} else {
 			ruleId = ruleInfo["id"].(int64)
+			updateData := map[string]interface{}{
+				"name":        rule["name"],
+				"type":        rule["type"],
+				"is_compel":   rule["is_compel"],
+				"icon":        rule["icon"],
+				"update_time": util.TimeNow(),
+			}
+			//存在状态字段，则更新状态
+			if ruleStatus, ok := rule["status"]; !ok {
+				updateData["status"] = ruleStatus
+			}
 			//值不全，不更新
 			if _, ok := rule["name"]; !ok {
 				goto EndUpdate
@@ -89,14 +104,17 @@ func setAdminRules(pid int64, rules []map[string]interface{}) {
 			if _, ok := rule["icon"]; !ok {
 				goto EndUpdate
 			}
+			//锁定后不更改
+			if ruleInfo["is_lock"].(int64) == 1 {
+				goto EndUpdate
+			}
 			//更新一下
-			db.New().Table("tb_admin_rules").Where("id", ruleId).Update(map[string]interface{}{
-				"name":        rule["name"],
-				"type":        rule["type"],
-				"is_compel":   rule["is_compel"],
-				"icon":        rule["icon"],
-				"update_time": util.TimeNow(),
-			})
+			_, err = db.New().Table("tb_admin_rules").Where("id", ruleId).Update(updateData)
+			logger.Alert("update " + rule["name"].(string))
+			if err != nil {
+				panic(err.Error())
+				return
+			}
 		EndUpdate:
 		}
 		if children, ok := rule["children"]; ok && len(children.([]map[string]interface{})) > 0 {
