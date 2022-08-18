@@ -10,6 +10,7 @@
 package adminHandle
 
 import (
+	"fmt"
 	"github.com/gef/GoEasy/EasyApp"
 	"github.com/gef/GoEasy/Models"
 	"github.com/gef/GoEasy/Utils/db"
@@ -34,6 +35,7 @@ var dataTypes = []map[string]interface{}{
 func (that OptionModels) PageInit(pageData *EasyApp.PageData) {
 	//注册handle
 	pageData.ActionAdd("dynamic", that.Dynamic)
+	pageData.ActionAdd("export_insert_data", that.ExportInsertData)
 }
 
 // NodeBegin 开始
@@ -46,8 +48,25 @@ func (that OptionModels) NodeBegin(pageData *EasyApp.PageData) (error, int) {
 
 // NodeList 初始化列表
 func (that OptionModels) NodeList(pageData *EasyApp.PageData) (error, int) {
+	pageData.SetButton("export_insert_data", EasyApp.Button{
+		ButtonName: "导出数据",
+		Action:     "export_insert_data",
+		ActionType: 2,
+		LayerTitle: "后台模型导出成内置数据",
+		ActionUrl:  "export_insert_data",
+		Class:      "black",
+		Icon:       "ri-braces-fill",
+		Display:    "",
+		Expand: map[string]string{
+			"w": "98%",
+			"h": "98%",
+		},
+	})
+	//!重置顶部按钮
+	pageData.SetListTopBtns("add", "export_insert_data")
+	
 	pageData.SetListOrder("index_num,id asc")
-	pageData.ListColumnAdd("unique_key", "KEY", "text", nil)
+	pageData.ListColumnAdd("unique_key", "标识符", "text", nil)
 	pageData.ListColumnAdd("name", "名称", "text", nil)
 	pageData.ListColumnAdd("data_type", "数据类型", "array", dataTypes)
 	pageData.ListColumnAdd("static_data", "静态数据", "html", nil)
@@ -78,7 +97,7 @@ func (that OptionModels) NodeListData(pageData *EasyApp.PageData, data []gorose.
 
 // NodeForm 初始化表单
 func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
-	pageData.FormFieldsAdd("unique_key", "text-sm", "唯一Key", "选项集支持ID和key两种方式，key可留空", "", false, nil, "", nil)
+	pageData.FormFieldsAdd("unique_key", "text-sm", "标识符", "选项集唯一的识别关键字", "", true, nil, "", nil)
 	pageData.FormFieldsAdd("name", "text-sm", "名称", "", "", true, nil, "", nil)
 	pageData.FormFieldsAdd("data_type", "radio", "数据类型", "", "0", true, dataTypes, "", nil)
 	pageData.FormFieldsAdd("static_data", "textarea", "静态数据", "", "[{\"name\":\"是\",\"value\":\"1\"},{\"name\":\"否\",\"value\":\"0\"}]", false, nil, "", map[string]interface{}{
@@ -120,11 +139,11 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 	//多级、数据转换
 	pageData.FormFieldsAdd("", "block", "多级、数据转换", "", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("parent_field", "text-xs", "上级字段", "设置上级，选项集中会多pid一项数据，值就是上级字段的值。", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("to_tree_array", "radio", "选项集转多维", "将选项集根据pid转为树形结构（多维数组）", "0", false, Models.OptionModels{}.ById(1, false), "", map[string]interface{}{
+	pageData.FormFieldsAdd("to_tree_array", "radio", "选项集转多维", "将选项集根据pid转为树形结构（多维数组）", "0", false, Models.OptionModels{}.ByKey("is", false), "", map[string]interface{}{
 		"if": "formFields.parent_field!=''",
 	})
 	pageData.FormFieldsAdd("children_option_model_id", "select", "下级选项集", "下级选项集必须查询数据表类型，必须设置上级字段", "", false, that.ChildrenOptionModelsList(id), "", nil)
-	//pageData.FormFieldsAdd("options_disable", "radio", "当前选项禁选", "设置此项后，选项只能选择下级的选项集。当前选项集自动添加字段disabled=disabled", "0", false, Models.OptionModels{}.ById(1, false), "",
+	//pageData.FormFieldsAdd("options_disable", "radio", "当前选项禁选", "设置此项后，选项只能选择下级的选项集。当前选项集自动添加字段disabled=disabled", "0", false, Models.OptionModels{}.ByKey("is", false), "",
 	//	map[string]interface{}{
 	//		"if": "!!formFields.children_option_model_id",
 	//	})
@@ -207,4 +226,26 @@ func (that OptionModels) Dynamic(pageData *EasyApp.PageData, w http.ResponseWrit
 	}
 	ops := Models.OptionModels{}.Select(util.String2Int(optionModelId), strings.Join(wheres, " and "), false)
 	that.ApiResult(w, 200, "success", ops)
+}
+
+func (that OptionModels) ExportInsertData(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	var items []string
+	optionModels, err := db.New().Table("tb_option_models").Where("is_delete", 0).Order("index_num,id asc").Get()
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+	
+	item := ""
+	for index, optionModel := range optionModels {
+		delete(optionModel, "id")
+		delete(optionModel, "create_time")
+		delete(optionModel, "update_time")
+		delete(optionModel, "is_delete")
+		optionModel["index_num"] = index + 1
+		item = `{TableName: "tb_option_models", Condition: [][]interface{}{{"unique_key", "` + optionModel["unique_key"].(string) + `"}},
+Data: map[string]interface{}` + util.JsonEncode(optionModel) + `}`
+		items = append(items, item)
+	}
+	fmt.Fprint(w, "\r\n//选项集\r\n"+strings.Join(items, ",\n"))
 }

@@ -109,7 +109,7 @@ func (that Configs) NodeList(pageData *EasyApp.PageData) (error, int) {
 
 	//搜索表单
 	pageData.ListSearchFieldAdd("group_id", "select", "选择分组", "", "", ConfigsGroups, "", nil)
-	pageData.ListSearchFieldAdd("status", "select", "选择状态", "", "", Models.OptionModels{}.ById(2, false), "", nil)
+	pageData.ListSearchFieldAdd("status", "select", "选择状态", "", "", Models.OptionModels{}.ByKey("status", false), "", nil)
 	return nil, 0
 }
 

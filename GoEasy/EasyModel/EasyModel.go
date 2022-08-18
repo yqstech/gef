@@ -283,16 +283,16 @@ func GetEasyModelInfo(modelKey string, actionName string) (EasyModel, error) {
 	}
 }
 
-// selectDataList 待选择数据
-var selectDataList = map[int64][]map[string]interface{}{}
-var selectDataListLock sync.Mutex
+// optionModelList 待选择数据
+var optionModelList = map[int64][]map[string]interface{}{}
+var optionModelListLock sync.Mutex
 
 func GetSelectData(id int64) []map[string]interface{} {
-	if selectData, ok := selectDataList[id]; ok {
-		return selectData
+	if optionModel, ok := optionModelList[id]; ok {
+		return optionModel
 	} else {
-		selectDataListLock.Lock()
-		defer selectDataListLock.Unlock()
+		optionModelListLock.Lock()
+		defer optionModelListLock.Unlock()
 		//通过数据库查询
 		data, err := db.New().Table("tb_option_models").
 			Where("is_delete", 0).
@@ -308,7 +308,7 @@ func GetSelectData(id int64) []map[string]interface{} {
 		if data["data_type"].(int64) == 0 {
 			//解析json格式的静态数据
 			if data["static_data"].(string) != "" {
-				util.JsonDecode(data["static_data"].(string), &selectData)
+				util.JsonDecode(data["static_data"].(string), &optionModel)
 			}
 		} else {
 			//通过数据表获取列表
@@ -320,18 +320,18 @@ func GetSelectData(id int64) []map[string]interface{} {
 				logger.Error(err.Error())
 				return nil
 			}
-			selectData = arrOptions
+			optionModel = arrOptions
 		}
 		//!定时删除
 		go func() {
 			t := time.After(time.Second * 10) //十秒钟后删除
 			_, _ = <-t
-			selectDataListLock.Lock()
-			defer selectDataListLock.Unlock()
-			delete(selectDataList, id)
+			optionModelListLock.Lock()
+			defer optionModelListLock.Unlock()
+			delete(optionModelList, id)
 		}()
 		
-		selectDataList[id] = selectData
-		return selectData
+		optionModelList[id] = optionModel
+		return optionModel
 	}
 }

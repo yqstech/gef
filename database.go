@@ -105,7 +105,7 @@ func setAdminRules(pid int64, rules []map[string]interface{}) {
 				goto EndUpdate
 			}
 			//锁定后不更改
-			if ruleInfo["is_lock"].(int64) == 1 {
+			if ruleInfo["is_inside"].(int64) == 0 {
 				goto EndUpdate
 			}
 			//更新一下
@@ -129,8 +129,9 @@ func (that DbManager) AutoInsideData(data []InsideData) {
 		if d.TableName != "" && len(d.Condition) > 0 {
 			conn := db.New().Table(d.TableName)
 			for _, c := range d.Condition {
-				conn.Where(c...)
+				conn = conn.Where(c...)
 			}
+			conn = conn.Where("is_delete",0)
 			first, err := conn.First()
 			if err != nil {
 				panic(err.Error())
@@ -141,6 +142,13 @@ func (that DbManager) AutoInsideData(data []InsideData) {
 				if err != nil {
 					panic(err.Error())
 					return
+				}
+			} else {
+				//如果是内置数据,可以更新，上层框架可修改内容
+				if _, ok := first["is_inside"]; ok {
+					if first["is_inside"].(int64) == 1 {
+						db.New().Table(d.TableName).Where("id", first["id"]).Update(d.Data)
+					}
 				}
 			}
 		}

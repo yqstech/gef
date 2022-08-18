@@ -239,7 +239,7 @@ func (that EasyModelsFields) NodeForm(pageData *EasyApp.PageData, id int64) (err
 	
 	//列表列装饰
 	pageData.FormFieldsAdd("", "block", "列表页装饰", "", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("set_as_tabs", "radio", "选项集设为Tabs", "", "0", false, Models.OptionModels{}.ById(1, false), "", map[string]interface{}{
+	pageData.FormFieldsAdd("set_as_tabs", "radio", "选项集设为Tabs", "", "0", false, Models.OptionModels{}.ByKey("is", false), "", map[string]interface{}{
 		"if": "formFields.option_models_id!=''",
 	})
 
@@ -250,7 +250,7 @@ func (that EasyModelsFields) NodeForm(pageData *EasyApp.PageData, id int64) (err
 
 	//数据分组
 	pageData.FormFieldsAdd("", "block", "表单页装饰", "", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("option_indent", "radio", "选项按上下级缩进", "", "0", false, Models.OptionModels{}.ById(1, false), "", map[string]interface{}{
+	pageData.FormFieldsAdd("option_indent", "radio", "选项按上下级缩进", "", "0", false, Models.OptionModels{}.ByKey("is", false), "", map[string]interface{}{
 		"if": "formFields.option_models_id!=''",
 	})
 	pageData.FormFieldsAdd("group_title", "text", "创建一个分组", "填写分组名称，会从当前项的前面创建一个新分组", "", false, nil, "", nil)

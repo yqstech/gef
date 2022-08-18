@@ -39,9 +39,9 @@ func (ar AdminRules) NodeList(pageData *EasyApp.PageData) (error, int) {
 	pageData.ListColumnAdd("name", "权限名称", "html", nil)
 	pageData.ListColumnAdd("route", "权限地址", "", nil)
 	pageData.ListColumnAdd("icon", "图标", "icon", nil)
-	pageData.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ById(2, true))
-	pageData.ListColumnAdd("is_compel", "必选", "array", Models.OptionModels{}.ById(1, true))
-	pageData.ListColumnAdd("type", "权限类型", "array", Models.OptionModels{}.ById(5, true))
+	pageData.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ByKey("status", true))
+	pageData.ListColumnAdd("is_compel", "必选", "array", Models.OptionModels{}.ByKey("is", true))
+	pageData.ListColumnAdd("type", "权限类型", "array", Models.OptionModels{}.ByKey("rule_type", true))
 	pageData.ListColumnAdd("open_log", "日志", "switch::text=开启|关闭", nil)
 	pageData.ListColumnAdd("index_num", "排序", "input::width=50px&type=number", nil)
 	
@@ -50,8 +50,8 @@ func (ar AdminRules) NodeList(pageData *EasyApp.PageData) (error, int) {
 	//pageData.ListSearchFieldAdd("start_time", "datetime", "", util.TimeNowFormat("2006-01-02 00:00:00", 0, 0, -2), nil, "", nil)
 	//pageData.ListSearchFieldAdd("end_time", "datetime", "-", util.TimeNowFormat("2006-01-02 00:00:00", 0, 0, +1), nil, "", nil)
 	pageData.ListSearchFieldAdd("id", "text", "ID", "", "", nil, "", nil)
-	pageData.ListSearchFieldAdd("status", "select", "状态", "-1", "-1", Models.OptionModels{}.ById(2, false), "", nil)
-	pageData.ListSearchFieldAdd("type", "select", "类型", "0", "0", Models.OptionModels{}.ById(5, false), "", nil)
+	pageData.ListSearchFieldAdd("status", "select", "状态", "-1", "-1", Models.OptionModels{}.ByKey("status", false), "", nil)
+	pageData.ListSearchFieldAdd("type", "select", "类型", "0", "0", Models.OptionModels{}.ByKey("rule_type", false), "", nil)
 	return nil, 0
 }
 
@@ -111,7 +111,7 @@ func (ar AdminRules) NodeForm(pageData *EasyApp.PageData, id int64) (error, int)
 	pageData.FormFieldsAdd("pid", "select", "上级权限", "", "0", true, parentsMenus, "", nil)
 	pageData.FormFieldsAdd("route", "text", "链接地址", "例如:/index/index", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("icon", "icon", "Icon图标", "请选择图标（remixicon）", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("type", "radio", "权限类型", "", "1", false, Models.OptionModels{}.ById(5, false), "", nil)
+	pageData.FormFieldsAdd("type", "radio", "权限类型", "", "1", false, Models.OptionModels{}.ByKey("rule_type", false), "", nil)
 	pageData.FormFieldsAdd("is_compel", "radio", "必选权限", "", "0", true, Models.AdminRules{}.AllIsCompels(), "", nil)
 	pageData.FormFieldsAdd("index_num", "number-xxs", "菜单排序", "值越小越靠前", "200", true, nil, "", nil)
 	
@@ -120,6 +120,6 @@ func (ar AdminRules) NodeForm(pageData *EasyApp.PageData, id int64) (error, int)
 
 // NodeSaveData 表单保存数据前使用
 func (ar AdminRules) NodeSaveData(pageData *EasyApp.PageData, oldData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
-	postData["is_lock"] = 1
+	postData["is_inside"] = 0
 	return postData, nil, 0
 }

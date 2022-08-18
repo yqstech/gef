@@ -10,13 +10,25 @@
 package adminHandle
 
 import (
+	"fmt"
 	"github.com/gef/GoEasy/EasyApp"
 	"github.com/gef/GoEasy/Models"
+	"github.com/gef/GoEasy/Utils/db"
+	"github.com/gef/GoEasy/Utils/util"
 	"github.com/gef/config"
+	"github.com/julienschmidt/httprouter"
+	"github.com/wonderivan/logger"
+	"net/http"
+	"strings"
 )
 
 type EasyCurdModels struct {
 	Base
+}
+// PageInit 初始化
+func (that EasyCurdModels) PageInit(pageData *EasyApp.PageData) {
+	//注册handle
+	pageData.ActionAdd("export_insert_data", that.ExportInsertData)
 }
 
 // NodeBegin 开始
@@ -47,8 +59,24 @@ func (that EasyCurdModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 			"h": "98%",
 		},
 	})
+	//导出结构
+	pageData.SetButton("export_insert_data", EasyApp.Button{
+		ButtonName: "",
+		Action:     "/easy_curd_models/export_insert_data",
+		ActionType: 2,
+		LayerTitle: "后台模型导出成内置数据",
+		ActionUrl:  config.AdminPath + "/easy_curd_models/export_insert_data",
+		Class:      "black",
+		Icon:       "ri-braces-fill",
+		Display:    "",
+		Expand: map[string]string{
+			"w": "98%",
+			"h": "98%",
+		},
+	})
 	//!重置右侧按钮
-	pageData.SetListRightBtns("edit", "disable", "enable", "fields", "delete")
+	pageData.SetListRightBtns("edit", "fields", "export_insert_data", "disable", "enable", "delete")
+	pageData.SetListOrder("id asc")
 	pageData.ListColumnAdd("model_key", "模型Key", "text", nil)
 	pageData.ListColumnAdd("model_name", "模型名称", "text", nil)
 	//pageData.ListColumnAdd("table_name", "数据表名", "text", nil)
@@ -58,7 +86,7 @@ func (that EasyCurdModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 	pageData.ListColumnAdd("allow_delete", "删除", "switch::text=允许|禁止", nil)
 	//pageData.ListColumnAdd("soft_delete_disable", "删除方式", "switch::text=硬删除|软删除", nil)
 	//pageData.ListColumnAdd("check_login", "校验登录", "switch::text=是|否", nil)
-	pageData.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ById(2, true))
+	pageData.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ByKey("status", true))
 	return nil, 0
 }
 
@@ -78,4 +106,46 @@ func (that EasyCurdModels) NodeForm(pageData *EasyApp.PageData, id int64) (error
 	pageData.FormFieldsAdd("uk_name", "text", "用户字段名", "代表用户id的字段名称", "user_id", true, nil, "", nil)
 	pageData.FormFieldsAdd("pk_name", "text", "主键字段名", "代表用主键的字段名称", "id", true, nil, "", nil)
 	return nil, 0
+}
+
+
+// ExportInsertData 导出内置数据
+func (that EasyCurdModels) ExportInsertData(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	id := util.GetValue(r, "id")
+	
+	s1 := "var InsideData = []gef.InsideData{"
+	s2 := ",\r\n}\r\n"
+	var items []string
+	
+	easyModel, err := db.New().Table("tb_easy_curd_models").Where("id", id).First()
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+	if easyModel == nil {
+		return
+	}
+	delete(easyModel, "create_time")
+	delete(easyModel, "update_time")
+	delete(easyModel, "is_delete")
+	item := `
+		//接口模型及模型字段-` + easyModel["model_name"].(string) + `
+		{TableName: "tb_easy_curd_models", Condition: [][]interface{}{{"model_key","` + easyModel["model_key"].(string) + `"}},Data: map[string]interface{}` + util.JsonEncode(easyModel) + `}`
+	items = append(items, item)
+	
+	Fields, err := db.New().Table("tb_easy_curd_models_fields").Where("is_delete", 0).Where("model_id", id).Order("id asc").Get()
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+	for _, field := range Fields {
+		delete(field, "id")
+		delete(field, "create_time")
+		delete(field, "update_time")
+		delete(field, "is_delete")
+		item = `{TableName: "tb_easy_curd_models_fields", Condition: [][]interface{}{{"model_id", "` + id + `"},{"field_key", "` + field["field_key"].(string) + `"}},
+Data: map[string]interface{}` + util.JsonEncode(field) + `}`
+		items = append(items, item)
+	}
+	fmt.Fprint(w, s1+strings.Join(items, ",\n")+s2)
 }

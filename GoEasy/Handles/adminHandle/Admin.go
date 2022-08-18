@@ -40,7 +40,7 @@ func (a Admin) NodeList(pageData *EasyApp.PageData) (error, int) {
 	pageData.ListColumnAdd("group_id", "权限组/角色", "array", groupOptions)
 	pageData.ListColumnAdd("name", "名称", "text", nil)
 	pageData.ListColumnAdd("account", "登录账户", "text", nil)
-	pageData.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ById(2, true))
+	pageData.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ByKey("status", true))
 	return nil, 0
 }
 

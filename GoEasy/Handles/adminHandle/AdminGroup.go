@@ -32,7 +32,7 @@ func (ad AdminGroup) NodeBegin(pageData *EasyApp.PageData) (error, int) {
 
 func (ad AdminGroup) NodeList(pageData *EasyApp.PageData) (error, int) {
 	pageData.ListColumnAdd("group_name", "角色名称", "text", nil)
-	pageData.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ById(2, true))
+	pageData.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ByKey("status", true))
 	return nil, 0
 }
 

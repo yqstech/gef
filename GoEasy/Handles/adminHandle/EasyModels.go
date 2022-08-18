@@ -10,15 +10,26 @@
 package adminHandle
 
 import (
+	"fmt"
 	"github.com/gef/GoEasy/EasyApp"
 	"github.com/gef/GoEasy/Models"
 	"github.com/gef/GoEasy/Utils/db"
+	"github.com/gef/GoEasy/Utils/util"
 	"github.com/gef/config"
+	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
+	"net/http"
+	"strings"
 )
 
 type EasyModels struct {
 	Base
+}
+
+// PageInit 初始化
+func (that EasyModels) PageInit(pageData *EasyApp.PageData) {
+	//注册handle
+	pageData.ActionAdd("export_insert_data", that.ExportInsertData)
 }
 
 // NodeBegin 开始
@@ -45,7 +56,7 @@ func (that EasyModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 			"h": "98%",
 		},
 	})
-
+	
 	//!重置顶部按钮
 	pageData.SetListTopBtns("add", "buttons")
 	//!重置右侧按钮
@@ -78,9 +89,25 @@ func (that EasyModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 			"h": "98%",
 		},
 	})
+	//导出结构
+	pageData.SetButton("export_insert_data", EasyApp.Button{
+		ButtonName: "",
+		Action:     "/easy_models/export_insert_data",
+		ActionType: 2,
+		LayerTitle: "后台模型导出成内置数据",
+		ActionUrl:  config.AdminPath + "/easy_models/export_insert_data",
+		Class:      "black",
+		Icon:       "ri-braces-fill",
+		Display:    "",
+		Expand: map[string]string{
+			"w": "98%",
+			"h": "98%",
+		},
+	})
 	//!重置右侧按钮
-	pageData.SetListRightBtns("edit", "fields", "disable", "enable", "delete")
-
+	pageData.SetListRightBtns("edit", "fields", "export_insert_data", "disable", "enable", "delete")
+	
+	pageData.SetListOrder("id asc")
 	pageData.ListColumnAdd("model_key", "模型Key", "text", nil)
 	pageData.ListColumnAdd("model_name", "模型名称", "text", nil)
 	//pageData.ListColumnAdd("table_name", "数据表名", "text", nil)
@@ -89,7 +116,7 @@ func (that EasyModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 	pageData.ListColumnAdd("allow_update", "修改按钮", "switch::text=显示|隐藏", nil)
 	pageData.ListColumnAdd("allow_status", "状态按钮", "switch::text=显示|隐藏", nil)
 	pageData.ListColumnAdd("allow_delete", "删除按钮", "switch::text=显示|隐藏", nil)
-	pageData.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ById(2, true))
+	pageData.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ByKey("status", true))
 	return nil, 0
 }
 
@@ -122,7 +149,7 @@ func (that EasyModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, in
 	pageData.FormFieldsAdd("table_name", "text", "关联数据表名", "关联操作的数据表名称", "", true, nil, "", nil)
 	pageData.FormFieldsAdd("order_type", "text", "排序方式", "列表页默认排序方式", "id desc", true, nil, "", nil)
 	pageData.FormFieldsAdd("page_size", "number", "分页大小", "列表页每页的数据条数，最小值为1", "20", true, nil, "", nil)
-	pageData.FormFieldsAdd("batch_action", "radio", "支持批量操作", "", "0", true, Models.OptionModels{}.ById(1,false), "", nil)
+	pageData.FormFieldsAdd("batch_action", "radio", "支持批量操作", "", "0", true, Models.OptionModels{}.ByKey("is", false), "", nil)
 	pageData.FormFieldsAdd("note", "text", "模型备注", "", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("", "block", "页面元素", "", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("top_buttons", "tags", "顶部按钮", "", "[{'classes':'tag-3','text':'add'}]", false, buttonList, "", nil)
@@ -134,4 +161,46 @@ func (that EasyModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, in
 	pageData.FormFieldsAdd("level_indent", "text", "字段按级缩进", "列表页支持按字段1的上下级关系缩进字段2，格式为:级别字段key:缩进字段key，例如pid:name", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("url_params", "textarea", "Url传参", "Url参数转为列表查询条件 并 透传顶部按钮链接 \n格式为 参数:数据库字段:默认值，例如：id:model_id:0\n默认值为空自动忽略，每行一个转换规则", "", false, nil, "", nil)
 	return nil, 0
+}
+
+// ExportInsertData 导出内置数据
+func (that EasyModels) ExportInsertData(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	id := util.GetValue(r, "id")
+	
+	s1 := "var InsideData = []gef.InsideData{"
+	s2 := ",\r\n}\r\n"
+	var items []string
+	
+	easyModel, err := db.New().Table("tb_easy_models").Where("id", id).First()
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+	if easyModel == nil {
+		return
+	}
+	delete(easyModel, "create_time")
+	delete(easyModel, "update_time")
+	delete(easyModel, "is_delete")
+	item := `
+		//后台模型` + easyModel["model_name"].(string) + `
+		{TableName: "tb_easy_models", Condition: [][]interface{}{{"model_key","` + easyModel["model_key"].(string) + `"}},Data: map[string]interface{}` + util.JsonEncode(easyModel) + `}`
+	items = append(items, item)
+	
+	Fields, err := db.New().Table("tb_easy_models_fields").Where("is_delete", 0).Where("model_id", id).Order("index_num,id asc").Get()
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+	for index, field := range Fields {
+		delete(field, "id")
+		delete(field, "create_time")
+		delete(field, "update_time")
+		delete(field, "is_delete")
+		field["index_num"] = index + 1
+		item = `{TableName: "tb_easy_models_fields", Condition: [][]interface{}{{"model_id", "` + id + `"},{"field_key", "` + field["field_key"].(string) + `"}},
+Data: map[string]interface{}` + util.JsonEncode(field) + `}`
+		items = append(items, item)
+	}
+	fmt.Fprint(w, s1+strings.Join(items, ",\n")+s2)
 }

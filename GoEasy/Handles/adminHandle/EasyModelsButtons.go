@@ -10,8 +10,15 @@
 package adminHandle
 
 import (
+	"fmt"
 	"github.com/gef/GoEasy/EasyApp"
 	"github.com/gef/GoEasy/Models"
+	"github.com/gef/GoEasy/Utils/db"
+	"github.com/gef/GoEasy/Utils/util"
+	"github.com/julienschmidt/httprouter"
+	"github.com/wonderivan/logger"
+	"net/http"
+	"strings"
 )
 
 type EasyModelsButtons struct {
@@ -37,6 +44,12 @@ var btnClasses = []map[string]interface{}{
 	{"name": "黑色", "value": "black"},
 }
 
+// PageInit 初始化
+func (that EasyModelsButtons) PageInit(pageData *EasyApp.PageData) {
+	//注册handle
+	pageData.ActionAdd("export_insert_data", that.ExportInsertData)
+}
+
 // NodeBegin 开始
 func (that EasyModelsButtons) NodeBegin(pageData *EasyApp.PageData) (error, int) {
 	pageData.SetTitle("模型按钮管理")
@@ -47,13 +60,31 @@ func (that EasyModelsButtons) NodeBegin(pageData *EasyApp.PageData) (error, int)
 
 // NodeList 初始化列表
 func (that EasyModelsButtons) NodeList(pageData *EasyApp.PageData) (error, int) {
+	//导出结构
+	pageData.SetButton("export_insert_data", EasyApp.Button{
+		ButtonName: "导出数据",
+		Action:     "export_insert_data",
+		ActionType: 2,
+		LayerTitle: "后台模型导出成内置数据",
+		ActionUrl:  "export_insert_data",
+		Class:      "black",
+		Icon:       "ri-braces-fill",
+		Display:    "",
+		Expand: map[string]string{
+			"w": "98%",
+			"h": "98%",
+		},
+	})
+	//!重置顶部按钮
+	pageData.SetListTopBtns("add", "export_insert_data")
+	
 	pageData.ListColumnAdd("button_key", "按钮关键字", "text", nil)
 	pageData.ListColumnAdd("button_name", "按钮名称", "text", nil)
 	pageData.ListColumnAdd("button_note", "按钮备注", "text", nil)
 	pageData.ListColumnAdd("button_icon", "按钮图标", "icon", nil)
 	pageData.ListColumnAdd("class_name", "按钮样式", "array", btnClasses)
 	pageData.ListColumnAdd("action_type", "按钮类型", "array", btnActionTypes)
-	pageData.ListColumnAdd("status", "按钮状态", "array", Models.OptionModels{}.ById(2, true))
+	pageData.ListColumnAdd("status", "按钮状态", "array", Models.OptionModels{}.ByKey("status", true))
 	return nil, 0
 }
 
@@ -69,20 +100,42 @@ func (that EasyModelsButtons) NodeForm(pageData *EasyApp.PageData, id int64) (er
 	pageData.FormFieldsAdd("action_url", "text", "链接地址", "相对路径或绝对路径,/开头会自动补全后台地址", "", true, nil, "", nil)
 	pageData.FormFieldsAdd("action_type", "radio", "按钮页面类型", "", "1", true, btnActionTypes, "", nil)
 	pageData.FormFieldsAdd("confirm_msg", "text", "确认信息", "填入值，则点击按钮，弹出确认对话框", "", false, nil, "", map[string]interface{}{
-		"if":"formFields.action_type==1",
+		"if": "formFields.action_type==1",
 	})
-	pageData.FormFieldsAdd("batch_action", "radio", "支持批量操作", "", "0", true, Models.OptionModels{}.ById(1,false), "", map[string]interface{}{
-		"if":"formFields.action_type==1",
+	pageData.FormFieldsAdd("batch_action", "radio", "支持批量操作", "", "0", true, Models.OptionModels{}.ByKey("is", false), "", map[string]interface{}{
+		"if": "formFields.action_type==1",
 	})
 	pageData.FormFieldsAdd("layer_title", "text", "弹窗标题", "弹窗类按钮，在此定义弹窗标题", "", false, nil, "", map[string]interface{}{
-		"if":"formFields.action_type==2",
+		"if": "formFields.action_type==2",
 	})
 	pageData.FormFieldsAdd("layer_width", "text", "弹窗宽度", "设置弹窗尺寸，支持px和%", "90%", false, nil, "", map[string]interface{}{
-		"if":"formFields.action_type==2",
+		"if": "formFields.action_type==2",
 	})
 	pageData.FormFieldsAdd("layer_height", "text", "弹窗高度", "设置弹窗尺寸，支持px和%", "86%", false, nil, "", map[string]interface{}{
-		"if":"formFields.action_type==2",
+		"if": "formFields.action_type==2",
 	})
 	
 	return nil, 0
+}
+
+func (that EasyModelsButtons) ExportInsertData(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	var items []string
+	buttons, err := db.New().Table("tb_easy_models_buttons").Where("is_delete", 0).Order("id asc").Get()
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+	
+	item := ""
+	for index, button := range buttons {
+		delete(button, "id")
+		delete(button, "create_time")
+		delete(button, "update_time")
+		delete(button, "is_delete")
+		button["index_num"] = index + 1
+		item = `{TableName: "tb_easy_models_buttons", Condition: [][]interface{}{{"button_key", "` + button["button_key"].(string) + `"}},
+Data: map[string]interface{}` + util.JsonEncode(button) + `}`
+		items = append(items, item)
+	}
+	fmt.Fprint(w, "\r\n//后台模型自定义按钮\r\n"+strings.Join(items, ",\n"))
 }
