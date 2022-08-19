@@ -44,7 +44,7 @@ func (that EasyCurdModelsFields) NodeList(pageData *EasyApp.PageData) (error, in
 	pageData.ListColumnAdd("field_key", "字段Key", "text", nil)
 	pageData.ListColumnAdd("field_name", "字段名称", "text", nil)
 	pageData.ListColumnAdd("field_note", "字段备注", "text", nil)
-	pageData.ListColumnAdd("option_models_id", "关联选项集", "array", that.OptionModelsList())
+	pageData.ListColumnAdd("option_models_key", "关联选项集", "array", that.OptionModelsList())
 	pageData.ListColumnAdd("is_private", "私密数据", "switch::text=私密|公开", nil)
 	pageData.ListColumnAdd("is_lock", "锁定数据", "switch::text=锁定|可改", nil)
 	pageData.ListColumnAdd("update_time", "最后同步", "text", nil)
@@ -69,25 +69,10 @@ func (that EasyCurdModelsFields) NodeListCondition(pageData *EasyApp.PageData, c
 
 // NodeForm 初始化表单
 func (that EasyCurdModelsFields) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
-	pageData.FormFieldsAdd("option_models_id", "select", "关联选项集", "", "", true, that.OptionModelsList(), "", nil)
+	pageData.FormFieldsAdd("option_models_key", "select", "关联选项集", "", "", true, that.OptionModelsList(), "", nil)
 	return nil, 0
 }
 
-// NodeFormData 表单显示前修改数据
-func (that EasyCurdModelsFields) NodeFormData(pageData *EasyApp.PageData, data gorose.Data, id int64) (gorose.Data, error, int) {
-	if data["option_models_id"].(int64) == 0 {
-		data["option_models_id"] = ""
-	}
-	return data, nil, 0
-}
-
-// NodeSaveData 表单保存数据前使用
-func (that EasyCurdModelsFields) NodeSaveData(pageData *EasyApp.PageData, oldData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
-	if postData["option_models_id"] == "" {
-		postData["option_models_id"] = 0
-	}
-	return postData, nil, 0
-}
 
 //默认设置成私密的字段名
 var defaultPrivateFields = []interface{}{"is_delete", "status", "create_time", "pid"}
@@ -179,7 +164,7 @@ func (that EasyCurdModelsFields) syncModelFields(easyModelId int) {
 				"field_key":        fieldKey,
 				"field_name":       fieldName,
 				"field_note":       fieldNote,
-				"option_models_id": Models.FieldMatchOptionModelsId(fieldKey), //自动匹配选择数据源
+				"option_models_key": Models.FieldMatchOptionModelsKey(fieldKey), //自动匹配选择数据源
 				"is_private":       isPrivate,
 				"is_lock":          isLock,
 				"update_time":      timeNow,

@@ -54,29 +54,29 @@ type UrlParam struct {
 
 // ModelField 模型字段信息
 type ModelField struct {
-	FieldKey                    string                   //字段关键字
-	FieldName                   string                   //字段名称
-	FieldNameReset              string                   //字段重置名称（列表）
-	FieldStyleReset             string                   //字段重设样式（列表）
-	FieldNotice                 string                   //字段提示信息
-	IsShowOnList                bool                     //是否在列表页展示该字段
-	DataTypeOnList              string                   //列表页展示时的数据类型
-	DataTypeCommandOnList       string                   //列表页展示时数据类型的指令
-	DataTypeOnCreate            string                   //表单页展示时的数据类型
-	DataTypeOnUpdate            string                   //表单页展示时的数据类型
-	AllowCreate                 bool                     //新增页显示
-	AllowUpdate                 bool                     //修改页显示
-	IsMust                      bool                     //是否必填
-	DefaultValue                string                   //默认值
-	FieldOptions                []map[string]interface{} //待选数据
-	OptionIndent                bool                     //选项按照上下级缩进
-	ExpandIf                    string                   //拓展数据-if条件
-	ExpandWatchFields           string                   //拓展数据-联动监听字段
-	ExpandDynamicOptionModelsId string                   //拓展数据-联动绑定动态选项集
-	GroupTitle                  string                   //创建一个新分组的标题
-	FieldAugment                string                   //数据增强转换规则
-	Attach2Field                string                   //附加到其他字段
-	SaveTransRule               string                   //保存时数据变换规则
+	FieldKey                     string                   //字段关键字
+	FieldName                    string                   //字段名称
+	FieldNameReset               string                   //字段重置名称（列表）
+	FieldStyleReset              string                   //字段重设样式（列表）
+	FieldNotice                  string                   //字段提示信息
+	IsShowOnList                 bool                     //是否在列表页展示该字段
+	DataTypeOnList               string                   //列表页展示时的数据类型
+	DataTypeCommandOnList        string                   //列表页展示时数据类型的指令
+	DataTypeOnCreate             string                   //表单页展示时的数据类型
+	DataTypeOnUpdate             string                   //表单页展示时的数据类型
+	AllowCreate                  bool                     //新增页显示
+	AllowUpdate                  bool                     //修改页显示
+	IsMust                       bool                     //是否必填
+	DefaultValue                 string                   //默认值
+	FieldOptions                 []map[string]interface{} //待选数据
+	OptionIndent                 bool                     //选项按照上下级缩进
+	ExpandIf                     string                   //拓展数据-if条件
+	ExpandWatchFields            string                   //拓展数据-联动监听字段
+	ExpandDynamicOptionModelsKey string                   //拓展数据-联动绑定动态选项集
+	GroupTitle                   string                   //创建一个新分组的标题
+	FieldAugment                 string                   //数据增强转换规则
+	Attach2Field                 string                   //附加到其他字段
+	SaveTransRule                string                   //保存时数据变换规则
 }
 
 // easyModelList 存储的模型信息列表
@@ -224,35 +224,35 @@ func GetEasyModelInfo(modelKey string, actionName string) (EasyModel, error) {
 		}
 		for _, field := range modelFields {
 			modelField := ModelField{
-				FieldKey:                    field["field_key"].(string),
-				FieldName:                   field["field_name"].(string),
-				FieldNameReset:              field["field_name_reset"].(string),
-				FieldStyleReset:             field["field_style_reset"].(string),
-				FieldNotice:                 field["field_notice"].(string),
-				IsShowOnList:                field["is_show_on_list"].(int64) == 1,
-				DataTypeOnList:              field["data_type_on_list"].(string),
-				DataTypeCommandOnList:       field["data_type_command_on_list"].(string),
-				DataTypeOnCreate:            field["data_type_on_create"].(string),
-				DataTypeOnUpdate:            field["data_type_on_update"].(string),
-				AllowCreate:                 field["allow_create"].(int64) == 1,
-				AllowUpdate:                 field["allow_update"].(int64) == 1,
-				IsMust:                      field["is_must"].(int64) == 1,
-				DefaultValue:                field["default_value"].(string),
-				FieldOptions:                nil,
-				OptionIndent:                field["option_indent"].(int64) == 1,
-				ExpandIf:                    field["expand_if"].(string),
-				ExpandWatchFields:           field["watch_fields"].(string),
-				ExpandDynamicOptionModelsId: util.Int642String(field["dynamic_option_models_id"].(int64)),
-				GroupTitle:                  field["group_title"].(string),
-				FieldAugment:                field["field_augment"].(string),
-				Attach2Field:                field["attach_to_field"].(string),
-				SaveTransRule:               field["save_trans_rule"].(string),
+				FieldKey:                     field["field_key"].(string),
+				FieldName:                    field["field_name"].(string),
+				FieldNameReset:               field["field_name_reset"].(string),
+				FieldStyleReset:              field["field_style_reset"].(string),
+				FieldNotice:                  field["field_notice"].(string),
+				IsShowOnList:                 field["is_show_on_list"].(int64) == 1,
+				DataTypeOnList:               field["data_type_on_list"].(string),
+				DataTypeCommandOnList:        field["data_type_command_on_list"].(string),
+				DataTypeOnCreate:             field["data_type_on_create"].(string),
+				DataTypeOnUpdate:             field["data_type_on_update"].(string),
+				AllowCreate:                  field["allow_create"].(int64) == 1,
+				AllowUpdate:                  field["allow_update"].(int64) == 1,
+				IsMust:                       field["is_must"].(int64) == 1,
+				DefaultValue:                 field["default_value"].(string),
+				FieldOptions:                 nil,
+				OptionIndent:                 field["option_indent"].(int64) == 1,
+				ExpandIf:                     field["expand_if"].(string),
+				ExpandWatchFields:            field["watch_fields"].(string),
+				ExpandDynamicOptionModelsKey: field["dynamic_option_models_key"].(string),
+				GroupTitle:                   field["group_title"].(string),
+				FieldAugment:                 field["field_augment"].(string),
+				Attach2Field:                 field["attach_to_field"].(string),
+				SaveTransRule:                field["save_trans_rule"].(string),
 			}
-			if field["option_models_id"].(int64) > 0 {
+			if field["option_models_key"].(string) != "" {
 				if actionName == "list" {
-					modelField.FieldOptions = Models.OptionModels{}.ById(util.Int642Int(field["option_models_id"].(int64)), field["option_beautify"].(int64) > 0)
+					modelField.FieldOptions = Models.OptionModels{}.ByKey(field["option_models_key"], field["option_beautify"].(int64) > 0)
 				} else {
-					modelField.FieldOptions = Models.OptionModels{}.ById(util.Int642Int(field["option_models_id"].(int64)), field["option_beautify"].(int64) == 1)
+					modelField.FieldOptions = Models.OptionModels{}.ByKey(field["option_models_key"], field["option_beautify"].(int64) == 1)
 				}
 				if field["set_as_tabs"].(int64) == 1 {
 					//!!!!!!!! 将某个字段和字段的选项集设置为列表tab页 !!!!!!!!!!!
@@ -280,58 +280,5 @@ func GetEasyModelInfo(modelKey string, actionName string) (EasyModel, error) {
 			delete(easyModelList, saveKey)
 		}()
 		return easyModel, nil
-	}
-}
-
-// optionModelList 待选择数据
-var optionModelList = map[int64][]map[string]interface{}{}
-var optionModelListLock sync.Mutex
-
-func GetOptionModels(id int64) []map[string]interface{} {
-	if optionModel, ok := optionModelList[id]; ok {
-		return optionModel
-	} else {
-		optionModelListLock.Lock()
-		defer optionModelListLock.Unlock()
-		//通过数据库查询
-		data, err := db.New().Table("tb_option_models").
-			Where("is_delete", 0).
-			Where("status", 1).
-			Where("id", id).First()
-		if err != nil {
-			logger.Error(err.Error())
-			return nil
-		}
-		if data == nil {
-			return nil
-		}
-		if data["data_type"].(int64) == 0 {
-			//解析json格式的静态数据
-			if data["static_data"].(string) != "" {
-				util.JsonDecode(data["static_data"].(string), &optionModel)
-			}
-		} else {
-			//通过数据表获取列表
-			arrOptions, err, _ := Models.Model{}.SelectOptionsData(data["table_name"].(string), map[string]string{
-				data["value_field"].(string): "value",
-				data["name_field"].(string):  "name",
-			}, "0", "未知", "", "")
-			if err != nil {
-				logger.Error(err.Error())
-				return nil
-			}
-			optionModel = arrOptions
-		}
-		//!定时删除
-		go func() {
-			t := time.After(time.Second * 10) //十秒钟后删除
-			_, _ = <-t
-			optionModelListLock.Lock()
-			defer optionModelListLock.Unlock()
-			delete(optionModelList, id)
-		}()
-		
-		optionModelList[id] = optionModel
-		return optionModel
 	}
 }

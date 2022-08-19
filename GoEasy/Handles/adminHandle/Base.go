@@ -13,7 +13,6 @@ import (
 	"github.com/gef/GoEasy/EasyApp"
 	"github.com/gef/GoEasy/Handles/commHandle"
 	"github.com/gef/GoEasy/Models"
-	"github.com/gef/GoEasy/Utils/util"
 	"github.com/wonderivan/logger"
 )
 
@@ -53,40 +52,40 @@ func (b Base) EasyModels() []map[string]interface{} {
 
 func (b Base) OptionModelsList() []map[string]interface{} {
 	//获取列表
-	SelectData, err, _ := Models.Model{}.SelectOptionsData("tb_option_models", map[string]string{
-		"id":   "value",
+	OptionModelsList, err, _ := Models.Model{}.SelectOptionsData("tb_option_models", map[string]string{
+		"unique_key":   "value",
 		"name": "name",
 	}, "", "", "", "")
 	if err != nil {
 		logger.Error(err.Error())
 		return nil
 	}
-	return SelectData
+	return OptionModelsList
 }
 
 func (b Base) DynamicOptionModelsList() []map[string]interface{} {
 	//获取列表
-	SelectData, err, _ := Models.Model{}.SelectOptionsData("tb_option_models", map[string]string{
-		"id":   "value",
+	OptionModelsList, err, _ := Models.Model{}.SelectOptionsData("tb_option_models", map[string]string{
+		"unique_key":   "value",
 		"name": "name",
 	}, "", "", "data_type=1 and dynamic_params!=''", "")
 	if err != nil {
 		logger.Error(err.Error())
 		return nil
 	}
-	return SelectData
+	return OptionModelsList
 }
 
 //ChildrenOptionModelsList 下级选项集
-func (b Base) ChildrenOptionModelsList(id int64) []map[string]interface{} {
+func (b Base) ChildrenOptionModelsList(uniqueKey string) []map[string]interface{} {
 	//获取列表
-	SelectData, err, _ := Models.Model{}.SelectOptionsData("tb_option_models", map[string]string{
-		"id":   "value",
-		"name": "name",
-	}, "", "", "data_type=1 and parent_field!='' and id!="+util.Int642String(id), "")
+	ChildrenOptionModels, err, _ := Models.Model{}.SelectOptionsData("tb_option_models", map[string]string{
+		"unique_key": "value",
+		"name":       "name",
+	}, "", "", "data_type=1 and parent_field!='' and unique_key!='"+uniqueKey+"'", "")
 	if err != nil {
 		logger.Error(err.Error())
 		return nil
 	}
-	return SelectData
+	return ChildrenOptionModels
 }

@@ -279,7 +279,7 @@
                     //select组件设置了监听哪些字段
                     {{range $fieldIndex,$field:=.formFields}}
                     {{- if $field.Expand.watch_fields}}
-                    {{- if $field.Expand.dynamic_option_model_id}}
+                    {{- if $field.Expand.dynamic_option_model_key}}
                     //监听字段
                     watch_fields = '{{$field.Expand.watch_fields}}'.split(',');
                     //是否变化
@@ -299,7 +299,7 @@
                     }
                     if(changed){
                         const postData = {}
-                        postData["_dynamic_option_model_id"] = '{{$field.Expand.dynamic_option_model_id}}';
+                        postData["_dynamic_option_model_key"] = '{{$field.Expand.dynamic_option_model_key}}';
                         for (let i = 0; i < watch_fields.length; i++) {
                             if (watch_fields[i] != "") {
                                 postData[watch_fields[i]] = newData[watch_fields[i]];

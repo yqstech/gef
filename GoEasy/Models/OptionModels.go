@@ -154,7 +154,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 				selectData[index]["name"] = optionName
 			}
 		}
-		logger.Alert("美化后的数据集", selectData)
+		//logger.Alert("美化后的数据集", selectData)
 		//!设置了禁用
 		if data["options_disable"].(int64) == 1 {
 			for thisIndex, _ := range selectData {
@@ -162,8 +162,8 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 			}
 		}
 		//! 合并下级选项集
-		if data["children_option_model_id"].(int64) > 0 {
-			nextOptionModels := that.ById(util.Int642Int(data["children_option_model_id"].(int64)), false)
+		if data["children_option_model_key"].(string) != "" {
+			nextOptionModels := that.ByKey(data["children_option_model_key"], false)
 			for _, nextOption := range nextOptionModels {
 				//下级必须存在pid字段
 				if pid, ok := nextOption["pid"]; ok {
@@ -182,7 +182,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 					}
 				}
 			}
-			logger.Alert("合并下级以后", selectData)
+			//logger.Alert("合并下级以后", selectData)
 			//! 跨表会造成value值重复，需要修改一下value值，且需要在补充完下级以后修改
 			//!取数据表名最后一个字段作为新ID的前缀
 			tbName := strings.Split(data["table_name"].(string), "_")
@@ -190,7 +190,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 			for thisIndex, thisOption := range selectData {
 				selectData[thisIndex]["value"] = Prefix + "_" + util.Interface2String(thisOption["value"])
 			}
-			logger.Alert("修改value值以后", selectData)
+			//logger.Alert("修改value值以后", selectData)
 		}
 		//!转多维数组
 		if data["to_tree_array"].(int64) == 1 {
@@ -220,8 +220,19 @@ func (that OptionModels) ById(id int, beautify bool) []map[string]interface{} {
 }
 
 // ByKey 获取选项集数据（可选择美化数据）
-func (that OptionModels) ByKey(uniqueKey string, beautify bool) []map[string]interface{} {
-	return that.Select(0, "unique_key = '"+uniqueKey+"'", beautify)
+func (that OptionModels) ByKey(uniqueKey interface{}, beautify bool) []map[string]interface{} {
+	var data []map[string]interface{}
+	switch uniqueKey.(type) {
+	case int:
+		data = that.ById(uniqueKey.(int), beautify)
+	case int64:
+		data = that.ById(util.Int642Int(uniqueKey.(int64)), beautify)
+	case string:
+		data = that.Select(0, "unique_key = '"+uniqueKey.(string)+"'", beautify)
+	default:
+		logger.Error("选项集key值类型异常！")
+	}
+	return data
 }
 
 // OptionDynamicParam 选项动态参数
@@ -232,12 +243,12 @@ type OptionDynamicParam struct {
 }
 
 // DynamicParams 获取选项集的动态参数
-func (that OptionModels) DynamicParams(id int) []OptionDynamicParam {
+func (that OptionModels) DynamicParams(uniqueKey string) []OptionDynamicParam {
 	var DynamicParams []OptionDynamicParam
 	data, err := db.New().Table("tb_option_models").
 		Where("is_delete", 0).
 		Where("status", 1).
-		Where("id", id).First()
+		Where("unique_key", uniqueKey).First()
 	if err != nil {
 		logger.Error(err.Error())
 		return DynamicParams
@@ -273,7 +284,7 @@ var matchRuleValidity = false
 var fieldMatchSelectData sync.Mutex
 
 //字段完全匹配的id索引
-var fieldKeyDataId = map[string]int64{}
+var fieldKey2OptionModelKey = map[string]string{}
 
 //字段匹配规则列表
 var fieldRules []fieldRule
@@ -282,16 +293,17 @@ type fieldRule struct {
 	Key       string //匹配关键字
 	KeyLength int    //匹配字段位数
 	MatchType int    //匹配规则（0开头）
-	DataId    int64  //数据
+	DataId    int64  //模型ID
+	UniqueKey string //模型关键字
 }
 
-// FieldMatchOptionModelsId 字段自动匹配选项集ID
-func FieldMatchOptionModelsId(fieldKey string) int64 {
+// FieldMatchOptionModelsKey 字段自动匹配选项集key
+func FieldMatchOptionModelsKey(fieldKey string) string {
 	//原子操作
 	fieldMatchSelectData.Lock()
 	defer fieldMatchSelectData.Unlock()
 	//默认返回0
-	selectId := int64(0)
+	uniqueKey := ""
 	//需要更新规则
 	if !matchRuleValidity {
 		//设置当前有效期有效
@@ -305,7 +317,7 @@ func FieldMatchOptionModelsId(fieldKey string) int64 {
 			matchRuleValidity = false
 		}()
 		//清空原始的数据
-		fieldKeyDataId = make(map[string]int64)
+		fieldKey2OptionModelKey = make(map[string]string)
 		fieldRules = []fieldRule{}
 		//查询关联数据列表和匹配规则
 		data, err := db.New().Table("tb_option_models").
@@ -316,7 +328,7 @@ func FieldMatchOptionModelsId(fieldKey string) int64 {
 			Get()
 		if err != nil {
 			logger.Error(err.Error())
-			return selectId
+			return uniqueKey
 		}
 		for _, item := range data {
 			if item["match_fields"].(string) != "" {
@@ -324,31 +336,32 @@ func FieldMatchOptionModelsId(fieldKey string) int64 {
 				for _, field := range fields {
 					idx := strings.IndexAny(field, "*")
 					if idx == -1 {
-						fieldKeyDataId[field] = item["id"].(int64)
+						fieldKey2OptionModelKey[field] = item["unique_key"].(string)
 					} else {
 						fieldRules = append(fieldRules, fieldRule{
 							Key:       field[0:idx],
 							KeyLength: idx,
 							MatchType: 0,
 							DataId:    item["id"].(int64),
+							UniqueKey: item["unique_key"].(string),
 						})
 					}
 				}
 			}
 		}
 	}
-	if id, ok := fieldKeyDataId[fieldKey]; ok {
-		return id
+	if key, ok := fieldKey2OptionModelKey[fieldKey]; ok {
+		return key
 	}
 	fieldKeyLength := len(fieldKey)
 	for _, rule := range fieldRules {
 		if fieldKeyLength >= rule.KeyLength {
 			if fieldKey[0:rule.KeyLength] == rule.Key {
-				return rule.DataId
+				return rule.UniqueKey
 			}
 		}
 	}
-	return selectId
+	return uniqueKey
 }
 
 // TreeArrayExtendField 多维数据补充数组的附加信息

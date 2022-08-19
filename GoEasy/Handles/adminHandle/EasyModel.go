@@ -244,9 +244,9 @@ func (that EasyModel) NodeForm(pageData *EasyApp.PageData, id int64) (error, int
 					if field.ExpandIf != "" {
 						expand["if"] = field.ExpandIf
 					}
-					if field.ExpandWatchFields != "" && field.ExpandDynamicOptionModelsId != "" {
+					if field.ExpandWatchFields != "" && field.ExpandDynamicOptionModelsKey != "" {
 						expand["watch_fields"] = field.ExpandWatchFields
-						expand["dynamic_option_model_id"] = field.ExpandDynamicOptionModelsId
+						expand["dynamic_option_model_key"] = field.ExpandDynamicOptionModelsKey
 					}
 					if field.GroupTitle != "" {
 						pageData.FormFieldsAdd("", "block", field.GroupTitle, "", "", false, nil, "", nil)
@@ -301,9 +301,9 @@ func (that EasyModel) NodeForm(pageData *EasyApp.PageData, id int64) (error, int
 					if field.ExpandIf != "" {
 						expand["if"] = field.ExpandIf
 					}
-					if field.ExpandWatchFields != "" && field.ExpandDynamicOptionModelsId != "" {
+					if field.ExpandWatchFields != "" && field.ExpandDynamicOptionModelsKey != "" {
 						expand["watch_fields"] = field.ExpandWatchFields
-						expand["dynamic_option_model_id"] = field.ExpandDynamicOptionModelsId
+						expand["dynamic_option_model_key"] = field.ExpandDynamicOptionModelsKey
 					}
 					if field.GroupTitle != "" {
 						pageData.FormFieldsAdd("", "block", field.GroupTitle, "", "", false, nil, "", nil)

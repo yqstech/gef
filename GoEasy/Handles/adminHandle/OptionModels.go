@@ -74,7 +74,7 @@ func (that OptionModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 	pageData.ListColumnAdd("value_field", "值字段", "text", nil)
 	pageData.ListColumnAdd("name_field", "名称字段", "text", nil)
 	pageData.ListColumnAdd("parent_field", "上级字段", "text", nil)
-	pageData.ListColumnAdd("children_option_model_id", "下级选项集", "array", that.ChildrenOptionModelsList(0))
+	pageData.ListColumnAdd("children_option_model_key", "下级选项集", "array", that.ChildrenOptionModelsList(""))
 	pageData.ListColumnAdd("index_num", "排序", "input::type=number&width=50px", nil)
 	return nil, 0
 }
@@ -142,10 +142,23 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 	pageData.FormFieldsAdd("to_tree_array", "radio", "选项集转多维", "将选项集根据pid转为树形结构（多维数组）", "0", false, Models.OptionModels{}.ByKey("is", false), "", map[string]interface{}{
 		"if": "formFields.parent_field!=''",
 	})
-	pageData.FormFieldsAdd("children_option_model_id", "select", "下级选项集", "下级选项集必须查询数据表类型，必须设置上级字段", "", false, that.ChildrenOptionModelsList(id), "", nil)
+	
+	//!选择下级选项集，要排除自己
+	exceptOptionModelKey := ""
+	if id > 0 {
+		//查找自己的 unique_key
+		my, err := db.New().Table("tb_option_models").Where("is_delete", 0).Where("id", id).First()
+		if err != nil {
+			return err, 500
+		}
+		if my != nil {
+			exceptOptionModelKey = my["unique_key"].(string)
+		}
+	}
+	pageData.FormFieldsAdd("children_option_model_key", "select", "下级选项集", "下级选项集必须查询数据表类型，必须设置上级字段", "", false, that.ChildrenOptionModelsList(exceptOptionModelKey), "", nil)
 	//pageData.FormFieldsAdd("options_disable", "radio", "当前选项禁选", "设置此项后，选项只能选择下级的选项集。当前选项集自动添加字段disabled=disabled", "0", false, Models.OptionModels{}.ByKey("is", false), "",
 	//	map[string]interface{}{
-	//		"if": "!!formFields.children_option_model_id",
+	//		"if": "!!formFields.children_option_model_key",
 	//	})
 	//
 	//选项图标、颜色、缩进
@@ -185,9 +198,7 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 // NodeFormData 表单显示前修改数据
 func (that OptionModels) NodeFormData(pageData *EasyApp.PageData, data gorose.Data, id int64) (gorose.Data, error, int) {
 	if id > 0 {
-		if data["children_option_model_id"] == 0 {
-			data["children_option_model_id"] = ""
-		}
+
 	}
 	return data, nil, 0
 }
@@ -201,20 +212,18 @@ func (that OptionModels) NodeSaveData(pageData *EasyApp.PageData, oldData gorose
 	} else {
 		postData["static_data"] = ""
 	}
-	if postData["children_option_model_id"] == "" {
-		postData["children_option_model_id"] = 0
-	}
+
 	return postData, nil, 0
 }
 
 // Dynamic 动态获取选项集
 func (that OptionModels) Dynamic(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	optionModelId := util.PostValue(r, "_dynamic_option_model_id")
-	if optionModelId == "" {
+	optionModelKey := util.PostValue(r, "_dynamic_option_model_key")
+	if optionModelKey == "" {
 		that.ApiResult(w, 201, "参数不全", nil)
 		return
 	}
-	DynamicParams := Models.OptionModels{}.DynamicParams(util.String2Int(optionModelId))
+	DynamicParams := Models.OptionModels{}.DynamicParams(optionModelKey)
 	var wheres []string
 	for _, dp := range DynamicParams {
 		v := util.PostValue(r, dp.ParamKey)
@@ -224,7 +233,9 @@ func (that OptionModels) Dynamic(pageData *EasyApp.PageData, w http.ResponseWrit
 			wheres = append(wheres, dp.FieldKey+" = '"+v+"'")
 		}
 	}
-	ops := Models.OptionModels{}.Select(util.String2Int(optionModelId), strings.Join(wheres, " and "), false)
+	wheres = append(wheres,"unique_key = '"+optionModelKey+"'")
+	
+	ops := Models.OptionModels{}.Select(0, strings.Join(wheres, " and "), false)
 	that.ApiResult(w, 200, "success", ops)
 }
 

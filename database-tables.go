@@ -183,7 +183,8 @@ func (m *TbConfigs) TableName() string {
 // TbConfigsGroup 应用设置项分组
 type TbConfigsGroup struct {
 	ID
-	GroupName string `gorm:"column:group_name;type:char(100);default:'';NOT NULL;comment:分组名" json:"group_name"` // 分组名
+	GroupKey  string `gorm:"column:group_key;type:varchar(100);default:'';NOT NULL;comment:分组标识" json:"group_key"`  // 分组名
+	GroupName string `gorm:"column:group_name;type:varchar(100);default:'';NOT NULL;comment:分组名" json:"group_name"` // 分组名
 	Note      string `gorm:"column:note;type:varchar(100)" json:"note"`
 	CUSD
 }
@@ -221,13 +222,13 @@ func (m *TbEasyCurdModels) TableName() string {
 // TbEasyCurdModelsFields easyCurd模型字段管理
 type TbEasyCurdModelsFields struct {
 	ID
-	ModelID        int    `gorm:"column:model_id;type:int(11);default:0;NOT NULL;comment:关联easyCurd模型ID" json:"model_id"`        // 关联easyCurd模型ID
-	FieldKey       string `gorm:"column:field_key;type:varchar(50);default:'';NOT NULL;comment:模型字段关键字" json:"field_key"`        // 模型字段关键字
-	FieldName      string `gorm:"column:field_name;type:varchar(50);default:'';NOT NULL;comment:模型字段名称" json:"field_name"`       // 模型字段名称
-	FieldNote      string `gorm:"column:field_note;type:varchar(50);default:'';NOT NULL;comment:模型字段备注" json:"field_note"`       // 模型字段备注
-	OptionModelsID int    `gorm:"column:option_models_id;type:int(11);default:0;NOT NULL;comment:选项集id" json:"option_models_id"` // 选项集id
-	IsPrivate      int    `gorm:"column:is_private;type:int(11);default:0;NOT NULL;comment:是否私密" json:"is_private"`              // 是否私密
-	IsLock         int    `gorm:"column:is_lock;type:int(11);default:0;NOT NULL;comment:是否锁定|禁止修改" json:"is_lock"`               // 是否锁定|禁止修改
+	ModelID         int    `gorm:"column:model_id;type:int(11);default:0;NOT NULL;comment:关联easyCurd模型ID" json:"model_id"`                // 关联easyCurd模型ID
+	FieldKey        string `gorm:"column:field_key;type:varchar(50);default:'';NOT NULL;comment:模型字段关键字" json:"field_key"`                // 模型字段关键字
+	FieldName       string `gorm:"column:field_name;type:varchar(50);default:'';NOT NULL;comment:模型字段名称" json:"field_name"`               // 模型字段名称
+	FieldNote       string `gorm:"column:field_note;type:varchar(50);default:'';NOT NULL;comment:模型字段备注" json:"field_note"`               // 模型字段备注
+	OptionModelsKey string `gorm:"column:option_models_key;type:varchar(50);default:'';NOT NULL;comment:选项集key" json:"option_models_key"` // 选项集key
+	IsPrivate       int    `gorm:"column:is_private;type:int(11);default:0;NOT NULL;comment:是否私密" json:"is_private"`                      // 是否私密
+	IsLock          int    `gorm:"column:is_lock;type:int(11);default:0;NOT NULL;comment:是否锁定|禁止修改" json:"is_lock"`                       // 是否锁定|禁止修改
 	CUSD
 }
 
@@ -290,33 +291,33 @@ func (m *TbEasyModelsButtons) TableName() string {
 // TbEasyModelsFields 模型字段
 type TbEasyModelsFields struct {
 	ID
-	ModelID               int    `gorm:"column:model_id;type:int(11);default:0;NOT NULL;comment:模型ID" json:"model_id"`                                                // 模型ID
-	FieldKey              string `gorm:"column:field_key;type:varchar(50);default:'';NOT NULL;comment:模型字段关键字" json:"field_key"`                                      // 模型字段关键字
-	FieldName             string `gorm:"column:field_name;type:varchar(50);default:'';NOT NULL;comment:模型字段名称" json:"field_name"`                                     // 模型字段名称
-	FieldNameReset        string `gorm:"column:field_name_reset;type:varchar(50);default:'';NOT NULL;comment:重置字段名称（列表顶部）" json:"field_name_reset"`                   // 重置字段名称（列表顶部）
-	FieldNotice           string `gorm:"column:field_notice;type:varchar(50);default:'';NOT NULL;comment:字段提示" json:"field_notice"`                                   // 字段提示
-	IndexNum              int    `gorm:"column:index_num;type:int(11);default:200;NOT NULL;comment:排序" json:"index_num"`                                              // 排序
-	OptionModelsID        int    `gorm:"column:option_models_id;type:int(11);default:0;NOT NULL;comment:选项集id" json:"option_models_id"`                               // 选项集id
-	OptionBeautify        int    `gorm:"column:option_beautify;type:tinyint(1);default:1;NOT NULL;comment:选项美化" json:"option_beautify"`                               // 选项美化
-	OptionIndent          int    `gorm:"column:option_indent;type:tinyint(1);default:0;NOT NULL;comment:选项按照上下级缩进" json:"option_indent"`                              // 选项按照上下级缩进
-	DynamicOptionModelsID int    `gorm:"column:dynamic_option_models_id;type:int(11);default:0;NOT NULL;comment:动态选项集" json:"dynamic_option_models_id"`               // 动态选项集
-	WatchFields           string `gorm:"column:watch_fields;type:varchar(200);default:'';NOT NULL;comment:监听字段|多个字段用英文逗号分割" json:"watch_fields"`                      // 监听字段|多个字段用英文逗号分割
-	SetAsTabs             int    `gorm:"column:set_as_tabs;type:tinyint(1);default:0;NOT NULL;comment:是否将字段设置成列表Tabs" json:"set_as_tabs"`                             // 是否将字段设置成列表Tabs
-	IsShowOnList          int    `gorm:"column:is_show_on_list;type:int(11);default:1;NOT NULL;comment:列表页显示" json:"is_show_on_list"`                                 // 列表页显示
-	DataTypeOnList        string `gorm:"column:data_type_on_list;type:varchar(50);default:'';NOT NULL;comment:列表页数据类型（组件）" json:"data_type_on_list"`                  // 列表页数据类型（组件）
-	DataTypeCommandOnList string `gorm:"column:data_type_command_on_list;type:varchar(50);default:'';NOT NULL;comment:数据指令（switch）" json:"data_type_command_on_list"` // 数据指令（switch）
-	AllowCreate           int    `gorm:"column:allow_create;type:int(11);default:1;NOT NULL;comment:可新增" json:"allow_create"`                                         // 可新增
-	AllowUpdate           int    `gorm:"column:allow_update;type:int(11);default:1;NOT NULL;comment:可修改" json:"allow_update"`                                         // 可修改
-	DataTypeOnCreate      string `gorm:"column:data_type_on_create;type:varchar(50);default:'';NOT NULL;comment:新增页数据类型" json:"data_type_on_create"`                  // 新增页数据类型
-	DataTypeOnUpdate      string `gorm:"column:data_type_on_update;type:varchar(50);default:'';NOT NULL;comment:编辑页数据类型（组件）" json:"data_type_on_update"`              // 编辑页数据类型（组件）
-	IsMust                int    `gorm:"column:is_must;type:int(11);default:1;NOT NULL;comment:必填项" json:"is_must"`                                                   // 必填项
-	DefaultValue          string `gorm:"column:default_value;type:varchar(50);default:'';NOT NULL;comment:默认值" json:"default_value"`                                  // 默认值
-	ExpandIf              string `gorm:"column:expand_if;type:varchar(255);default:'';NOT NULL;comment:拓展数据，查询条件" json:"expand_if"`                                   // 拓展数据，查询条件
-	GroupTitle            string `gorm:"column:group_title;type:varchar(100);default:'';NOT NULL;comment:表单分组名称" json:"group_title"`                                  // 表单分组名称
-	FieldAugment          string `gorm:"column:field_augment;type:varchar(1024);default:'';NOT NULL;comment:字段值扩充" json:"field_augment"`                              // 字段值扩充
-	AttachToField         string `gorm:"column:attach_to_field;type:varchar(50);default:'';NOT NULL;comment:数据附加到此字段下" json:"attach_to_field"`                        // 数据附加到此字段下
-	SaveTransRule         string `gorm:"column:save_trans_rule;type:varchar(100);default:'';NOT NULL;comment:保存时的数据转换规则" json:"save_trans_rule"`                      // 保存时的数据转换规则
-	FieldStyleReset       string `gorm:"column:field_style_reset;type:varchar(50);default:'';NOT NULL;comment:重置字段样式列表" json:"field_style_reset"`                     // 重置字段样式列表
+	ModelID                int    `gorm:"column:model_id;type:int(11);default:0;NOT NULL;comment:模型ID" json:"model_id"`                                                // 模型ID
+	FieldKey               string `gorm:"column:field_key;type:varchar(50);default:'';NOT NULL;comment:模型字段关键字" json:"field_key"`                                      // 模型字段关键字
+	FieldName              string `gorm:"column:field_name;type:varchar(50);default:'';NOT NULL;comment:模型字段名称" json:"field_name"`                                     // 模型字段名称
+	FieldNameReset         string `gorm:"column:field_name_reset;type:varchar(50);default:'';NOT NULL;comment:重置字段名称（列表顶部）" json:"field_name_reset"`                   // 重置字段名称（列表顶部）
+	FieldNotice            string `gorm:"column:field_notice;type:varchar(50);default:'';NOT NULL;comment:字段提示" json:"field_notice"`                                   // 字段提示
+	IndexNum               int    `gorm:"column:index_num;type:int(11);default:200;NOT NULL;comment:排序" json:"index_num"`                                              // 排序
+	OptionModelsKey        string `gorm:"column:option_models_key;type:varchar(50);default:'';NOT NULL;comment:选项集key" json:"option_models_key"`                       // 选项集key
+	OptionBeautify         int    `gorm:"column:option_beautify;type:tinyint(1);default:1;NOT NULL;comment:选项美化" json:"option_beautify"`                               // 选项美化
+	OptionIndent           int    `gorm:"column:option_indent;type:tinyint(1);default:0;NOT NULL;comment:选项按照上下级缩进" json:"option_indent"`                              // 选项按照上下级缩进
+	DynamicOptionModelsKey string `gorm:"column:dynamic_option_models_key;type:varchar(50);default:'';NOT NULL;comment:动态选项集" json:"dynamic_option_models_key"`        // 动态选项集
+	WatchFields            string `gorm:"column:watch_fields;type:varchar(200);default:'';NOT NULL;comment:监听字段|多个字段用英文逗号分割" json:"watch_fields"`                      // 监听字段|多个字段用英文逗号分割
+	SetAsTabs              int    `gorm:"column:set_as_tabs;type:tinyint(1);default:0;NOT NULL;comment:是否将字段设置成列表Tabs" json:"set_as_tabs"`                             // 是否将字段设置成列表Tabs
+	IsShowOnList           int    `gorm:"column:is_show_on_list;type:int(11);default:1;NOT NULL;comment:列表页显示" json:"is_show_on_list"`                                 // 列表页显示
+	DataTypeOnList         string `gorm:"column:data_type_on_list;type:varchar(50);default:'';NOT NULL;comment:列表页数据类型（组件）" json:"data_type_on_list"`                  // 列表页数据类型（组件）
+	DataTypeCommandOnList  string `gorm:"column:data_type_command_on_list;type:varchar(50);default:'';NOT NULL;comment:数据指令（switch）" json:"data_type_command_on_list"` // 数据指令（switch）
+	AllowCreate            int    `gorm:"column:allow_create;type:int(11);default:1;NOT NULL;comment:可新增" json:"allow_create"`                                         // 可新增
+	AllowUpdate            int    `gorm:"column:allow_update;type:int(11);default:1;NOT NULL;comment:可修改" json:"allow_update"`                                         // 可修改
+	DataTypeOnCreate       string `gorm:"column:data_type_on_create;type:varchar(50);default:'';NOT NULL;comment:新增页数据类型" json:"data_type_on_create"`                  // 新增页数据类型
+	DataTypeOnUpdate       string `gorm:"column:data_type_on_update;type:varchar(50);default:'';NOT NULL;comment:编辑页数据类型（组件）" json:"data_type_on_update"`              // 编辑页数据类型（组件）
+	IsMust                 int    `gorm:"column:is_must;type:int(11);default:1;NOT NULL;comment:必填项" json:"is_must"`                                                   // 必填项
+	DefaultValue           string `gorm:"column:default_value;type:varchar(50);default:'';NOT NULL;comment:默认值" json:"default_value"`                                  // 默认值
+	ExpandIf               string `gorm:"column:expand_if;type:varchar(255);default:'';NOT NULL;comment:拓展数据，查询条件" json:"expand_if"`                                   // 拓展数据，查询条件
+	GroupTitle             string `gorm:"column:group_title;type:varchar(100);default:'';NOT NULL;comment:表单分组名称" json:"group_title"`                                  // 表单分组名称
+	FieldAugment           string `gorm:"column:field_augment;type:varchar(1024);default:'';NOT NULL;comment:字段值扩充" json:"field_augment"`                              // 字段值扩充
+	AttachToField          string `gorm:"column:attach_to_field;type:varchar(50);default:'';NOT NULL;comment:数据附加到此字段下" json:"attach_to_field"`                        // 数据附加到此字段下
+	SaveTransRule          string `gorm:"column:save_trans_rule;type:varchar(100);default:'';NOT NULL;comment:保存时的数据转换规则" json:"save_trans_rule"`                      // 保存时的数据转换规则
+	FieldStyleReset        string `gorm:"column:field_style_reset;type:varchar(50);default:'';NOT NULL;comment:重置字段样式列表" json:"field_style_reset"`                     // 重置字段样式列表
 	CUSD
 }
 
@@ -327,27 +328,27 @@ func (m *TbEasyModelsFields) TableName() string {
 // TbOptionModels 模型字段选项数据源
 type TbOptionModels struct {
 	ID
-	UniqueKey             string `gorm:"column:unique_key;type:varchar(50);default:'';NOT NULL;comment:唯一Key" json:"unique_key"`                        // 唯一key
-	Name                  string `gorm:"column:name;type:varchar(30);default:未命名;NOT NULL;comment:选项名称" json:"name"`                                    // 选项名称
-	DataType              int    `gorm:"column:data_type;type:int(11);default:0;NOT NULL;comment:数据类型" json:"data_type"`                                // 数据类型
-	StaticData            string `gorm:"column:static_data;type:varchar(1024);default:'';NOT NULL;comment:静态数据(json)" json:"static_data"`               // 静态数据(json)
-	DbTableName           string `gorm:"column:table_name;type:varchar(50);default:'';NOT NULL;comment:数据表" json:"table_name"`                          // 数据表
-	ValueField            string `gorm:"column:value_field;type:varchar(50);default:'';NOT NULL;comment:value字段" json:"value_field"`                    // value字段
-	NameField             string `gorm:"column:name_field;type:varchar(50);default:'';NOT NULL;comment:name字段" json:"name_field"`                       // name字段
-	ParentField           string `gorm:"column:parent_field;type:varchar(50);default:'';NOT NULL;comment:上级字段" json:"parent_field"`                     // 上级字段
-	ToTreeArray           int    `gorm:"column:to_tree_array;type:tinyint(1);default:0;NOT NULL;comment:选项集根据pid值转多维数组" json:"to_tree_array"`           // 选项集根据pid值转多维数组
-	ChildrenOptionModelID int    `gorm:"column:children_option_model_id;type:int(11);default:0;NOT NULL;comment:下级选项集" json:"children_option_model_id"` // 下级选项集
-	OptionsDisable        int    `gorm:"column:options_disable;type:tinyint(1);default:0;NOT NULL;comment:当前选项集禁选" json:"options_disable"`              // 当前选项集禁选
-	ColorField            string `gorm:"column:color_field;type:varchar(50);default:'';NOT NULL;comment:颜色字段" json:"color_field"`                       // 颜色字段
-	ColorArray            string `gorm:"column:color_array;type:varchar(1024);default:'';NOT NULL;comment:颜色集" json:"color_array"`                      // 颜色集
-	IconField             string `gorm:"column:icon_field;type:varchar(50);default:'';NOT NULL;comment:Icon字段" json:"icon_field"`                       // Icon字段
-	IconArray             string `gorm:"column:icon_array;type:varchar(2048);default:'';NOT NULL;comment:图标集" json:"icon_array"`                        // 图标集
-	SelectWhere           string `gorm:"column:select_where;type:varchar(100);default:'';NOT NULL;comment:查询条件" json:"select_where"`                    // 查询条件
-	DynamicParams         string `gorm:"column:dynamic_params;type:varchar(1024);default:'';NOT NULL;comment:动态参数" json:"dynamic_params"`               // 动态参数
-	SelectOrder           string `gorm:"column:select_order;type:varchar(100);default:'';NOT NULL;comment:查询排序条件" json:"select_order"`                  // 查询排序条件
-	IndexNum              int    `gorm:"column:index_num;type:int(11);default:200;NOT NULL;comment:显示排序" json:"index_num"`                              // 显示排序
-	MatchFields           string `gorm:"column:match_fields;type:varchar(1024);default:'';NOT NULL;comment:匹配字段" json:"match_fields"`                   // 匹配字段
-	DefaultData           string `gorm:"column:default_data;type:varchar(1024);default:'';NOT NULL;comment:默认数据" json:"default_data"`                   // 默认数据
+	UniqueKey              string `gorm:"column:unique_key;type:varchar(50);default:'';NOT NULL;comment:唯一Key" json:"unique_key"`                               // 唯一key
+	Name                   string `gorm:"column:name;type:varchar(30);default:未命名;NOT NULL;comment:选项名称" json:"name"`                                           // 选项名称
+	DataType               int    `gorm:"column:data_type;type:int(11);default:0;NOT NULL;comment:数据类型" json:"data_type"`                                       // 数据类型
+	StaticData             string `gorm:"column:static_data;type:varchar(1024);default:'';NOT NULL;comment:静态数据(json)" json:"static_data"`                      // 静态数据(json)
+	DbTableName            string `gorm:"column:table_name;type:varchar(50);default:'';NOT NULL;comment:数据表" json:"table_name"`                                 // 数据表
+	ValueField             string `gorm:"column:value_field;type:varchar(50);default:'';NOT NULL;comment:value字段" json:"value_field"`                           // value字段
+	NameField              string `gorm:"column:name_field;type:varchar(50);default:'';NOT NULL;comment:name字段" json:"name_field"`                              // name字段
+	ParentField            string `gorm:"column:parent_field;type:varchar(50);default:'';NOT NULL;comment:上级字段" json:"parent_field"`                            // 上级字段
+	ToTreeArray            int    `gorm:"column:to_tree_array;type:tinyint(1);default:0;NOT NULL;comment:选项集根据pid值转多维数组" json:"to_tree_array"`                  // 选项集根据pid值转多维数组
+	ChildrenOptionModelKey string `gorm:"column:children_option_model_key;type:varchar(50);default:'';NOT NULL;comment:下级选项集" json:"children_option_model_key"` // 下级选项集
+	OptionsDisable         int    `gorm:"column:options_disable;type:tinyint(1);default:0;NOT NULL;comment:当前选项集禁选" json:"options_disable"`                     // 当前选项集禁选
+	ColorField             string `gorm:"column:color_field;type:varchar(50);default:'';NOT NULL;comment:颜色字段" json:"color_field"`                              // 颜色字段
+	ColorArray             string `gorm:"column:color_array;type:varchar(1024);default:'';NOT NULL;comment:颜色集" json:"color_array"`                             // 颜色集
+	IconField              string `gorm:"column:icon_field;type:varchar(50);default:'';NOT NULL;comment:Icon字段" json:"icon_field"`                              // Icon字段
+	IconArray              string `gorm:"column:icon_array;type:varchar(2048);default:'';NOT NULL;comment:图标集" json:"icon_array"`                               // 图标集
+	SelectWhere            string `gorm:"column:select_where;type:varchar(100);default:'';NOT NULL;comment:查询条件" json:"select_where"`                           // 查询条件
+	DynamicParams          string `gorm:"column:dynamic_params;type:varchar(1024);default:'';NOT NULL;comment:动态参数" json:"dynamic_params"`                      // 动态参数
+	SelectOrder            string `gorm:"column:select_order;type:varchar(100);default:'';NOT NULL;comment:查询排序条件" json:"select_order"`                         // 查询排序条件
+	IndexNum               int    `gorm:"column:index_num;type:int(11);default:200;NOT NULL;comment:显示排序" json:"index_num"`                                     // 显示排序
+	MatchFields            string `gorm:"column:match_fields;type:varchar(1024);default:'';NOT NULL;comment:匹配字段" json:"match_fields"`                          // 匹配字段
+	DefaultData            string `gorm:"column:default_data;type:varchar(1024);default:'';NOT NULL;comment:默认数据" json:"default_data"`                          // 默认数据
 	CUSD
 }
 
