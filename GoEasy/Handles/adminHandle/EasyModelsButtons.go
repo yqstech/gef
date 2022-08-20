@@ -18,7 +18,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
 	"net/http"
-	"strings"
 )
 
 type EasyModelsButtons struct {
@@ -119,23 +118,28 @@ func (that EasyModelsButtons) NodeForm(pageData *EasyApp.PageData, id int64) (er
 }
 
 func (that EasyModelsButtons) ExportInsertData(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var items []string
 	buttons, err := db.New().Table("tb_easy_models_buttons").Where("is_delete", 0).Order("id asc").Get()
 	if err != nil {
 		logger.Error(err.Error())
 		return
 	}
 	
-	item := ""
+	fmt.Fprint(w, "//! 后台模型自定义按钮")
+	
 	for index, button := range buttons {
 		delete(button, "id")
 		delete(button, "create_time")
 		delete(button, "update_time")
 		delete(button, "is_delete")
 		button["index_num"] = index + 1
-		item = `{TableName: "tb_easy_models_buttons", Condition: [][]interface{}{{"button_key", "` + button["button_key"].(string) + `"}},
-Data: map[string]interface{}` + util.JsonEncode(button) + `}`
-		items = append(items, item)
+		content := `
+{
+	TableName: "tb_easy_models_buttons",
+	Condition: [][]interface{}{{"button_key", "` + button["button_key"].(string) + `"}},
+	Data: map[string]interface{}` + util.JsonEncode(button) + `,
+},
+`
+		fmt.Fprint(w, content)
 	}
-	fmt.Fprint(w, "\r\n//后台模型自定义按钮\r\n"+strings.Join(items, ",\n"))
+	
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/gef/GoEasy/Utils/gdb"
 	"github.com/gef/GoEasy/Utils/util"
 	"github.com/wonderivan/logger"
+	"strings"
 )
 
 // DbManager 数据库管理
@@ -110,7 +111,6 @@ func setAdminRules(pid int64, rules []map[string]interface{}) {
 			}
 			//更新一下
 			_, err = db.New().Table("tb_admin_rules").Where("id", ruleId).Update(updateData)
-			logger.Alert("update " + rule["name"].(string))
 			if err != nil {
 				panic(err.Error())
 				return
@@ -125,31 +125,65 @@ func setAdminRules(pid int64, rules []map[string]interface{}) {
 
 // AutoInsideData 内置数据维护
 func (that DbManager) AutoInsideData(data []InsideData) {
+	//遍历内部数据组
 	for _, d := range data {
+		//必须设置表名和查询条件
 		if d.TableName != "" && len(d.Condition) > 0 {
+			//查询一条数据
 			conn := db.New().Table(d.TableName)
 			for _, c := range d.Condition {
 				conn = conn.Where(c...)
 			}
-			conn = conn.Where("is_delete",0)
+			conn = conn.Where("is_delete", 0)
 			first, err := conn.First()
 			if err != nil {
 				panic(err.Error())
 				return
 			}
+			//logger.Debug(conn.LastSql())
+			DataId := int64(0)
+			//不存在则添加
 			if first == nil {
-				_, err := db.New().Table(d.TableName).Insert(d.Data)
+				insertId, err := db.New().Table(d.TableName).InsertGetId(d.Data)
 				if err != nil {
 					panic(err.Error())
 					return
 				}
+				DataId = insertId
 			} else {
-				//如果是内置数据,可以更新，上层框架可修改内容
+				//如果存在is_inside 且 is_inside=1时，更新数据
 				if _, ok := first["is_inside"]; ok {
 					if first["is_inside"].(int64) == 1 {
 						db.New().Table(d.TableName).Where("id", first["id"]).Update(d.Data)
 					}
 				}
+				DataId = first["id"].(int64)
+			}
+			//插入或查找成功，有下级，处理下级
+			if DataId > 0 && len(d.Children) > 0 {
+				//遍历下级数据,替换掉查询条件里的__PID__ 和 数据里的__PID__
+				var newInsideDataList []InsideData
+				for childIndex, childData := range d.Children {
+					//处理下级的查询条件
+					ccJson := util.JsonEncode(childData.(InsideData).Condition)
+					ccJson = strings.Replace(ccJson, "__PID__", util.Int642String(DataId), -1)
+					var ccArr [][]interface{}
+					util.JsonDecode(ccJson, &ccArr)
+					for ck, cv := range childData.(InsideData).Data {
+						if util.Interface2String(cv) == "__PID__" {
+							childData.(InsideData).Data[ck] = DataId
+						}
+					}
+					newInsideData := InsideData{
+						TableName: childData.(InsideData).TableName,
+						Condition: ccArr,
+						Data:      childData.(InsideData).Data,
+						Children:  childData.(InsideData).Children,
+					}
+					newInsideDataList = append(newInsideDataList, newInsideData)
+					d.Children[childIndex] = newInsideData
+				}
+				that.AutoInsideData(newInsideDataList)
 			}
 		}
 	}
@@ -158,5 +192,6 @@ func (that DbManager) AutoInsideData(data []InsideData) {
 type InsideData struct {
 	TableName string                 //数据表
 	Condition [][]interface{}        //查询条件
-	Data      map[string]interface{} //存储数据
+	Data      map[string]interface{} //存储的数据
+	Children  []interface{}          //下级数据集合
 }

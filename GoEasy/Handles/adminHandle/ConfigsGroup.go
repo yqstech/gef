@@ -17,7 +17,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
 	"net/http"
-	"strings"
 )
 
 type ConfigsGroup struct {
@@ -76,40 +75,101 @@ func (that ConfigsGroup) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 func (that ConfigsGroup) ExportInsertData(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := util.GetValue(r, "id")
 	
-	var items []string
-	
-	groups, err := db.New().Table("tb_configs_group").Where("id", id).First()
+	configGroup, err := db.New().Table("tb_configs_group").Where("id", id).First()
 	if err != nil {
 		logger.Error(err.Error())
 		return
 	}
-	if groups == nil {
+	if configGroup == nil {
 		return
 	}
-	delete(groups, "id")
-	delete(groups, "create_time")
-	delete(groups, "update_time")
-	delete(groups, "is_delete")
-	item := `
-		//设置分组` + groups["group_name"].(string) + `和其设置项
-		{TableName: "tb_configs_group", Condition: [][]interface{}{{"group_key","` + groups["group_key"].(string) + `"}},
-Data: map[string]interface{}` + util.JsonEncode(groups) + `}`
-	items = append(items, item)
+	fmt.Fprint(w, "//! 后台设置项分组【"+configGroup["group_name"].(string)+"】")
+	delete(configGroup, "id")
+	delete(configGroup, "create_time")
+	delete(configGroup, "update_time")
+	delete(configGroup, "is_delete")
+	content := `
+{
+	TableName: "tb_configs_group",
+	Condition: [][]interface{}{{"group_key", "` + configGroup["group_key"].(string) + `"}},
+	Data: map[string]interface{}` + util.JsonEncode(configGroup) + `,
+	Children:[]interface{}{
+		//!当前分组内的设置项
+		
+	},
+},
+`
+	fmt.Fprint(w, content)
 	
-	configList, err := db.New().Table("tb_configs").Where("is_delete", 0).Where("group_id", id).Order("index_num,id asc").Get()
+	fmt.Fprint(w, "\n\n//=============================================>\n")
+	fmt.Fprint(w, "//=============================================>\n")
+	fmt.Fprint(w, "//=============================================>\n")
+	fmt.Fprint(w, "//=============================================>\n\n\n")
+	fmt.Fprint(w, "//!下边是当前分组内的设置项\n\n")
+	
+	List, err := db.New().
+		Table("tb_configs").
+		Where("is_delete", 0).
+		Where("group_id", id).
+		Order("index_num,id asc").Get()
 	if err != nil {
 		logger.Error(err.Error())
 		return
 	}
-	for index, configItem := range configList {
-		delete(configItem, "id")
-		delete(configItem, "create_time")
-		delete(configItem, "update_time")
-		delete(configItem, "is_delete")
-		configItem["index_num"] = index + 1
-		item = `{TableName: "tb_configs", Condition: [][]interface{}{{"group_id", "` + id + `"},{"name","`+configItem["name"].(string)+`"}},
-Data: map[string]interface{}` + util.JsonEncode(configItem) + `}`
-		items = append(items, item)
+	for index, Item := range List {
+		//删除部分字段
+		delete(Item, "id")
+		delete(Item, "create_time")
+		delete(Item, "update_time")
+		delete(Item, "is_delete")
+		//按顺序添加排序字段
+		Item["index_num"] = index + 1
+		//标记上级ID
+		Item["group_id"] = "__PID__"
+		content = `
+gef.InsideData{
+	TableName: "tb_configs",
+	Condition: [][]interface{}{{"group_id", "__PID__"},{"name", "` + Item["name"].(string) + `"}},
+	Data: map[string]interface{}` + util.JsonEncode(Item) + `,
+},
+`
+		fmt.Fprint(w, content)
 	}
-	fmt.Fprint(w, strings.Join(items, ",\n"))
+	
+	
+	fmt.Fprint(w, "\n\n//=============================================>\n")
+	fmt.Fprint(w, "//=============================================>\n")
+	fmt.Fprint(w, "//=============================================>\n")
+	fmt.Fprint(w, "//=============================================>\n\n\n")
+	fmt.Fprint(w, "//!下边是当前分组内的应用设置记录\n\n")
+	
+	List, err = db.New().
+		Table("tb_app_configs").
+		Where("is_delete", 0).
+		Where("group_id", id).
+		Order("id asc").Get()
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+	for _, Item := range List {
+		//删除部分字段
+		delete(Item, "id")
+		delete(Item, "create_time")
+		delete(Item, "update_time")
+		delete(Item, "is_delete")
+		//标记上级ID
+		Item["group_id"] = "__PID__"
+		content = `
+gef.InsideData{
+	TableName: "tb_app_configs",
+	Condition: [][]interface{}{{"group_id", "__PID__"},{"name", "` + Item["name"].(string) + `"}},
+	Data: map[string]interface{}` + util.JsonEncode(Item) + `,
+},
+`
+		fmt.Fprint(w, content)
+	}
+	
+	
+	fmt.Fprint(w, "\n\n\n\n\n")
 }

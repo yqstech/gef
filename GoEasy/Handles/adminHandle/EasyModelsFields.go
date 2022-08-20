@@ -135,7 +135,7 @@ func (that EasyModelsFields) NodeList(pageData *EasyApp.PageData) (error, int) {
 		pageData.ListColumnAdd("option_models_key", "选项集", "array", that.OptionModelsList())
 		pageData.ListColumnAdd("dynamic_option_models_key", "联动选项集", "array", that.DynamicOptionModelsList())
 		pageData.ListColumnAdd("default_value", "默认值", "input::width=60px", nil)
-		pageData.ListColumnAdd("index_num", "排序值", "input::type=number&width=50px", nil)
+		pageData.ListColumnAdd("index_num", "排序", "input::type=number&width=50px", nil)
 	} else if tabIndex == 1 {
 		//重新设置排序
 		pageData.SetListOrder("is_show_on_list desc,index_num asc,id asc")

@@ -240,23 +240,30 @@ func (that OptionModels) Dynamic(pageData *EasyApp.PageData, w http.ResponseWrit
 }
 
 func (that OptionModels) ExportInsertData(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var items []string
-	optionModels, err := db.New().Table("tb_option_models").Where("is_delete", 0).Order("index_num,id asc").Get()
+	//查找页面列表
+	mainList, err := db.New().Table("tb_option_models").Where("is_delete", 0).Order("index_num,id asc").Get()
 	if err != nil {
 		logger.Error(err.Error())
 		return
 	}
-	
-	item := ""
-	for index, optionModel := range optionModels {
-		delete(optionModel, "id")
-		delete(optionModel, "create_time")
-		delete(optionModel, "update_time")
-		delete(optionModel, "is_delete")
-		optionModel["index_num"] = index + 1
-		item = `{TableName: "tb_option_models", Condition: [][]interface{}{{"unique_key", "` + optionModel["unique_key"].(string) + `"}},
-Data: map[string]interface{}` + util.JsonEncode(optionModel) + `}`
-		items = append(items, item)
+	fmt.Fprint(w, "//! 选项集")
+	//遍历列表
+	for index, Item := range mainList {
+		//删除部分字段
+		delete(Item, "id")
+		delete(Item, "create_time")
+		delete(Item, "update_time")
+		delete(Item, "is_delete")
+		//按顺序添加排序字段
+		Item["index_num"] = index + 1
+		
+		content := `
+{
+	TableName: "tb_option_models",
+	Condition: [][]interface{}{{"unique_key", "` + Item["unique_key"].(string) + `"}},
+	Data: map[string]interface{}` + util.JsonEncode(Item) + `,
+},
+`
+		fmt.Fprint(w, content)
 	}
-	fmt.Fprint(w, "\r\n//选项集\r\n"+strings.Join(items, ",\n"))
 }

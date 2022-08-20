@@ -229,6 +229,7 @@ type TbEasyCurdModelsFields struct {
 	OptionModelsKey string `gorm:"column:option_models_key;type:varchar(50);default:'';NOT NULL;comment:选项集key" json:"option_models_key"` // 选项集key
 	IsPrivate       int    `gorm:"column:is_private;type:int(11);default:0;NOT NULL;comment:是否私密" json:"is_private"`                      // 是否私密
 	IsLock          int    `gorm:"column:is_lock;type:int(11);default:0;NOT NULL;comment:是否锁定|禁止修改" json:"is_lock"`                       // 是否锁定|禁止修改
+	IndexNum        int    `gorm:"column:index_num;type:int(11);default:1;NOT NULL;comment:排序" json:"index_num"`                          // 排序
 	CUSD
 }
 
@@ -296,7 +297,7 @@ type TbEasyModelsFields struct {
 	FieldName              string `gorm:"column:field_name;type:varchar(50);default:'';NOT NULL;comment:模型字段名称" json:"field_name"`                                     // 模型字段名称
 	FieldNameReset         string `gorm:"column:field_name_reset;type:varchar(50);default:'';NOT NULL;comment:重置字段名称（列表顶部）" json:"field_name_reset"`                   // 重置字段名称（列表顶部）
 	FieldNotice            string `gorm:"column:field_notice;type:varchar(50);default:'';NOT NULL;comment:字段提示" json:"field_notice"`                                   // 字段提示
-	IndexNum               int    `gorm:"column:index_num;type:int(11);default:200;NOT NULL;comment:排序" json:"index_num"`                                              // 排序
+	IndexNum               int    `gorm:"column:index_num;type:int(11);default:1;NOT NULL;comment:排序" json:"index_num"`                                                // 排序
 	OptionModelsKey        string `gorm:"column:option_models_key;type:varchar(50);default:'';NOT NULL;comment:选项集key" json:"option_models_key"`                       // 选项集key
 	OptionBeautify         int    `gorm:"column:option_beautify;type:tinyint(1);default:1;NOT NULL;comment:选项美化" json:"option_beautify"`                               // 选项美化
 	OptionIndent           int    `gorm:"column:option_indent;type:tinyint(1);default:0;NOT NULL;comment:选项按照上下级缩进" json:"option_indent"`                              // 选项按照上下级缩进

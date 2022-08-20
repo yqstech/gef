@@ -19,7 +19,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
 	"net/http"
-	"strings"
 )
 
 type EasyCurdModels struct {
@@ -64,7 +63,7 @@ func (that EasyCurdModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 		ButtonName: "",
 		Action:     "/easy_curd_models/export_insert_data",
 		ActionType: 2,
-		LayerTitle: "后台模型导出成内置数据",
+		LayerTitle: "接口模型导出成内置数据",
 		ActionUrl:  config.AdminPath + "/easy_curd_models/export_insert_data",
 		Class:      "black",
 		Icon:       "ri-braces-fill",
@@ -113,10 +112,6 @@ func (that EasyCurdModels) NodeForm(pageData *EasyApp.PageData, id int64) (error
 func (that EasyCurdModels) ExportInsertData(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := util.GetValue(r, "id")
 	
-	s1 := "var InsideData = []gef.InsideData{"
-	s2 := ",\r\n}\r\n"
-	var items []string
-	
 	easyModel, err := db.New().Table("tb_easy_curd_models").Where("id", id).First()
 	if err != nil {
 		logger.Error(err.Error())
@@ -125,27 +120,57 @@ func (that EasyCurdModels) ExportInsertData(pageData *EasyApp.PageData, w http.R
 	if easyModel == nil {
 		return
 	}
+	fmt.Fprint(w, "//! 接口模型【"+easyModel["model_name"].(string)+"】")
+	delete(easyModel, "id")
 	delete(easyModel, "create_time")
 	delete(easyModel, "update_time")
 	delete(easyModel, "is_delete")
-	item := `
-		//接口模型及模型字段-` + easyModel["model_name"].(string) + `
-		{TableName: "tb_easy_curd_models", Condition: [][]interface{}{{"model_key","` + easyModel["model_key"].(string) + `"}},Data: map[string]interface{}` + util.JsonEncode(easyModel) + `}`
-	items = append(items, item)
+	content := `
+{
+	TableName: "tb_easy_curd_models",
+	Condition: [][]interface{}{{"model_key", "` + easyModel["model_key"].(string) + `"}},
+	Data: map[string]interface{}` + util.JsonEncode(easyModel) + `,
+	Children:[]interface{}{
+		//!接口模型的字段
+		
+	},
+},
+`
+	fmt.Fprint(w, content)
 	
-	Fields, err := db.New().Table("tb_easy_curd_models_fields").Where("is_delete", 0).Where("model_id", id).Order("id asc").Get()
+	fmt.Fprint(w, "\n\n//=============================================>\n")
+	fmt.Fprint(w, "//=============================================>\n")
+	fmt.Fprint(w, "//=============================================>\n")
+	fmt.Fprint(w, "//=============================================>\n\n\n")
+	fmt.Fprint(w, "//!下边是接口模型字段\n\n")
+	
+	Fields, err := db.New().
+		Table("tb_easy_curd_models_fields").
+		Where("is_delete", 0).
+		Where("model_id", id).
+		Order("index_num,id asc").Get()
 	if err != nil {
 		logger.Error(err.Error())
 		return
 	}
-	for _, field := range Fields {
-		delete(field, "id")
-		delete(field, "create_time")
-		delete(field, "update_time")
-		delete(field, "is_delete")
-		item = `{TableName: "tb_easy_curd_models_fields", Condition: [][]interface{}{{"model_id", "` + id + `"},{"field_key", "` + field["field_key"].(string) + `"}},
-Data: map[string]interface{}` + util.JsonEncode(field) + `}`
-		items = append(items, item)
+	for index, Item := range Fields {
+		//删除部分字段
+		delete(Item, "id")
+		delete(Item, "create_time")
+		delete(Item, "update_time")
+		delete(Item, "is_delete")
+		//按顺序添加排序字段
+		Item["index_num"] = index + 1
+		//标记上级ID
+		Item["model_id"] = "__PID__"
+		content = `
+gef.InsideData{
+	TableName: "tb_easy_curd_models_fields",
+	Condition: [][]interface{}{{"model_id", "__PID__"},{"field_key", "` + Item["field_key"].(string) + `"}},
+	Data: map[string]interface{}` + util.JsonEncode(Item) + `,
+},
+`
+		fmt.Fprint(w, content)
 	}
-	fmt.Fprint(w, s1+strings.Join(items, ",\n")+s2)
+	fmt.Fprint(w, "\n\n\n\n\n")
 }
