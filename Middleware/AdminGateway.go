@@ -211,7 +211,7 @@ func (admin AdminBoot) log(next EasyApp.BootHandle) EasyApp.BootHandle {
 					"account_id":   ps.ByName("account_id"),
 					"account_name": ps.ByName("account_name"),
 					"account":      ps.ByName("account"),
-					"data":         ps.ByName("_body"),
+					"data":         "",
 					"create_time":  util.TimeNow(),
 				}
 				id := util.PostValue(r, "id")

@@ -1,10 +1,8 @@
 package EasyApp
 
 import (
-	"bytes"
-	"io/ioutil"
 	"net/http"
-
+	
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -38,12 +36,6 @@ func (ar AppBoot) SafeHandle(next BootHandle) BootHandle {
 		//		fmt.Fprint(w, "程序异常：", r)
 		//	}
 		//}()
-		if r.Method == "POST" {
-			bodyBytes, _ := ioutil.ReadAll(r.Body)
-			_body := httprouter.Param{Key: "_body", Value: string(bodyBytes)}
-			ps = append(ps, _body)
-			r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-		}
 		next(appPages, w, r, ps)
 	}
 }
