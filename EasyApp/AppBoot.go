@@ -24,7 +24,8 @@ func (ar AppBoot) Run(AppPages map[string]AppPage, w http.ResponseWriter, r *htt
 	if activePage, ok := AppPages[pageName]; ok {
 		activePage.Run(&activePage, w, r, ps)
 	} else {
-		activePage = DefaultPage{}
+		//检索不到，转发到空白页
+		activePage = EmptyPage{}
 		activePage.Run(&activePage, w, r, ps)
 	}
 }
