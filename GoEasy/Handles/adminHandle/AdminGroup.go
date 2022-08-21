@@ -10,11 +10,11 @@ package adminHandle
 
 import (
 	"errors"
-	"github.com/gef/GoEasy/EasyApp"
-	"github.com/gef/GoEasy/Models"
-	"github.com/gef/GoEasy/Utils/db"
-	"github.com/gef/GoEasy/Utils/util"
-	
+	"github.com/yqstech/gef/GoEasy/EasyApp"
+	"github.com/yqstech/gef/GoEasy/Models"
+	"github.com/yqstech/gef/GoEasy/Utils/db"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
+
 	"github.com/gohouse/gorose/v2"
 	"github.com/wonderivan/logger"
 )
@@ -48,7 +48,7 @@ func (ad AdminGroup) NodeForm(pageData *EasyApp.PageData, id int64) (error, int)
 		logger.Error(err.Error())
 		return errors.New("出错了"), 500
 	}
-	
+
 	//goroseData 转成 []map
 	var data []map[string]interface{}
 	for _, v := range rules {

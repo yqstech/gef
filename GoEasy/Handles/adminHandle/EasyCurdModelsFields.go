@@ -10,13 +10,13 @@
 package adminHandle
 
 import (
-	"github.com/gef/GoEasy/EasyApp"
-	"github.com/gef/GoEasy/Models"
-	"github.com/gef/GoEasy/Utils/db"
-	"github.com/gef/GoEasy/Utils/util"
-	"github.com/gef/config"
 	"github.com/gohouse/gorose/v2"
 	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/GoEasy/EasyApp"
+	"github.com/yqstech/gef/GoEasy/Models"
+	"github.com/yqstech/gef/GoEasy/Utils/db"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
+	"github.com/yqstech/gef/config"
 	"strings"
 )
 
@@ -73,7 +73,6 @@ func (that EasyCurdModelsFields) NodeForm(pageData *EasyApp.PageData, id int64) 
 	pageData.FormFieldsAdd("option_models_key", "select", "关联选项集", "", "", true, that.OptionModelsList(), "", nil)
 	return nil, 0
 }
-
 
 //默认设置成私密的字段名
 var defaultPrivateFields = []interface{}{"is_delete", "status", "create_time", "pid"}
@@ -161,14 +160,14 @@ func (that EasyCurdModelsFields) syncModelFields(easyModelId int) {
 			fieldsMap[fieldKey]["sync_tag"] = true
 		} else {
 			db.New().Table("tb_easy_curd_models_fields").Insert(map[string]interface{}{
-				"model_id":         easyModelId,
-				"field_key":        fieldKey,
-				"field_name":       fieldName,
-				"field_note":       fieldNote,
+				"model_id":          easyModelId,
+				"field_key":         fieldKey,
+				"field_name":        fieldName,
+				"field_note":        fieldNote,
 				"option_models_key": Models.FieldMatchOptionModelsKey(fieldKey), //自动匹配选择数据源
-				"is_private":       isPrivate,
-				"is_lock":          isLock,
-				"update_time":      timeNow,
+				"is_private":        isPrivate,
+				"is_lock":           isLock,
+				"update_time":       timeNow,
 			})
 		}
 	}

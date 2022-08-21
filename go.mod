@@ -1,4 +1,4 @@
-module github.com/gef
+module github.com/yqstech/gef
 
 go 1.17
 

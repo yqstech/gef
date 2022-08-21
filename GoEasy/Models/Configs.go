@@ -10,9 +10,9 @@
 package Models
 
 import (
-	"github.com/gef/GoEasy/Utils/db"
-	"github.com/gef/GoEasy/Utils/util"
 	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/GoEasy/Utils/db"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
 )
 
 type Configs struct {

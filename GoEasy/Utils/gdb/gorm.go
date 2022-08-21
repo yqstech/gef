@@ -10,7 +10,7 @@
 package gdb
 
 import (
-	"github.com/gef/config"
+	"github.com/yqstech/gef/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

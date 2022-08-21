@@ -1,8 +1,8 @@
 package db
 
 import (
-	"github.com/gef/config"
-	
+	"github.com/yqstech/gef/config"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gohouse/gorose/v2"
 )

@@ -10,10 +10,10 @@
 package adminHandle
 
 import (
-	"github.com/gef/GoEasy/EasyApp"
-	"github.com/gef/GoEasy/Utils/db"
-	"github.com/gef/GoEasy/Utils/util"
 	"github.com/gohouse/gorose/v2"
+	"github.com/yqstech/gef/GoEasy/EasyApp"
+	"github.com/yqstech/gef/GoEasy/Utils/db"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
 	"os"
 	"strings"
 )
@@ -48,7 +48,7 @@ var FileExtImage = map[string]string{
 	".3gp":  "/static/images/exts/video.png",
 	".png":  "/static/images/exts/png.png",
 	".jpg":  "/static/images/exts/jpg.png",
-	".jpeg":  "/static/images/exts/jpg.png",
+	".jpeg": "/static/images/exts/jpg.png",
 	".gif":  "/static/images/exts/gif.png",
 	"other": "/static/images/exts/other.png",
 }

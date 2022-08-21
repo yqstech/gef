@@ -10,10 +10,10 @@
 package adminHandle
 
 import (
-	"github.com/gef/GoEasy/EasyApp"
-	"github.com/gef/GoEasy/Handles/commHandle"
-	"github.com/gef/GoEasy/Models"
 	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/GoEasy/EasyApp"
+	"github.com/yqstech/gef/GoEasy/Handles/commHandle"
+	"github.com/yqstech/gef/GoEasy/Models"
 )
 
 type Base struct {
@@ -53,8 +53,8 @@ func (b Base) EasyModels() []map[string]interface{} {
 func (b Base) OptionModelsList() []map[string]interface{} {
 	//获取列表
 	OptionModelsList, err, _ := Models.Model{}.SelectOptionsData("tb_option_models", map[string]string{
-		"unique_key":   "value",
-		"name": "name",
+		"unique_key": "value",
+		"name":       "name",
 	}, "", "", "", "")
 	if err != nil {
 		logger.Error(err.Error())
@@ -66,8 +66,8 @@ func (b Base) OptionModelsList() []map[string]interface{} {
 func (b Base) DynamicOptionModelsList() []map[string]interface{} {
 	//获取列表
 	OptionModelsList, err, _ := Models.Model{}.SelectOptionsData("tb_option_models", map[string]string{
-		"unique_key":   "value",
-		"name": "name",
+		"unique_key": "value",
+		"name":       "name",
 	}, "", "", "data_type=1 and dynamic_params!=''", "")
 	if err != nil {
 		logger.Error(err.Error())

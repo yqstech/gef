@@ -11,11 +11,11 @@ package EasyModel
 
 import (
 	"errors"
-	"github.com/gef/GoEasy/EasyApp"
-	"github.com/gef/GoEasy/Models"
-	"github.com/gef/GoEasy/Utils/db"
-	"github.com/gef/GoEasy/Utils/util"
 	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/GoEasy/EasyApp"
+	"github.com/yqstech/gef/GoEasy/Models"
+	"github.com/yqstech/gef/GoEasy/Utils/db"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
 	"strings"
 	"sync"
 	"time"
@@ -192,7 +192,7 @@ func GetEasyModelInfo(modelKey string, actionName string) (EasyModel, error) {
 				}
 			}
 		}
-		
+
 		//!格式化url参数
 		urlParams := strings.Split(modelInfo["url_params"].(string), "\n")
 		for _, urlParam := range urlParams {
@@ -267,7 +267,7 @@ func GetEasyModelInfo(modelKey string, actionName string) (EasyModel, error) {
 			}
 			easyModel.Fields = append(easyModel.Fields, modelField)
 		}
-		
+
 		//!保存并返回
 		easyModelList[saveKey] = easyModel
 		//!定时删除数据

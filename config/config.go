@@ -11,7 +11,7 @@ import (
 
 // 系统
 var (
-	GOOS       = "linux"
+	GOOS     = "linux"
 	WorkPath = ""
 	AppPath  = ""
 )
@@ -55,7 +55,7 @@ func Init() error {
 	var err error
 	//! 获取运行的系统类型
 	GOOS = runtime.GOOS
-	
+
 	//! 获取工作目录
 	WorkPath, err = os.Getwd()
 	if err != nil {

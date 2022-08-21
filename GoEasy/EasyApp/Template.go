@@ -11,9 +11,9 @@ package EasyApp
 
 import (
 	"bytes"
-	"github.com/gef/GoEasy/Templates"
-	"github.com/gef/GoEasy/Utils/util"
 	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/GoEasy/Templates"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
 	"html"
 	"io/fs"
 	"strings"
@@ -98,7 +98,7 @@ func (t *Template) PageData2Display(pageData *PageData) {
 	data["listPageSize"] = pageData.listPageSize //分页
 	//批量操作
 	data["listBatchAction"] = pageData.listBatchAction //批量操作
-	
+
 	//表单
 	//提交地址
 	data["editDataUrl"] = pageData.editDataUrl
@@ -129,22 +129,22 @@ func (t *Template) PageData2Display(pageData *PageData) {
 			if ftype == "code" || ftype == "codeEditor" {
 				pageData.formFields[k].Value = html.EscapeString(pageData.formFields[k].Value)
 			}
-			
+
 		}
 	}
 	data["formFields"] = pageData.formFields
-	
+
 	if pageData.formSubmitTitle == "" {
 		pageData.formSubmitTitle = pageData.actionName + pageData.pageName
 	}
 	data["formSubmitTitle"] = pageData.formSubmitTitle
-	
+
 	data["formSubmitHide"] = pageData.formSubmitHide
-	
+
 	//组件需要
 	//上传图片的地址
 	data["uploadImageUrl"] = pageData.uploadImageUrl
-	
+
 	//组件默认
 	t.DisplayData = data
 }
@@ -172,7 +172,7 @@ func (t *Template) Display() (string, error) {
 			}
 		}
 	}
-	
+
 	//加载自定义页面
 	if len(t.TemplateSelf) > 0 {
 		tpl, err = tpl.ParseFS(Templates.FilesSelf, t.TemplateSelf...)

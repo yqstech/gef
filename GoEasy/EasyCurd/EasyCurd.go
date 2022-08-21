@@ -11,11 +11,11 @@ package EasyCurd
 
 import (
 	"fmt"
-	"github.com/gef/GoEasy/Utils/db"
-	"github.com/gef/GoEasy/Utils/util"
 	"github.com/gohouse/gorose/v2"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/GoEasy/Utils/db"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
 	"net/http"
 	"strings"
 )
@@ -38,23 +38,23 @@ type DbModel struct {
 	SoftDeleteDisable  bool   //软删除是否禁用，禁用标识真删除
 	CheckLogin         bool   //是否校验登录
 	SelectWithDisabled bool   //是否校验登录
-	
+
 	Condition map[string]interface{} //查询或更新的sql条件
 	Data      map[string]interface{} //新增或更新数据
 	UkName    string                 //用户键字段
 	PkName    string                 //主键
 	Order     string                 //排序 默认id desc
-	
+
 	Fields        string   //公开查询字段，不填为*
 	PrivateFields []string //私密的数据库字段，不对外展示，查询出的数据做删除处理
 	LockFields    []string //锁定字段，锁定的字段不许修改，假如是更新操作，删除此字段
-	
+
 	FmtRule map[string]FmtRuleFunc //对定义某个键的数据值进行格式化
-	
+
 	ResultExtend map[string]interface{} //返回数据拓展数据
-	
+
 	CompleteData CompleteDataFunc //完善select单项或者find单项数据
-	
+
 	CompleteResultData CompleteResultDataFunc //对查询结果进行转换
 }
 
@@ -83,14 +83,14 @@ func (that *EasyCurd) Select(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	data, err := conn.Fields(that.DbModel.Fields).Limit(that.PageSize).Page(that.Page).Order(that.DbModel.Order).Get()
 	if err != nil {
-		logger.Error(err.Error(),conn.LastSql())
+		logger.Error(err.Error(), conn.LastSql())
 		that.ApiResult(w, 500, "数据库操作错误！", nil)
 		return
 	}
 	//logger.Debug(conn.LastSql(),data)
 	total, err := that.getOrm(ps).Count()
 	if err != nil {
-		logger.Error(err.Error(),conn.LastSql())
+		logger.Error(err.Error(), conn.LastSql())
 		that.ApiResult(w, 500, "数据库操作错误！", nil)
 		return
 	}
@@ -101,7 +101,7 @@ func (that *EasyCurd) Select(w http.ResponseWriter, r *http.Request, ps httprout
 			data[k] = that.DbModel.CompleteData(data[k])
 		}
 	}
-	
+
 	resultData := map[string]interface{}{
 		"data":    data,
 		"total":   total,
@@ -144,10 +144,10 @@ func (that *EasyCurd) Find(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 	//返回数据
 	resultData := map[string]interface{}{
-		"data":    data,
-		"_extend": that.DbModel.ResultExtend,
-		"_time":util.TimeNow(),
-		"_unix_time":util.Str2UnixTime(util.TimeNow()),
+		"data":       data,
+		"_extend":    that.DbModel.ResultExtend,
+		"_time":      util.TimeNow(),
+		"_unix_time": util.Str2UnixTime(util.TimeNow()),
 	}
 	if that.DbModel.CompleteResultData != nil {
 		that.ApiResult(w, 200, "success", that.DbModel.CompleteResultData(resultData, FindAction))
@@ -164,7 +164,7 @@ func (that *EasyCurd) Create(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	//确认数据
 	that.verifyData(false)
-	
+
 	//插入数据
 	conn := that.getOrm(ps)
 	insertId, err := conn.InsertGetId(that.DbModel.Data)
@@ -177,16 +177,16 @@ func (that *EasyCurd) Create(w http.ResponseWriter, r *http.Request, ps httprout
 		that.ApiResult(w, 500, "插入数据失败！", nil)
 		return
 	}
-	
+
 	//返回结果
 	resultData := map[string]interface{}{
-		"id":      insertId,
-		"_extend": that.DbModel.ResultExtend,
-		"_time":util.TimeNow(),
-		"_unix_time":util.Str2UnixTime(util.TimeNow()),
+		"id":         insertId,
+		"_extend":    that.DbModel.ResultExtend,
+		"_time":      util.TimeNow(),
+		"_unix_time": util.Str2UnixTime(util.TimeNow()),
 	}
 	that.ApiResult(w, 200, "success", resultData)
-	
+
 }
 func (that *EasyCurd) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	that.Action = UpdateAction
@@ -195,10 +195,10 @@ func (that *EasyCurd) Update(w http.ResponseWriter, r *http.Request, ps httprout
 		that.ApiResult(w, 101, "无权操作！", nil)
 		return
 	}
-	
+
 	//格式化要更新的数据
 	that.verifyData(true)
-	
+
 	//更新数据
 	conn := that.getOrm(ps)
 	update, err := conn.Update(that.DbModel.Data)
@@ -213,14 +213,14 @@ func (that *EasyCurd) Update(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	//返回结果
 	resultData := map[string]interface{}{
-		"update":  update,
-		"_extend": that.DbModel.ResultExtend,
-		"_time":util.TimeNow(),
-		"_unix_time":util.Str2UnixTime(util.TimeNow()),
+		"update":     update,
+		"_extend":    that.DbModel.ResultExtend,
+		"_time":      util.TimeNow(),
+		"_unix_time": util.Str2UnixTime(util.TimeNow()),
 	}
-	
+
 	that.ApiResult(w, 200, "success", resultData)
-	
+
 }
 func (that *EasyCurd) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	that.Action = DeleteAction
@@ -248,17 +248,17 @@ func (that *EasyCurd) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 		}
 		//返回结果
 		resultData := map[string]interface{}{
-			"delete":  update, //数量
-			"_extend": that.DbModel.ResultExtend,
-			"_time":util.TimeNow(),
-			"_unix_time":util.Str2UnixTime(util.TimeNow()),
+			"delete":     update, //数量
+			"_extend":    that.DbModel.ResultExtend,
+			"_time":      util.TimeNow(),
+			"_unix_time": util.Str2UnixTime(util.TimeNow()),
 		}
-		
+
 		that.ApiResult(w, 200, "success", resultData)
 	} else {
 		delete, err := conn.Delete()
 		if err != nil {
-			logger.Error(err.Error(),conn.LastSql())
+			logger.Error(err.Error(), conn.LastSql())
 			that.ApiResult(w, 500, "删除出错！", nil)
 			return
 		}
@@ -268,10 +268,10 @@ func (that *EasyCurd) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 		}
 		//返回结果
 		resultData := map[string]interface{}{
-			"delete":  delete, //数量
-			"_extend": that.DbModel.ResultExtend,
-			"_time":util.TimeNow(),
-			"_unix_time":util.Str2UnixTime(util.TimeNow()),
+			"delete":     delete, //数量
+			"_extend":    that.DbModel.ResultExtend,
+			"_time":      util.TimeNow(),
+			"_unix_time": util.Str2UnixTime(util.TimeNow()),
 		}
 		that.ApiResult(w, 200, "success", resultData)
 	}

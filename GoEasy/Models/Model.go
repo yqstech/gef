@@ -11,9 +11,9 @@ package Models
 
 import (
 	"errors"
-	"github.com/gef/GoEasy/Utils/db"
-	"github.com/gef/GoEasy/Utils/util"
-	
+	"github.com/yqstech/gef/GoEasy/Utils/db"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
+
 	"github.com/gohouse/gorose/v2"
 	"github.com/wonderivan/logger"
 )
@@ -44,7 +44,7 @@ var DefaultIsOrNot = []map[string]interface{}{
 //  @return int
 //
 func (mod Model) SelectOptionsData(tbName string, keyTrans map[string]string, defValue, defName, where string, order string) ([]map[string]interface{}, error, int) {
-	
+
 	//设置默认值
 	var result []map[string]interface{}
 	if defValue != "" && defName != "" {
@@ -71,7 +71,7 @@ func (mod Model) SelectOptionsData(tbName string, keyTrans map[string]string, de
 	if gList != nil {
 		result = append(result, gList...)
 	}
-	
+
 	//返回数组
 	return result, nil, 0
 }

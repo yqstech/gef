@@ -11,17 +11,18 @@ package adminHandle
 
 import (
 	"fmt"
-	"github.com/gef/GoEasy/EasyApp"
-	"github.com/gef/GoEasy/Utils/db"
-	"github.com/gef/GoEasy/Utils/util"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/GoEasy/EasyApp"
+	"github.com/yqstech/gef/GoEasy/Utils/db"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
 	"net/http"
 )
 
 type ConfigsGroup struct {
 	Base
 }
+
 // PageInit 初始化
 func (that ConfigsGroup) PageInit(pageData *EasyApp.PageData) {
 	//注册handle
@@ -69,12 +70,10 @@ func (that ConfigsGroup) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 	return nil, 0
 }
 
-
-
 // ExportInsertData 导出内置数据
 func (that ConfigsGroup) ExportInsertData(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := util.GetValue(r, "id")
-	
+
 	configGroup, err := db.New().Table("tb_configs_group").Where("id", id).First()
 	if err != nil {
 		logger.Error(err.Error())
@@ -100,13 +99,13 @@ func (that ConfigsGroup) ExportInsertData(pageData *EasyApp.PageData, w http.Res
 },
 `
 	fmt.Fprint(w, content)
-	
+
 	fmt.Fprint(w, "\n\n//=============================================>\n")
 	fmt.Fprint(w, "//=============================================>\n")
 	fmt.Fprint(w, "//=============================================>\n")
 	fmt.Fprint(w, "//=============================================>\n\n\n")
 	fmt.Fprint(w, "//!下边是当前分组内的设置项\n\n")
-	
+
 	List, err := db.New().
 		Table("tb_configs").
 		Where("is_delete", 0).
@@ -135,14 +134,13 @@ gef.InsideData{
 `
 		fmt.Fprint(w, content)
 	}
-	
-	
+
 	fmt.Fprint(w, "\n\n//=============================================>\n")
 	fmt.Fprint(w, "//=============================================>\n")
 	fmt.Fprint(w, "//=============================================>\n")
 	fmt.Fprint(w, "//=============================================>\n\n\n")
 	fmt.Fprint(w, "//!下边是当前分组内的应用设置记录\n\n")
-	
+
 	List, err = db.New().
 		Table("tb_app_configs").
 		Where("is_delete", 0).
@@ -169,7 +167,6 @@ gef.InsideData{
 `
 		fmt.Fprint(w, content)
 	}
-	
-	
+
 	fmt.Fprint(w, "\n\n\n\n\n")
 }

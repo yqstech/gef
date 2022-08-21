@@ -11,11 +11,11 @@ package adminHandle
 
 import (
 	"errors"
-	"github.com/gef/GoEasy/EasyApp"
-	EasyModel2 "github.com/gef/GoEasy/EasyModel"
-	"github.com/gef/GoEasy/Models"
-	"github.com/gef/GoEasy/Utils/util"
 	"github.com/gohouse/gorose/v2"
+	"github.com/yqstech/gef/GoEasy/EasyApp"
+	EasyModel2 "github.com/yqstech/gef/GoEasy/EasyModel"
+	"github.com/yqstech/gef/GoEasy/Models"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
 	"strings"
 )
 
@@ -59,12 +59,12 @@ func (that EasyModel) NodeList(pageData *EasyApp.PageData) (error, int) {
 		//获取第几页
 		tabIndex := that.GetTabIndex(pageData, "tab")
 		pageData.SetPageTabSelect(tabIndex)
-		
+
 		//!获取自定义按钮列表
 		for btnName, Btn := range easyModel.Buttons {
 			pageData.SetButton(btnName, Btn)
 		}
-		
+
 		//!顶部按钮
 		topBtns := easyModel.TopButtons
 		//新增
@@ -226,7 +226,7 @@ func (that EasyModel) NodeListData(pageData *EasyApp.PageData, data []gorose.Dat
 		}
 		return data, nil, 0
 	}
-	
+
 }
 
 // NodeForm 初始化表单
@@ -351,7 +351,7 @@ func (that EasyModel) NodeForm(pageData *EasyApp.PageData, id int64) (error, int
 				}
 			}
 		}
-		
+
 		return nil, 0
 	}
 }

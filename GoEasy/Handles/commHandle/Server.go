@@ -9,7 +9,7 @@ package commHandle
 
 import (
 	"fmt"
-	"github.com/gef/GoEasy/Utils/util"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
 	"net/http"
 	"os"
 	"os/exec"

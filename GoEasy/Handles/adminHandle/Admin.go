@@ -9,9 +9,9 @@
 package adminHandle
 
 import (
-	"github.com/gef/GoEasy/EasyApp"
-	"github.com/gef/GoEasy/Models"
-	"github.com/gef/GoEasy/Utils/util"
+	"github.com/yqstech/gef/GoEasy/EasyApp"
+	"github.com/yqstech/gef/GoEasy/Models"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
 
 	"github.com/gohouse/gorose/v2"
 )

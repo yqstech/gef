@@ -9,7 +9,7 @@ package Models
 
 import (
 	"errors"
-	"github.com/gef/GoEasy/Utils/db"
+	"github.com/yqstech/gef/GoEasy/Utils/db"
 
 	"github.com/wonderivan/logger"
 )

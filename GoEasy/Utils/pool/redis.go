@@ -1,7 +1,7 @@
 package pool
 
 import (
-	"github.com/gef/config"
+	"github.com/yqstech/gef/config"
 
 	"github.com/go-redis/redis"
 	_ "github.com/go-sql-driver/mysql"

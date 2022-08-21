@@ -276,8 +276,6 @@ func UrlRemoveDomain(url string) string {
 	return url
 }
 
-
-
 // ToMux 将httpRouter转为MuxRouter
 func ToMux(next func(http.ResponseWriter, *http.Request, httprouter.Params)) func(http.ResponseWriter, *http.Request) {
 	return func(writer http.ResponseWriter, request *http.Request) {

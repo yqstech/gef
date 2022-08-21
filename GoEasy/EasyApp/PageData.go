@@ -10,10 +10,10 @@
 package EasyApp
 
 import (
-	"github.com/gef/GoEasy/Utils/pool"
-	"github.com/gef/GoEasy/Utils/util"
 	"github.com/gohouse/gorose/v2"
 	"github.com/julienschmidt/httprouter"
+	"github.com/yqstech/gef/GoEasy/Utils/pool"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
 	"net/http"
 	"strings"
 	"time"
@@ -24,7 +24,7 @@ type PageData struct {
 	RequestID  string                //请求ID
 	ActivePage AppPage               //真实结构体对象
 	ActionList map[string]PageAction //页面的处理方法列表
-	
+
 	//http请求
 	httpW  http.ResponseWriter
 	httpR  *http.Request
@@ -56,42 +56,42 @@ type PageData struct {
 	pageTabs []pageTab
 	// pageTabSelect Tab选项卡选中第几个
 	pageTabSelect int
-	
+
 	// 列表查询字段，默认全查
 	listFields string
-	
+
 	// 列表数据中需要删除的字段
 	listFieldsRemove []string
-	
+
 	// 列表页排序
 	listOrder string
-	
+
 	// 列表页数据查询地址
 	listDataUrl string
-	
+
 	listPage int
-	
+
 	//隐藏分页组件
 	listPageHide bool
-	
+
 	//列表是否支持批量操作
 	listBatchAction bool
-	
+
 	// 列表页数据分页大小
 	listPageSize int
-	
+
 	// 列表页查询条件
 	listCondition [][]interface{}
-	
+
 	// 全部按钮列表
 	buttons map[string]Button
-	
+
 	// 列表页右侧按钮组
 	listRightBtns []string
-	
+
 	// 列表顶部按钮组
 	listTopBtns []string
-	
+
 	// 列表展示列列表
 	listColumns []ListColumn
 	//列表展示列样式
@@ -230,34 +230,34 @@ func (fd *PageData) DataReset() {
 			},
 		},
 		"disable": {
-			ButtonName: "禁用",
-			Action:     "status",
-			ActionType: 1,
-			ActionUrl:  "status?status=0",
-			Class:      "layui-btn-warm",
-			Icon:       "ri-forbid-line",
-			Display:    "(!item.btn_status || item.btn_status!='hide') && item.status==1",
+			ButtonName:  "禁用",
+			Action:      "status",
+			ActionType:  1,
+			ActionUrl:   "status?status=0",
+			Class:       "layui-btn-warm",
+			Icon:        "ri-forbid-line",
+			Display:     "(!item.btn_status || item.btn_status!='hide') && item.status==1",
 			BatchAction: true,
 		},
 		"enable": {
-			ButtonName: "启用",
-			Action:     "status",
-			ActionType: 1,
-			ActionUrl:  "status?status=1",
-			Class:      "",
-			Icon:       "ri-checkbox-circle-line",
-			Display:    "(!item.btn_status || item.btn_status!='hide') && item.status==0",
+			ButtonName:  "启用",
+			Action:      "status",
+			ActionType:  1,
+			ActionUrl:   "status?status=1",
+			Class:       "",
+			Icon:        "ri-checkbox-circle-line",
+			Display:     "(!item.btn_status || item.btn_status!='hide') && item.status==0",
 			BatchAction: true,
 		},
 		"delete": {
-			ButtonName: "删除",
-			Action:     "delete",
-			ActionType: 1,
-			ActionUrl:  "delete",
-			ConfirmMsg: "确定要删除此项？",
-			Class:      "layui-btn-danger",
-			Icon:       "ri-delete-bin-2-line",
-			Display:    "!item.btn_delete || item.btn_delete!='hide'",
+			ButtonName:  "删除",
+			Action:      "delete",
+			ActionType:  1,
+			ActionUrl:   "delete",
+			ConfirmMsg:  "确定要删除此项？",
+			Class:       "layui-btn-danger",
+			Icon:        "ri-delete-bin-2-line",
+			Display:     "!item.btn_delete || item.btn_delete!='hide'",
 			BatchAction: true,
 		},
 	}
@@ -272,14 +272,14 @@ func (fd *PageData) DataReset() {
 	fd.listColumnsStyles = map[string]interface{}{}
 	fd.listSearchFields = []ListSearchField{}
 	fd.listBatchAction = false
-	
+
 	fd.addDataUrl = ""
 	fd.addTplName = "add.html"
-	
+
 	fd.findDataUrl = "find"
 	fd.editDataUrl = ""
 	fd.editTplName = "edit.html"
-	
+
 	fd.formFields = []FormField{}
 	fd.formFieldKeys = []interface{}{}
 	fd.formSubmitTitle = ""
@@ -502,7 +502,7 @@ func (fd *PageData) ListColumnAdd(FieldName, ColumnName, DataType string, Data [
 			MapData[dataK] = dataV
 		}
 	}
-	
+
 	//DataType参数支持::指令写法,可以设置组件参数
 	Options := map[string]interface{}{}
 	if strings.Contains(DataType, "::") {
@@ -543,13 +543,13 @@ func (fd *PageData) ListColumnClear() {
 func (fd *PageData) ListSearchFieldAdd(fkey, ftype, ftitle string, defvalue interface{}, value interface{}, data []map[string]interface{},
 	style string,
 	expand map[string]interface{}) {
-	
+
 	//数据自动转map
 	MapData := map[interface{}]interface{}{}
 	for _, v := range data {
 		MapData[v["value"]] = v["name"]
 	}
-	
+
 	fd.listSearchFields = append(fd.listSearchFields, ListSearchField{
 		Key:      fkey,
 		Type:     ftype,

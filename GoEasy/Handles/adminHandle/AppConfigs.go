@@ -10,13 +10,13 @@
 package adminHandle
 
 import (
-	"github.com/gef/GoEasy/EasyApp"
-	"github.com/gef/GoEasy/Models"
-	"github.com/gef/GoEasy/Utils/db"
-	"github.com/gef/GoEasy/Utils/util"
 	"github.com/gohouse/gorose/v2"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/GoEasy/EasyApp"
+	"github.com/yqstech/gef/GoEasy/Models"
+	"github.com/yqstech/gef/GoEasy/Utils/db"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
 	"net/http"
 )
 
@@ -44,14 +44,14 @@ func (that AppConfigs) GroupName() string {
 
 // NodeBegin 开始
 func (that AppConfigs) NodeBegin(pageData *EasyApp.PageData) (error, int) {
-	
+
 	pageData.SetTitle(that.GroupName())
 	pageData.SetPageName("设置")
 	pageData.SetTbName("tb_app_configs")
-	
+
 	//自动清理重复项
 	that.ClearAppConfigs()
-	
+
 	return nil, 0
 }
 
@@ -67,7 +67,7 @@ func (that AppConfigs) ClearAppConfigs() {
 	}
 	//删除所有无效的应用配置项
 	db.New().Table("tb_app_configs").WhereNotIn("name", configNames).Delete()
-	
+
 	//!清理重复项
 	appConfigs, err := db.New().Table("tb_app_configs").
 		Where("is_delete", 0).Order("id asc").Get()
@@ -100,7 +100,7 @@ func (that AppConfigs) NodeList(pageData *EasyApp.PageData) (error, int) {
 	pageData.SetListColumnStyle("key", "width:150px")
 	//隐藏分页
 	pageData.SetListPageHide()
-	
+
 	//新增右侧日志开启关闭按钮
 	pageData.SetButton("edit2", EasyApp.Button{
 		ButtonName: "编辑" + that.GroupName(),
@@ -116,7 +116,7 @@ func (that AppConfigs) NodeList(pageData *EasyApp.PageData) (error, int) {
 		},
 	})
 	pageData.SetListTopBtns("edit2")
-	
+
 	return nil, 0
 }
 
@@ -136,7 +136,7 @@ func (that AppConfigs) NodeListData(pageData *EasyApp.PageData, data []gorose.Da
 	for _, v := range data {
 		configValue[v["name"].(string)] = v["value"]
 	}
-	
+
 	//!按配置顺序显示出来
 	result := []gorose.Data{}
 	//获取所有应用内配置项
@@ -187,10 +187,10 @@ func (that AppConfigs) Edit2(pageData *EasyApp.PageData, w http.ResponseWriter, 
 				config["value"].(string), false, config["options"].([]map[string]interface{}), "", expand)
 		}
 	}
-	
+
 	if r.Method == "POST" {
 		PostData := util.PostJson(r, "formFields")
-		
+
 		for _, config := range appConfigs {
 			keyName := config["name"].(string)
 			value := PostData[keyName]
@@ -229,11 +229,11 @@ func (that AppConfigs) Edit2(pageData *EasyApp.PageData, w http.ResponseWriter, 
 				}
 			}
 		}
-		
+
 		that.ApiResult(w, 200, "修改成功!", "success")
 		return
 	}
-	
+
 	cfgs, err := db.New().Table("tb_app_configs").
 		Where("is_delete", 0).
 		Where("group_id", that.GroupId).Get()
@@ -247,7 +247,7 @@ func (that AppConfigs) Edit2(pageData *EasyApp.PageData, w http.ResponseWriter, 
 		odata[cfg["name"].(string)] = cfg["value"]
 	}
 	pageData.SetFormData(odata)
-	
+
 	that.ActShow(w, EasyApp.Template{
 		TplName: "edit.html",
 	}, pageData)

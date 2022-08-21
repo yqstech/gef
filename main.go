@@ -12,22 +12,22 @@ package gef
 import (
 	"embed"
 	"errors"
-	"github.com/gef/GoEasy/EasyApp"
-	"github.com/gef/GoEasy/Event"
-	"github.com/gef/GoEasy/Registry"
-	"github.com/gef/GoEasy/Routers"
-	"github.com/gef/GoEasy/Templates"
-	"github.com/gef/GoEasy/Utils/db"
-	"github.com/gef/GoEasy/Utils/gdb"
-	"github.com/gef/GoEasy/Utils/pool"
-	"github.com/gef/GoEasy/Utils/serv"
-	"github.com/gef/GoEasy/Utils/util"
-	"github.com/gef/config"
-	"github.com/gef/routers"
-	"github.com/gef/static"
 	"github.com/gorilla/mux"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/GoEasy/EasyApp"
+	"github.com/yqstech/gef/GoEasy/Event"
+	"github.com/yqstech/gef/GoEasy/Registry"
+	"github.com/yqstech/gef/GoEasy/Routers"
+	"github.com/yqstech/gef/GoEasy/Templates"
+	"github.com/yqstech/gef/GoEasy/Utils/db"
+	"github.com/yqstech/gef/GoEasy/Utils/gdb"
+	"github.com/yqstech/gef/GoEasy/Utils/pool"
+	"github.com/yqstech/gef/GoEasy/Utils/serv"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
+	"github.com/yqstech/gef/config"
+	"github.com/yqstech/gef/routers"
+	"github.com/yqstech/gef/static"
 	"net/http"
 	"os"
 )
@@ -51,13 +51,13 @@ func init() {
 	//! 初始化数据库
 	db.Init()
 	gdb.Init()
-	
+
 	//! 自动维护数据库
 	dbm := DbManager{}
 	dbm.AutoTable(tables)
 	dbm.AutoAdminRules(adminRules)
 	dbm.AutoInsideData(insideData)
-	
+
 	//! 初始化Redis
 	pool.RedisInit()
 	//! 初始化GoCache
@@ -182,7 +182,7 @@ func (g *Gef) Run() {
 	for _, server := range g.selfServers {
 		g.Servers = append(g.Servers, server)
 	}
-	
+
 	//!启动web服务组
 	HttpServers := serv.Server{}
 	for _, serv := range g.Servers {

@@ -10,14 +10,14 @@
 package Routers
 
 import (
-	"github.com/gef/GoEasy/EasyApp"
-	"github.com/gef/GoEasy/Handles/commHandle"
-	"github.com/gef/GoEasy/Middleware"
-	"github.com/gef/GoEasy/Registry"
-	"github.com/gef/GoEasy/Utils/util"
-	"github.com/gef/config"
-	"github.com/gef/static"
 	"github.com/julienschmidt/httprouter"
+	"github.com/yqstech/gef/GoEasy/EasyApp"
+	"github.com/yqstech/gef/GoEasy/Handles/commHandle"
+	"github.com/yqstech/gef/GoEasy/Middleware"
+	"github.com/yqstech/gef/GoEasy/Registry"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
+	"github.com/yqstech/gef/config"
+	"github.com/yqstech/gef/static"
 	"net/http"
 )
 
@@ -35,14 +35,14 @@ func AdminRouters() *httprouter.Router {
 	router.ServeFiles("/static/*filepath", fs)
 	//存储上传
 	router.ServeFiles("/uploads/*filepath", http.Dir("data/uploads/"))
-	
+
 	//工具包，打印post提交信息
 	router.POST("/utils/requestPrint", commHandle.Utils{}.RequestPrint)
-	
+
 	//当前服务控制
 	router.GET("/server/manage/pid", commHandle.Server{}.Pid)         //PID
 	router.GET("/server/manage/restart", commHandle.Server{}.Restart) //重启
-	
+
 	//后台模块启动器
 	AdminBoot := Middleware.AdminBoot{AppPages: map[string]EasyApp.AppPage{}}
 	//绑定Page列表

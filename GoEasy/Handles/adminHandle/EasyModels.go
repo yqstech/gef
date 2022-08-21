@@ -11,13 +11,13 @@ package adminHandle
 
 import (
 	"fmt"
-	"github.com/gef/GoEasy/EasyApp"
-	"github.com/gef/GoEasy/Models"
-	"github.com/gef/GoEasy/Utils/db"
-	"github.com/gef/GoEasy/Utils/util"
-	"github.com/gef/config"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/GoEasy/EasyApp"
+	"github.com/yqstech/gef/GoEasy/Models"
+	"github.com/yqstech/gef/GoEasy/Utils/db"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
+	"github.com/yqstech/gef/config"
 	"net/http"
 )
 
@@ -55,7 +55,7 @@ func (that EasyModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 			"h": "98%",
 		},
 	})
-	
+
 	//!重置顶部按钮
 	pageData.SetListTopBtns("add", "buttons")
 	//!重置右侧按钮
@@ -105,7 +105,7 @@ func (that EasyModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 	})
 	//!重置右侧按钮
 	pageData.SetListRightBtns("edit", "fields", "export_insert_data", "disable", "enable", "delete")
-	
+
 	pageData.SetListOrder("id asc")
 	pageData.ListColumnAdd("model_key", "模型Key", "text", nil)
 	pageData.ListColumnAdd("model_name", "模型名称", "text", nil)
@@ -165,7 +165,7 @@ func (that EasyModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, in
 // ExportInsertData 导出内置数据
 func (that EasyModels) ExportInsertData(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := util.GetValue(r, "id")
-	
+
 	easyModel, err := db.New().Table("tb_easy_models").Where("id", id).First()
 	if err != nil {
 		logger.Error(err.Error())
@@ -191,13 +191,13 @@ func (that EasyModels) ExportInsertData(pageData *EasyApp.PageData, w http.Respo
 },
 `
 	fmt.Fprint(w, content)
-	
+
 	fmt.Fprint(w, "\n\n//=============================================>\n")
 	fmt.Fprint(w, "//=============================================>\n")
 	fmt.Fprint(w, "//=============================================>\n")
 	fmt.Fprint(w, "//=============================================>\n\n\n")
 	fmt.Fprint(w, "//!下边是后台模型字段\n\n")
-	
+
 	Fields, err := db.New().
 		Table("tb_easy_models_fields").
 		Where("is_delete", 0).

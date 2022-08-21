@@ -10,10 +10,10 @@
 package adminHandle
 
 import (
-	"github.com/gef/GoEasy/EasyApp"
-	"github.com/gef/GoEasy/Models"
-	"github.com/gef/GoEasy/Utils/util"
-	
+	"github.com/yqstech/gef/GoEasy/EasyApp"
+	"github.com/yqstech/gef/GoEasy/Models"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
+
 	"github.com/gohouse/gorose/v2"
 )
 
@@ -34,7 +34,7 @@ func (ar AdminRules) NodeList(pageData *EasyApp.PageData) (error, int) {
 	//列表查询条件
 	pageData.SetListPageSize(200)
 	pageData.SetListOrder("index_num,id asc")
-	
+
 	//设置列表项
 	pageData.ListColumnAdd("name", "权限名称", "html", nil)
 	pageData.ListColumnAdd("route", "权限地址", "", nil)
@@ -44,7 +44,7 @@ func (ar AdminRules) NodeList(pageData *EasyApp.PageData) (error, int) {
 	pageData.ListColumnAdd("type", "权限类型", "array", Models.OptionModels{}.ByKey("rule_type", true))
 	pageData.ListColumnAdd("open_log", "日志", "switch::text=开启|关闭", nil)
 	pageData.ListColumnAdd("index_num", "排序", "input::width=50px&type=number", nil)
-	
+
 	//设置搜索表单
 	//pageData.ListSearchFieldAdd("time_type", "select", "按订单时间", "1", nil, "width:auto;min-width:0px", nil)
 	//pageData.ListSearchFieldAdd("start_time", "datetime", "", util.TimeNowFormat("2006-01-02 00:00:00", 0, 0, -2), nil, "", nil)
@@ -114,7 +114,7 @@ func (ar AdminRules) NodeForm(pageData *EasyApp.PageData, id int64) (error, int)
 	pageData.FormFieldsAdd("type", "radio", "权限类型", "", "1", false, Models.OptionModels{}.ByKey("rule_type", false), "", nil)
 	pageData.FormFieldsAdd("is_compel", "radio", "必选权限", "", "0", true, Models.AdminRules{}.AllIsCompels(), "", nil)
 	pageData.FormFieldsAdd("index_num", "number-xxs", "菜单排序", "值越小越靠前", "200", true, nil, "", nil)
-	
+
 	return nil, 0
 }
 

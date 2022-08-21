@@ -11,12 +11,12 @@ package adminHandle
 
 import (
 	"fmt"
-	"github.com/gef/GoEasy/EasyApp"
-	"github.com/gef/GoEasy/Models"
-	"github.com/gef/GoEasy/Utils/db"
-	"github.com/gef/GoEasy/Utils/util"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/GoEasy/EasyApp"
+	"github.com/yqstech/gef/GoEasy/Models"
+	"github.com/yqstech/gef/GoEasy/Utils/db"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
 	"net/http"
 )
 
@@ -76,7 +76,7 @@ func (that EasyModelsButtons) NodeList(pageData *EasyApp.PageData) (error, int) 
 	})
 	//!重置顶部按钮
 	pageData.SetListTopBtns("add", "export_insert_data")
-	
+
 	pageData.ListColumnAdd("button_key", "按钮关键字", "text", nil)
 	pageData.ListColumnAdd("button_name", "按钮名称", "text", nil)
 	pageData.ListColumnAdd("button_note", "按钮备注", "text", nil)
@@ -113,7 +113,7 @@ func (that EasyModelsButtons) NodeForm(pageData *EasyApp.PageData, id int64) (er
 	pageData.FormFieldsAdd("layer_height", "text", "弹窗高度", "设置弹窗尺寸，支持px和%", "86%", false, nil, "", map[string]interface{}{
 		"if": "formFields.action_type==2",
 	})
-	
+
 	return nil, 0
 }
 
@@ -123,9 +123,9 @@ func (that EasyModelsButtons) ExportInsertData(pageData *EasyApp.PageData, w htt
 		logger.Error(err.Error())
 		return
 	}
-	
+
 	fmt.Fprint(w, "//! 后台模型自定义按钮")
-	
+
 	for index, button := range buttons {
 		delete(button, "id")
 		delete(button, "create_time")
@@ -141,5 +141,5 @@ func (that EasyModelsButtons) ExportInsertData(pageData *EasyApp.PageData, w htt
 `
 		fmt.Fprint(w, content)
 	}
-	
+
 }

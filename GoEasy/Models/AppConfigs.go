@@ -10,8 +10,8 @@
 package Models
 
 import (
-	"github.com/gef/GoEasy/Utils/db"
 	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/GoEasy/Utils/db"
 )
 
 // AppConfigs 应用配置信息

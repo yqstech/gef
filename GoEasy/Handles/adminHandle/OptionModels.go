@@ -11,13 +11,13 @@ package adminHandle
 
 import (
 	"fmt"
-	"github.com/gef/GoEasy/EasyApp"
-	"github.com/gef/GoEasy/Models"
-	"github.com/gef/GoEasy/Utils/db"
-	"github.com/gef/GoEasy/Utils/util"
 	"github.com/gohouse/gorose/v2"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/GoEasy/EasyApp"
+	"github.com/yqstech/gef/GoEasy/Models"
+	"github.com/yqstech/gef/GoEasy/Utils/db"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
 	"net/http"
 	"strings"
 )
@@ -64,7 +64,7 @@ func (that OptionModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 	})
 	//!重置顶部按钮
 	pageData.SetListTopBtns("add", "export_insert_data")
-	
+
 	pageData.SetListOrder("index_num,id asc")
 	pageData.ListColumnAdd("unique_key", "标识符", "text", nil)
 	pageData.ListColumnAdd("name", "名称", "text", nil)
@@ -125,24 +125,24 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 	pageData.FormFieldsAdd("select_where", "text-sm", "补充查询条件", "补充数据表查询条件", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
-	
+
 	//联动设置
 	pageData.FormFieldsAdd("", "block", "选项集联动", "", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
-	
+
 	pageData.FormFieldsAdd("dynamic_params", "textarea", "联动配置", "用来做数据联动的参数设置，程序根据设置的字段，查询post参数\n格式为 监听参数:选项集数据表字段:默认值，例如：group_id:group_id:0\n默认值为空自动忽略，每行一个转换规则", "", false,
 		nil, "", map[string]interface{}{
 			"if": "formFields.data_type==1",
 		})
-	
+
 	//多级、数据转换
 	pageData.FormFieldsAdd("", "block", "多级、数据转换", "", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("parent_field", "text-xs", "上级字段", "设置上级，选项集中会多pid一项数据，值就是上级字段的值。", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("to_tree_array", "radio", "选项集转多维", "将选项集根据pid转为树形结构（多维数组）", "0", false, Models.OptionModels{}.ByKey("is", false), "", map[string]interface{}{
 		"if": "formFields.parent_field!=''",
 	})
-	
+
 	//!选择下级选项集，要排除自己
 	exceptOptionModelKey := ""
 	if id > 0 {
@@ -191,7 +191,7 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 	}
 	pageData.FormFieldsAdd("match_fields", "textarea", "自动匹配字段", "每个字段占一行，支持全匹配字段和半匹配字段,例如is_*", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("index_num", "text-xs", "排序", "", util.Int2String(indexNum), true, nil, "", nil)
-	
+
 	return nil, 0
 }
 
@@ -233,8 +233,8 @@ func (that OptionModels) Dynamic(pageData *EasyApp.PageData, w http.ResponseWrit
 			wheres = append(wheres, dp.FieldKey+" = '"+v+"'")
 		}
 	}
-	wheres = append(wheres,"unique_key = '"+optionModelKey+"'")
-	
+	wheres = append(wheres, "unique_key = '"+optionModelKey+"'")
+
 	ops := Models.OptionModels{}.Select(0, strings.Join(wheres, " and "), false)
 	that.ApiResult(w, 200, "success", ops)
 }
@@ -256,7 +256,7 @@ func (that OptionModels) ExportInsertData(pageData *EasyApp.PageData, w http.Res
 		delete(Item, "is_delete")
 		//按顺序添加排序字段
 		Item["index_num"] = index + 1
-		
+
 		content := `
 {
 	TableName: "tb_option_models",

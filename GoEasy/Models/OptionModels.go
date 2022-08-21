@@ -10,9 +10,9 @@
 package Models
 
 import (
-	"github.com/gef/GoEasy/Utils/db"
-	"github.com/gef/GoEasy/Utils/util"
 	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/GoEasy/Utils/db"
+	"github.com/yqstech/gef/GoEasy/Utils/util"
 	"strings"
 	"sync"
 	"time"
@@ -61,7 +61,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 		if data == nil {
 			return nil
 		}
-		
+
 		if data["data_type"].(int64) == 0 {
 			//解析json格式的静态数据
 			if data["static_data"].(string) != "" {
@@ -99,7 +99,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 			if data["value_field"].(string) != "id" {
 				keyTrans["id"] = "id"
 			}
-			
+
 			arrOptions, err, _ := Model{}.SelectOptionsData(data["table_name"].(string), keyTrans, "", "", where, data["select_order"].(string))
 			if err != nil {
 				logger.Error(err.Error())
@@ -200,7 +200,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 		selectData, _, _ = TreeArrayExtendField(selectData)
 		//
 		//logger.Info(id, util.JsonEncode(selectData))
-		
+
 		//!定时删除
 		go func() {
 			t := time.After(time.Second * 10) //十秒钟后删除
@@ -402,9 +402,9 @@ func TreeArrayExtendField(data []map[string]interface{}) ([]map[string]interface
 				data[k]["_child"] = newChild
 				data[k]["_children"] = childrenIds2
 				data[k]["_lastLevel"] = childMaxLevel2 + 1 //后面还有几级
-				
+
 				childrenIds = append(childrenIds, childrenIds2...)
-				
+
 				//处理完毕，跳转到下次循环
 				continue
 			} else {
@@ -413,7 +413,7 @@ func TreeArrayExtendField(data []map[string]interface{}) ([]map[string]interface
 		} else {
 			data[k]["_child"] = []map[string]interface{}{}
 		}
-		
+
 		//获取下级失败或者下级为空
 		data[k]["_children"] = []interface{}{}
 		data[k]["_lastLevel"] = int64(0)
