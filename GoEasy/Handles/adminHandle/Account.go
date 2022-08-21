@@ -11,14 +11,14 @@ package adminHandle
 
 import (
 	"github.com/yqstech/gef/GoEasy/EasyApp"
-	"github.com/yqstech/gef/GoEasy/Utils/captcha"
 	"github.com/yqstech/gef/GoEasy/Utils/db"
 	"github.com/yqstech/gef/GoEasy/Utils/pool"
 	"github.com/yqstech/gef/GoEasy/Utils/util"
+	"github.com/yqstech/gef/GoEasy/Utils/util/captcha"
 	"github.com/yqstech/gef/config"
 	"net/http"
 	"time"
-
+	
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
 )
