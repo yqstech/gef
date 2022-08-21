@@ -12,7 +12,7 @@ package Libs
 import (
 	"errors"
 	"github.com/wonderivan/logger"
-	util2 "github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/Utils/util"
 	"strings"
 )
 
@@ -28,14 +28,14 @@ func (that *ExpressJdly) ExpressTrack(expressNumber, Tel string) (map[string]int
 		expressNumber = expressNumber + "-" + Tel
 	}
 	Url := "https://way.jd.com/lywl/kd?nuo=" + expressNumber + "&appkey=" + that.JdAppKey
-	content, err := util2.FastHttpGet(Url)
+	content, err := util.FastHttpGet(Url)
 	if err != nil {
 		return nil, err
 	}
 	logger.Alert(content)
 	//格式化json数据
 	expressInfo := map[string]interface{}{}
-	util2.JsonDecode(content, &expressInfo)
+	util.JsonDecode(content, &expressInfo)
 	//查询错误返回码
 	if expressInfo["code"].(string) != "10000" {
 		return nil, errors.New(expressInfo["msg"].(string) + "；code=" + expressInfo["code"].(string))
@@ -69,7 +69,7 @@ func (that *ExpressJdly) ExpressTrack(expressNumber, Tel string) (map[string]int
 		for _, item := range result["context"].([]interface{}) {
 			ExpressTracks = append(ExpressTracks, map[string]string{
 				"AcceptStation": item.(map[string]interface{})["desc"].(string),
-				"AcceptTime":    util2.UnixTimeFormat(int64(util2.String2Int(util2.Interface2String(item.(map[string]interface{})["time"]))), "2006-01-02 15:04:05"),
+				"AcceptTime":    util.UnixTimeFormat(int64(util.String2Int(util.Interface2String(item.(map[string]interface{})["time"]))), "2006-01-02 15:04:05"),
 				"Location":      "",
 			})
 		}

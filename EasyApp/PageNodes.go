@@ -11,7 +11,7 @@ package EasyApp
 
 import (
 	"github.com/gohouse/gorose/v2"
-	util2 "github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/Utils/util"
 )
 
 // ================  默认节点 ====================================
@@ -95,8 +95,8 @@ func (nf Page) NodeAutoData(pageData *PageData, postData map[string]interface{},
 		//非数据库自增，设置int64 ID
 		if !pageData.isAutoID {
 			if id, ok := postData[pageData.tbPK]; ok {
-				if id == "" || util2.Interface2String(id) == "0" {
-					postData[pageData.tbPK] = util2.GetOnlyID()
+				if id == "" || util.Interface2String(id) == "0" {
+					postData[pageData.tbPK] = util.GetOnlyID()
 				}
 			}
 		} else {
@@ -114,21 +114,21 @@ func (nf Page) NodeAutoData(pageData *PageData, postData map[string]interface{},
 	}
 	//数组类型的自动转json（checkbox组件）
 	for key, value := range postData {
-		postData[key] = util2.Array2String(value)
+		postData[key] = util.Array2String(value)
 	}
 
 	//其他字段自动完成
 	for _, fieldKey := range pageData.insertAutoFields {
 		if fieldKey == "create_time" && action == "add" {
-			postData["create_time"] = util2.TimeNow()
+			postData["create_time"] = util.TimeNow()
 		}
 		if fieldKey == "update_time" {
-			postData["update_time"] = util2.TimeNow()
+			postData["update_time"] = util.TimeNow()
 		}
 	}
 	for _, fieldKey := range pageData.updateAutoFields {
 		if fieldKey == "update_time" {
-			postData["update_time"] = util2.TimeNow()
+			postData["update_time"] = util.TimeNow()
 		}
 	}
 

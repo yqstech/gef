@@ -14,7 +14,7 @@ import (
 	"github.com/gohouse/gorose/v2"
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/EasyApp"
-	Models2 "github.com/yqstech/gef/Models"
+	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/util"
 	"html"
@@ -86,7 +86,7 @@ func (that Configs) NodeBegin(pageData *EasyApp.PageData) (error, int) {
 // NodeList 初始化列表
 func (that Configs) NodeList(pageData *EasyApp.PageData) (error, int) {
 	//获取配置组列表
-	ConfigsGroups, err, code := Models2.Model{}.SelectOptionsData("tb_configs_group", map[string]string{
+	ConfigsGroups, err, code := Models.Model{}.SelectOptionsData("tb_configs_group", map[string]string{
 		"id":         "value",
 		"group_name": "name",
 	}, "", "", "", "")
@@ -102,14 +102,14 @@ func (that Configs) NodeList(pageData *EasyApp.PageData) (error, int) {
 	pageData.ListColumnAdd("notice", "说明", "text", nil)
 	pageData.ListColumnAdd("index_num", "排序", "text", nil)
 	//pageData.ListColumnAdd("status", "状态", "array", models.DefaultStatus)
-
+	
 	pageData.SetListColumnStyle("notice", "width:20%")
 	pageData.SetListColumnStyle("value", "width:20%")
 	pageData.SetListColumnStyle("action", "width:20%")
-
+	
 	//搜索表单
 	pageData.ListSearchFieldAdd("group_id", "select", "选择分组", "", "", ConfigsGroups, "", nil)
-	pageData.ListSearchFieldAdd("status", "select", "选择状态", "", "", Models2.OptionModels{}.ByKey("status", false), "", nil)
+	pageData.ListSearchFieldAdd("status", "select", "选择状态", "", "", Models.OptionModels{}.ByKey("status", false), "", nil)
 	return nil, 0
 }
 
@@ -136,7 +136,7 @@ func (that Configs) NodeListData(pageData *EasyApp.PageData, data []gorose.Data)
 // NodeForm 初始化表单
 func (that Configs) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
 	//获取配置组列表
-	ConfigsGroups, err, code := Models2.Model{}.SelectOptionsData("tb_configs_group", map[string]string{
+	ConfigsGroups, err, code := Models.Model{}.SelectOptionsData("tb_configs_group", map[string]string{
 		"id":         "value",
 		"group_name": "name",
 	}, "", "", "", "")
@@ -147,7 +147,7 @@ func (that Configs) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) 
 	if id == 0 {
 		pageData.FormFieldsAdd("group_id", "select", "选择分组", "", "1", true, ConfigsGroups, "", nil)
 	}
-
+	
 	pageData.FormFieldsAdd("title", "text", "配置项名称", "中文名称", "", true, nil, "", nil)
 	pageData.FormFieldsAdd("name", "text", "关键字", "推荐格式小写字母下划线拼接：app_domain", "", true, nil, "", nil)
 	pageData.FormFieldsAdd("value", "text", "默认值", "", "", false, nil, "", nil)

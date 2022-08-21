@@ -12,7 +12,7 @@ package Models
 import (
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/Utils/db"
-	util2 "github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/Utils/util"
 	"strings"
 	"sync"
 	"time"
@@ -26,9 +26,9 @@ var OptionModelsListLock sync.Mutex
 
 // Select 新增选项集底层查询方法，支持where条件查询
 func (that OptionModels) Select(id int, where string, beautify bool) []map[string]interface{} {
-	cacheKey := util2.Int2String(id) + "_" + util2.Is(beautify, "1", "0").(string)
+	cacheKey := util.Int2String(id) + "_" + util.Is(beautify, "1", "0").(string)
 	if where != "" {
-		cacheKey = cacheKey + "_" + util2.MD5(where)
+		cacheKey = cacheKey + "_" + util.MD5(where)
 	}
 	if selectData, ok := OptionModelsList[cacheKey]; ok {
 		return selectData
@@ -65,11 +65,11 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 		if data["data_type"].(int64) == 0 {
 			//解析json格式的静态数据
 			if data["static_data"].(string) != "" {
-				util2.JsonDecode(data["static_data"].(string), &selectData)
+				util.JsonDecode(data["static_data"].(string), &selectData)
 			}
 		} else {
 			if data["default_data"].(string) != "" {
-				util2.JsonDecode(data["default_data"].(string), &selectData)
+				util.JsonDecode(data["default_data"].(string), &selectData)
 			}
 			//数据表查询支持补充颜色和图标
 			colorArray := strings.Split(data["color_array"].(string), ",")
@@ -149,7 +149,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 				if icon, ok := option["icon"].(string); ok && icon != "" {
 					optionIcon = "<i class=\"" + icon + "\"></i>"
 				}
-				optionName := "<div class=\"option-tag\" style=\"" + optionColor + "\">" + optionIcon + util2.Interface2String(
+				optionName := "<div class=\"option-tag\" style=\"" + optionColor + "\">" + optionIcon + util.Interface2String(
 					option["name"]) + "</div>"
 				selectData[index]["name"] = optionName
 			}
@@ -172,7 +172,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 						//获取值
 						if thisId, ok2 := thisOption[data["value_field"].(string)]; ok2 {
 							//当前选项集选项ID 和 下级选项集选项的PID相同
-							if util2.Interface2String(thisId) == util2.Interface2String(pid) {
+							if util.Interface2String(thisId) == util.Interface2String(pid) {
 								if _, ok3 := selectData[thisIndex]["_child"]; !ok3 {
 									selectData[thisIndex]["_child"] = []map[string]interface{}{}
 								}
@@ -188,13 +188,13 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 			tbName := strings.Split(data["table_name"].(string), "_")
 			Prefix := tbName[len(tbName)-1]
 			for thisIndex, thisOption := range selectData {
-				selectData[thisIndex]["value"] = Prefix + "_" + util2.Interface2String(thisOption["value"])
+				selectData[thisIndex]["value"] = Prefix + "_" + util.Interface2String(thisOption["value"])
 			}
 			//logger.Alert("修改value值以后", selectData)
 		}
 		//!转多维数组
 		if data["to_tree_array"].(int64) == 1 {
-			selectData, _, _ = util2.ArrayMap2Tree(selectData, 0, data["value_field"].(string), "pid", "_child")
+			selectData, _, _ = util.ArrayMap2Tree(selectData, 0, data["value_field"].(string), "pid", "_child")
 		}
 		//!迭代更新一下标记值
 		selectData, _, _ = TreeArrayExtendField(selectData)
@@ -226,7 +226,7 @@ func (that OptionModels) ByKey(uniqueKey interface{}, beautify bool) []map[strin
 	case int:
 		data = that.ById(uniqueKey.(int), beautify)
 	case int64:
-		data = that.ById(util2.Int642Int(uniqueKey.(int64)), beautify)
+		data = that.ById(util.Int642Int(uniqueKey.(int64)), beautify)
 	case string:
 		data = that.Select(0, "unique_key = '"+uniqueKey.(string)+"'", beautify)
 	default:
@@ -374,9 +374,9 @@ func TreeArrayExtendField(data []map[string]interface{}) ([]map[string]interface
 	//循环数组
 	for k, v := range data {
 		//明确判断值是数字还是字符串
-		valueStr := util2.Interface2String(v["value"])
-		if util2.IsNum(valueStr) {
-			childrenIds = append(childrenIds, int64(util2.String2Int(valueStr)))
+		valueStr := util.Interface2String(v["value"])
+		if util.IsNum(valueStr) {
+			childrenIds = append(childrenIds, int64(util.String2Int(valueStr)))
 		} else {
 			childrenIds = append(childrenIds, valueStr)
 		}

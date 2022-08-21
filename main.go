@@ -21,7 +21,7 @@ import (
 	"github.com/yqstech/gef/Templates"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/gdb"
-	pool2 "github.com/yqstech/gef/Utils/pool"
+	"github.com/yqstech/gef/Utils/pool"
 	"github.com/yqstech/gef/Utils/serv"
 	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/config"
@@ -58,9 +58,9 @@ func init() {
 	dbm.AutoInsideData(insideData)
 
 	//! 初始化Redis
-	pool2.RedisInit()
+	pool.RedisInit()
 	//! 初始化GoCache
-	pool2.GocacheInit()
+	pool.GocacheInit()
 }
 
 // New 创建新的Gef应用

@@ -10,7 +10,7 @@
 package adminHandle
 
 import (
-	EasyApp2 "github.com/yqstech/gef/EasyApp"
+	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/util"
@@ -27,14 +27,14 @@ type Index struct {
 }
 
 // PageInit 设置Handel路由
-func (index Index) PageInit(pageData *EasyApp2.PageData) {
+func (index Index) PageInit(pageData *EasyApp.PageData) {
 	pageData.ActionAdd("get_menus", index.GetMenus)
 	pageData.ActionAdd("main", index.Main)
 }
 
 // Index 后台主页框架
-func (index Index) Index(pageData *EasyApp2.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	tpl := EasyApp2.Template{
+func (index Index) Index(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	tpl := EasyApp.Template{
 		TplName: "index.html",
 	}
 	tpl.SetDate("title", Models.AppConfigs{}.Value("app_name")+" - 后台管理中心")
@@ -45,8 +45,8 @@ func (index Index) Index(pageData *EasyApp2.PageData, w http.ResponseWriter, r *
 }
 
 // Main 后台欢迎页
-func (index Index) Main(pageData *EasyApp2.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	tpl := EasyApp2.Template{
+func (index Index) Main(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	tpl := EasyApp.Template{
 		TplName: "main.html",
 	}
 	tpl.SetDate("title", "首页")
@@ -54,7 +54,7 @@ func (index Index) Main(pageData *EasyApp2.PageData, w http.ResponseWriter, r *h
 }
 
 // GetMenus 获取菜单接口，支持顶部菜单，左侧菜单，右侧菜单
-func (index Index) GetMenus(pageData *EasyApp2.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (index Index) GetMenus(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//主账户ID
 	main_account_id := ps.ByName("main_account_id")
 	//当前账户ID
@@ -63,11 +63,11 @@ func (index Index) GetMenus(pageData *EasyApp2.PageData, w http.ResponseWriter, 
 	account := ps.ByName("account")
 	//当前账户所属分组角色
 	group_id := ps.ByName("group_id")
-
+	
 	//定义权限表
 	var rules interface{}
 	var err error
-
+	
 	userMenus := []map[string]interface{}{
 		{
 			"name":   "退出",
@@ -88,7 +88,7 @@ func (index Index) GetMenus(pageData *EasyApp2.PageData, w http.ResponseWriter, 
 			"target": "main_area",
 		},
 	}
-
+	
 	if account_id == main_account_id {
 		//当为主账户时，获取所有菜单
 		rules, err = db.New().Table("tb_admin_rules").
@@ -141,7 +141,7 @@ func (index Index) GetMenus(pageData *EasyApp2.PageData, w http.ResponseWriter, 
 				return
 			}
 			logger.Info(rules)
-
+			
 		} else {
 			//未分配角色，获取默认菜单
 			conn := db.New().Table("tb_admin_rules")
@@ -159,14 +159,14 @@ func (index Index) GetMenus(pageData *EasyApp2.PageData, w http.ResponseWriter, 
 			}
 		}
 	}
-
+	
 	//!cookie 获取menuGroupID
 	menuGroupID := int64(0)
 	menuGroup, err := r.Cookie("menuGroupID")
 	if err == nil {
 		menuGroupID = int64(util.String2Int(menuGroup.Value))
 	}
-
+	
 	//获取顶部一级菜单，并确定选中的菜单ID =》topMenuActiveID
 	//topMenus
 	topMenus := []map[string]interface{}{}
@@ -198,7 +198,7 @@ func (index Index) GetMenus(pageData *EasyApp2.PageData, w http.ResponseWriter, 
 			break
 		}
 	}
-
+	
 	//菜单结构
 	ruleMap := map[int64]map[string]interface{}{}
 	//记录一级菜单顺序，map是无序的
@@ -206,7 +206,7 @@ func (index Index) GetMenus(pageData *EasyApp2.PageData, w http.ResponseWriter, 
 	for _, rule := range rules.([]gorose.Data) {
 		if rule["pid"].(int64) == topMenuActiveID {
 			ruleIndex = append(ruleIndex, rule["id"].(int64))
-
+			
 			//#开头的路径不对外显示
 			if rule["route"].(string) != "" && rule["route"].(string)[0:1] == "#" {
 				rule["route"] = ""
@@ -246,7 +246,7 @@ func (index Index) GetMenus(pageData *EasyApp2.PageData, w http.ResponseWriter, 
 	for _, Index := range ruleIndex {
 		menuArr = append(menuArr, ruleMap[Index])
 	}
-
+	
 	index.ApiResult(w, 200, "success", map[string]interface{}{
 		"menus":        menuArr,
 		"topMenus":     topMenus,

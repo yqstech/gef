@@ -10,7 +10,7 @@ package adminHandle
 
 import (
 	"github.com/yqstech/gef/EasyApp"
-	Models2 "github.com/yqstech/gef/Models"
+	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/util"
 	
 	"github.com/gohouse/gorose/v2"
@@ -28,9 +28,9 @@ func (a Admin) NodeBegin(pageData *EasyApp.PageData) (error, int) {
 }
 
 func (a Admin) NodeList(pageData *EasyApp.PageData) (error, int) {
-
+	
 	//获取角色列表
-	groupOptions, err, code := Models2.Model{}.SelectOptionsData("tb_admin_group", map[string]string{
+	groupOptions, err, code := Models.Model{}.SelectOptionsData("tb_admin_group", map[string]string{
 		"id":         "value",
 		"group_name": "name",
 	}, "0", "未分配", "", "")
@@ -40,7 +40,7 @@ func (a Admin) NodeList(pageData *EasyApp.PageData) (error, int) {
 	pageData.ListColumnAdd("group_id", "权限组/角色", "array", groupOptions)
 	pageData.ListColumnAdd("name", "名称", "text", nil)
 	pageData.ListColumnAdd("account", "登录账户", "text", nil)
-	pageData.ListColumnAdd("status", "状态", "array", Models2.OptionModels{}.ByKey("status", true))
+	pageData.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ByKey("status", true))
 	return nil, 0
 }
 
@@ -53,7 +53,7 @@ func (a Admin) NodeListCondition(pageData *EasyApp.PageData, condition [][]inter
 }
 
 func (a Admin) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
-	groupOptions, err, code := Models2.Model{}.SelectOptionsData("tb_admin_group", map[string]string{
+	groupOptions, err, code := Models.Model{}.SelectOptionsData("tb_admin_group", map[string]string{
 		"id":         "value",
 		"group_name": "name",
 	}, "0", "暂不分配", "", "")

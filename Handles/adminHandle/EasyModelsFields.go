@@ -15,7 +15,7 @@ import (
 	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
-	util2 "github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/config"
 	"strings"
 )
@@ -89,8 +89,8 @@ func (that EasyModelsFields) NodeBegin(pageData *EasyApp.PageData) (error, int) 
 	pageData.SetTbName("tb_easy_models_fields")
 	if pageData.GetHttpRequest().Method == "POST" {
 		//自动同步数据库字段
-		id := util2.GetValue(pageData.GetHttpRequest(), "id")
-		that.syncModelFields(util2.String2Int(id))
+		id := util.GetValue(pageData.GetHttpRequest(), "id")
+		that.syncModelFields(util.String2Int(id))
 		//不在表单的项目，都设置成非必填项
 		db.New().Table("tb_easy_models_fields").
 			Where("is_delete", 0).
@@ -112,7 +112,7 @@ func (that EasyModelsFields) NodeList(pageData *EasyApp.PageData) (error, int) {
 
 	//!设置tab列表
 	//获取页面地址，允许参数有参数id
-	validUrl := util2.UrlScreenParam(pageData.GetHttpRequest(), []string{"id"}, false, true)
+	validUrl := util.UrlScreenParam(pageData.GetHttpRequest(), []string{"id"}, false, true)
 	pageData.PageTabAdd("全部字段", validUrl)
 	pageData.PageTabAdd("列表页预览", validUrl+"tab=1")
 	pageData.PageTabAdd("新增页", validUrl+"tab=2")
@@ -178,9 +178,9 @@ func (that EasyModelsFields) NodeList(pageData *EasyApp.PageData) (error, int) {
 // NodeListCondition 修改查询条件
 func (that EasyModelsFields) NodeListCondition(pageData *EasyApp.PageData, condition [][]interface{}) ([][]interface{}, error, int) {
 	modelID := 0
-	modelId := util2.GetValue(pageData.GetHttpRequest(), "id")
+	modelId := util.GetValue(pageData.GetHttpRequest(), "id")
 	if modelId != "" {
-		modelID = util2.String2Int(modelId)
+		modelID = util.String2Int(modelId)
 		//追加查询条件
 		condition = append(condition, []interface{}{
 			"model_id", "=", modelID,
@@ -334,7 +334,7 @@ func (that EasyModelsFields) syncModelFields(easyModelId int) {
 	for _, field := range fields {
 		fieldsMap[field["field_key"].(string)] = field
 	}
-	timeNow := util2.TimeNow()
+	timeNow := util.TimeNow()
 	//对比更新模型字段信息
 	for index, fieldInfo := range query {
 		//字段key
@@ -361,17 +361,17 @@ func (that EasyModelsFields) syncModelFields(easyModelId int) {
 		}
 		//是否在列表显示
 		isShowOnList := 0
-		if util2.IsInArray(fieldKey, defaultListShowFields) {
+		if util.IsInArray(fieldKey, defaultListShowFields) {
 			isShowOnList = 1
 		}
 		//是否默认设置成锁定
 		allowCreate := 1
-		if util2.IsInArray(fieldKey, defaultNotAllowCreateFields) {
+		if util.IsInArray(fieldKey, defaultNotAllowCreateFields) {
 			allowCreate = 0
 		}
 		//是否默认设置成锁定
 		allowUpdate := 1
-		if util2.IsInArray(fieldKey, defaultNotAllowUpdateFields) {
+		if util.IsInArray(fieldKey, defaultNotAllowUpdateFields) {
 			allowUpdate = 0
 		}
 		//是否存在字段

@@ -10,10 +10,10 @@
 package adminHandle
 
 import (
-	EasyApp2 "github.com/yqstech/gef/EasyApp"
+	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/pool"
-	util2 "github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/Utils/util/captcha"
 	"github.com/yqstech/gef/config"
 	"net/http"
@@ -28,7 +28,7 @@ type Account struct {
 }
 
 // PageInit 初始化
-func (ac Account) PageInit(pageData *EasyApp2.PageData) {
+func (ac Account) PageInit(pageData *EasyApp.PageData) {
 	//清除默认handle
 	pageData.ActionClear()
 	pageData.ActionAdd("resetpwd", ac.ResetPwd)
@@ -39,12 +39,12 @@ func (ac Account) PageInit(pageData *EasyApp2.PageData) {
 }
 
 // Login 登录页面
-func (ac Account) Login(pageData *EasyApp2.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
+func (ac Account) Login(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	
 	if r.Method == "POST" {
 		//获取账户和密码
-		account := util2.PostValue(r, "account")
-		pwd := util2.PostValue(r, "pwd")
+		account := util.PostValue(r, "account")
+		pwd := util.PostValue(r, "pwd")
 		if account == "" {
 			ac.ApiResult(w, 101, "账号不得为空！", "")
 			return
@@ -59,8 +59,8 @@ func (ac Account) Login(pageData *EasyApp2.PageData, w http.ResponseWriter, r *h
 			//假如失败次数达到三次以上
 			if failTimes.(int) >= 3 {
 				//校验码必填
-				code := util2.PostValue(r, "code")
-				captchaId := util2.PostValue(r, "captchaId")
+				code := util.PostValue(r, "code")
+				captchaId := util.PostValue(r, "captchaId")
 				if code == "" {
 					ac.ApiResult(w, 101, "请填入验证码！", map[string]interface{}{
 						"verify": "reload",
@@ -85,7 +85,7 @@ func (ac Account) Login(pageData *EasyApp2.PageData, w http.ResponseWriter, r *h
 		//按账户和密码查询账户
 		where := ac.WhereObj()
 		where["account"] = account
-		where["password"] = util2.GetPassword(pwd)
+		where["password"] = util.GetPassword(pwd)
 		where["status"] = 1
 		where["is_delete"] = 0
 		data, err := ac.DbModel("tb_admin").Where(where).First()
@@ -113,12 +113,12 @@ func (ac Account) Login(pageData *EasyApp2.PageData, w http.ResponseWriter, r *h
 			return
 		}
 		//查询成功创建token
-		token := util2.MD5(util2.TimeNow() + "xxxx")
+		token := util.MD5(util.TimeNow() + "xxxx")
 		//记录token
 		_, err = ac.DbModel("tb_admin_token").Insert(map[string]interface{}{
 			"account_id":  data["id"],
 			"token":       token,
-			"create_time": util2.TimeNow(),
+			"create_time": util.TimeNow(),
 		})
 		if err != nil {
 			logger.Error(err.Error())
@@ -138,7 +138,7 @@ func (ac Account) Login(pageData *EasyApp2.PageData, w http.ResponseWriter, r *h
 		})
 		return
 	}
-	tpl := EasyApp2.Template{
+	tpl := EasyApp.Template{
 		TplName: "login.html",
 	}
 	//默认不需要校验码
@@ -156,14 +156,14 @@ func (ac Account) Login(pageData *EasyApp2.PageData, w http.ResponseWriter, r *h
 }
 
 // ResetPwd 修改密码页面
-func (ac Account) ResetPwd(pageData *EasyApp2.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
+func (ac Account) ResetPwd(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	
 	if r.Method == "POST" {
 		//当前账号ID
 		accountId := ps.ByName("account_id")
 		//获取数据
-		password := util2.PostValue(r, "password")
-		newpassword := util2.PostValue(r, "newpassword")
+		password := util.PostValue(r, "password")
+		newpassword := util.PostValue(r, "newpassword")
 		if password == "" {
 			ac.ApiResult(w, 101, "密码不得为空！", "")
 			return
@@ -180,15 +180,15 @@ func (ac Account) ResetPwd(pageData *EasyApp2.PageData, w http.ResponseWriter, r
 			return
 		}
 		//判断密码是否一致
-		oldPwd := util2.PostValue(r, "password")
-		oldPwd = util2.GetPassword(oldPwd)
+		oldPwd := util.PostValue(r, "password")
+		oldPwd = util.GetPassword(oldPwd)
 		if accountInfo["password"].(string) != oldPwd {
 			ac.ApiResult(w, 101, "旧密码不正确！", "")
 			return
 		}
 		//修改密码
 		_, err = ac.DbModel("tb_admin").Where("id", accountId).Update(map[string]string{
-			"password": util2.GetPassword(newpassword),
+			"password": util.GetPassword(newpassword),
 		})
 		if err != nil {
 			logger.Error(err.Error())
@@ -198,7 +198,7 @@ func (ac Account) ResetPwd(pageData *EasyApp2.PageData, w http.ResponseWriter, r
 		ac.ApiResult(w, 200, "success", "success")
 		return
 	}
-	tpl := EasyApp2.Template{
+	tpl := EasyApp.Template{
 		TplName: "resetpwd.html",
 	}
 	tpl.SetDate("title", "修改密码")
@@ -207,11 +207,11 @@ func (ac Account) ResetPwd(pageData *EasyApp2.PageData, w http.ResponseWriter, r
 	ac.ActShow(w, tpl, pageData)
 }
 
-func (ac Account) UserInfo(pageData *EasyApp2.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
+func (ac Account) UserInfo(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	
 	//当前账号ID
 	accountId := ps.ByName("account_id")
-
+	
 	//查询当前账号信息
 	accountInfo, err := ac.DbModel("tb_admin").Where("id", accountId).First()
 	if err != nil {
@@ -225,8 +225,8 @@ func (ac Account) UserInfo(pageData *EasyApp2.PageData, w http.ResponseWriter, r
 	}
 	if r.Method == "POST" {
 		//获取数据
-		name := util2.PostValue(r, "name")
-		account := util2.PostValue(r, "account")
+		name := util.PostValue(r, "name")
+		account := util.PostValue(r, "account")
 		if name == "" {
 			ac.ApiResult(w, 101, "名称不能为空", "")
 			return
@@ -261,7 +261,7 @@ func (ac Account) UserInfo(pageData *EasyApp2.PageData, w http.ResponseWriter, r
 		ac.ApiResult(w, 200, "success", "success")
 		return
 	}
-	tpl := EasyApp2.Template{
+	tpl := EasyApp.Template{
 		TplName: "account_info.html",
 	}
 	tpl.SetDate("account_name", accountInfo["name"])
@@ -272,10 +272,10 @@ func (ac Account) UserInfo(pageData *EasyApp2.PageData, w http.ResponseWriter, r
 	ac.ActShow(w, tpl, pageData)
 }
 
-func (ac Account) LogOut(pageData *EasyApp2.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
+func (ac Account) LogOut(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	
 	//清空账户Cookie
-	accountId := util2.String2Int(ps.ByName("account_id"))
+	accountId := util.String2Int(ps.ByName("account_id"))
 	db.New().Table("tb_admin_token").Where("account_id", accountId).Delete()
 	ck := &http.Cookie{
 		Name:   "token",
@@ -284,14 +284,14 @@ func (ac Account) LogOut(pageData *EasyApp2.PageData, w http.ResponseWriter, r *
 		MaxAge: -1,
 	}
 	w.Header().Set("set-cookie", ck.String())
-	tpl := EasyApp2.Template{
+	tpl := EasyApp.Template{
 		TplName: "logout.html",
 	}
 	tpl.SetDate("successUrl", config.AdminPath+"/account/login")
 	ac.ActShow(w, tpl, pageData)
 }
 
-func (ac Account) verifyCode(pageData *EasyApp2.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ac Account) verifyCode(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//数字验证码配置
 	captchaId, base64, err := captcha.GetCaptchaBase64("auto", 40, 130, 6, captcha.ColorWight)
 	if err != nil {

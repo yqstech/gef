@@ -13,7 +13,7 @@ import (
 	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
-	util2 "github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/Utils/util"
 	
 	"github.com/gohouse/gorose/v2"
 	"github.com/wonderivan/logger"
@@ -67,7 +67,7 @@ func (ad AdminGroup) NodeForm(pageData *EasyApp.PageData, id int64) (error, int)
 		})
 	}
 	//[]map转成上下级结构
-	data, _, _ = util2.ArrayMap2Tree(data, 0, "value", "pid", "_child")
+	data, _, _ = util.ArrayMap2Tree(data, 0, "value", "pid", "_child")
 	//表单信息
 	pageData.FormFieldsAdd("group_name", "text", "角色名称", "", "", true, nil, "", nil)
 	pageData.FormFieldsAdd("rules", "checkbox_level", "配置权限", "", "", false, data, "", nil)
@@ -81,6 +81,6 @@ func (ad AdminGroup) NodeForm(pageData *EasyApp.PageData, id int64) (error, int)
  * @return {*}
  */
 func (ad AdminGroup) NodeSaveData(pageData *EasyApp.PageData, formData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
-	postData["rules"] = util2.JsonEncode(postData["rules"])
+	postData["rules"] = util.JsonEncode(postData["rules"])
 	return postData, nil, 0
 }

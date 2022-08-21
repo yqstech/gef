@@ -13,7 +13,7 @@ import (
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Handles/commHandle"
-	Models2 "github.com/yqstech/gef/Models"
+	"github.com/yqstech/gef/Models"
 )
 
 type Base struct {
@@ -22,13 +22,13 @@ type Base struct {
 
 // NodeCheckAuth 重写校验权限节点
 func (b Base) NodeCheckAuth(pageData *EasyApp.PageData, btnRule string, accountID int) (bool, error) {
-	return Models2.Admin{}.CheckAuth(btnRule, accountID), nil
+	return Models.Admin{}.CheckAuth(btnRule, accountID), nil
 }
 
 func (b Base) SmsUpstreamList() []map[string]interface{} {
 	//获取列表
 	//获取列表
-	upstreamOptions, err, _ := Models2.Model{}.SelectOptionsData("tb_sms_upstream", map[string]string{
+	upstreamOptions, err, _ := Models.Model{}.SelectOptionsData("tb_sms_upstream", map[string]string{
 		"id":            "value",
 		"upstream_name": "name",
 	}, "", "", "", "")
@@ -39,7 +39,7 @@ func (b Base) SmsUpstreamList() []map[string]interface{} {
 	return upstreamOptions
 }
 func (b Base) EasyModels() []map[string]interface{} {
-	data, err, _ := Models2.Model{}.SelectOptionsData("tb_easy_models", map[string]string{
+	data, err, _ := Models.Model{}.SelectOptionsData("tb_easy_models", map[string]string{
 		"id":         "value",
 		"model_name": "name",
 	}, "", "", "", "")
@@ -52,7 +52,7 @@ func (b Base) EasyModels() []map[string]interface{} {
 
 func (b Base) OptionModelsList() []map[string]interface{} {
 	//获取列表
-	OptionModelsList, err, _ := Models2.Model{}.SelectOptionsData("tb_option_models", map[string]string{
+	OptionModelsList, err, _ := Models.Model{}.SelectOptionsData("tb_option_models", map[string]string{
 		"unique_key": "value",
 		"name":       "name",
 	}, "", "", "", "")
@@ -65,7 +65,7 @@ func (b Base) OptionModelsList() []map[string]interface{} {
 
 func (b Base) DynamicOptionModelsList() []map[string]interface{} {
 	//获取列表
-	OptionModelsList, err, _ := Models2.Model{}.SelectOptionsData("tb_option_models", map[string]string{
+	OptionModelsList, err, _ := Models.Model{}.SelectOptionsData("tb_option_models", map[string]string{
 		"unique_key": "value",
 		"name":       "name",
 	}, "", "", "data_type=1 and dynamic_params!=''", "")
@@ -79,7 +79,7 @@ func (b Base) DynamicOptionModelsList() []map[string]interface{} {
 //ChildrenOptionModelsList 下级选项集
 func (b Base) ChildrenOptionModelsList(uniqueKey string) []map[string]interface{} {
 	//获取列表
-	ChildrenOptionModels, err, _ := Models2.Model{}.SelectOptionsData("tb_option_models", map[string]string{
+	ChildrenOptionModels, err, _ := Models.Model{}.SelectOptionsData("tb_option_models", map[string]string{
 		"unique_key": "value",
 		"name":       "name",
 	}, "", "", "data_type=1 and parent_field!='' and unique_key!='"+uniqueKey+"'", "")

@@ -9,9 +9,9 @@
 package commHandle
 
 import (
-	EasyApp2 "github.com/yqstech/gef/EasyApp"
+	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Utils/db"
-	util2 "github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/Utils/util"
 	"net/http"
 	"strings"
 	
@@ -19,15 +19,15 @@ import (
 )
 
 type Base struct {
-	EasyApp2.Page
+	EasyApp.Page
 }
 
-func (base Base) GetTabIndex(pageData *EasyApp2.PageData, keyName string) int {
+func (base Base) GetTabIndex(pageData *EasyApp.PageData, keyName string) int {
 	//获取tab序列号并设置选中序列
-	tab := util2.GetValue(pageData.GetHttpRequest(), keyName)
+	tab := util.GetValue(pageData.GetHttpRequest(), keyName)
 	tabIndex := 0
 	if tab != "" {
-		tabIndex = util2.String2Int(tab)
+		tabIndex = util.String2Int(tab)
 	}
 	return tabIndex
 }
@@ -51,13 +51,13 @@ func (base Base) WhereObj() map[string]interface{} {
 }
 
 func (base Base) DefPageInfo(r *http.Request) (int, int) {
-	page := util2.PostValue(r, "page")
-	pageNum := util2.String2Int(page)
+	page := util.PostValue(r, "page")
+	pageNum := util.String2Int(page)
 	if pageNum < 1 {
 		pageNum = 1
 	}
-	page_size := util2.PostValue(r, "page_size")
-	pageSize := util2.String2Int(page_size)
+	page_size := util.PostValue(r, "page_size")
+	pageSize := util.String2Int(page_size)
 	if pageSize < 1 || pageSize > 100 {
 		pageSize = 20
 	}
@@ -77,7 +77,7 @@ func GetIp(r *http.Request) string {
 	if RealIP != "" && IP_ADDR == "127.0.0.1" {
 		IP_ADDR = RealIP
 	}
-	util2.Echo("IP_ADDR", IP_ADDR)
+	util.Echo("IP_ADDR", IP_ADDR)
 	return IP_ADDR
 }
 
@@ -88,9 +88,9 @@ func GetIp(r *http.Request) string {
  * @return {*}
  */
 func StringValue(r *http.Request, name string) string {
-	value := util2.PostValue(r, name)
+	value := util.PostValue(r, name)
 	if value == "" {
-		value = util2.GetValue(r, name)
+		value = util.GetValue(r, name)
 	}
 	return value
 }
@@ -106,7 +106,7 @@ func IntValue(r *http.Request, name string) int {
 	if value == "" {
 		return 0
 	}
-	return util2.String2Int(value)
+	return util.String2Int(value)
 }
 
 /**

@@ -2,7 +2,7 @@
  * @Author: 云起时
  * @Email: limingxiang@yqstech.com
  * @Description:
- * @File: EasyModel
+ * @File: EasyModelHandle
  * @Version: 1.0.0
  * @Date: 2022/5/2 10:54
  */
@@ -13,20 +13,20 @@ import (
 	"errors"
 	"github.com/gohouse/gorose/v2"
 	"github.com/yqstech/gef/EasyApp"
-	EasyModel2 "github.com/yqstech/gef/EasyModel"
+	"github.com/yqstech/gef/EasyModel"
 	"github.com/yqstech/gef/Models"
-	util2 "github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/Utils/util"
 	"strings"
 )
 
-type EasyModel struct {
+type EasyModelHandle struct {
 	Base
 	ModelKey string //模型关键字
 }
 
 // NodeBegin 开始
-func (that EasyModel) NodeBegin(pageData *EasyApp.PageData) (error, int) {
-	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey, "begin")
+func (that EasyModelHandle) NodeBegin(pageData *EasyApp.PageData) (error, int) {
+	easyModel, err := EasyModel.GetEasyModelInfo(that.ModelKey, "begin")
 	if err != nil {
 		return err, 500
 	} else {
@@ -38,8 +38,8 @@ func (that EasyModel) NodeBegin(pageData *EasyApp.PageData) (error, int) {
 }
 
 // NodeList 初始化列表
-func (that EasyModel) NodeList(pageData *EasyApp.PageData) (error, int) {
-	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey, "list")
+func (that EasyModelHandle) NodeList(pageData *EasyApp.PageData) (error, int) {
+	easyModel, err := EasyModel.GetEasyModelInfo(that.ModelKey, "list")
 	if err != nil {
 		return err, 500
 	} else {
@@ -52,19 +52,19 @@ func (that EasyModel) NodeList(pageData *EasyApp.PageData) (error, int) {
 			pageData.SetPageNotice(easyModel.PageNotice)
 		}
 		//!设置tabs列表和选中项
-		validUrl := util2.UrlScreenParam(pageData.GetHttpRequest(), []string{"id"}, false, true)
+		validUrl := util.UrlScreenParam(pageData.GetHttpRequest(), []string{"id"}, false, true)
 		for index, tab := range easyModel.ListTabs {
-			pageData.PageTabAdd(tab.TabName, validUrl+"tab="+util2.Int2String(index))
+			pageData.PageTabAdd(tab.TabName, validUrl+"tab="+util.Int2String(index))
 		}
 		//获取第几页
 		tabIndex := that.GetTabIndex(pageData, "tab")
 		pageData.SetPageTabSelect(tabIndex)
-
+		
 		//!获取自定义按钮列表
 		for btnName, Btn := range easyModel.Buttons {
 			pageData.SetButton(btnName, Btn)
 		}
-
+		
 		//!顶部按钮
 		topBtns := easyModel.TopButtons
 		//新增
@@ -79,7 +79,7 @@ func (that EasyModel) NodeList(pageData *EasyApp.PageData) (error, int) {
 		//!URL参数透传到顶部按钮上
 		for _, urlParam := range easyModel.UrlParams {
 			for _, btn := range topBtns {
-				urlAppend := urlParam.FieldKey + "=" + util2.GetValue(pageData.GetHttpRequest(), urlParam.ParamKey)
+				urlAppend := urlParam.FieldKey + "=" + util.GetValue(pageData.GetHttpRequest(), urlParam.ParamKey)
 				pageData.SetButtonActionUrl(btn, urlAppend, true)
 			}
 		}
@@ -134,15 +134,15 @@ func (that EasyModel) NodeList(pageData *EasyApp.PageData) (error, int) {
 }
 
 // NodeListCondition 修改查询条件
-func (that EasyModel) NodeListCondition(pageData *EasyApp.PageData, condition [][]interface{}) ([][]interface{}, error, int) {
-	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey, "list")
+func (that EasyModelHandle) NodeListCondition(pageData *EasyApp.PageData, condition [][]interface{}) ([][]interface{}, error, int) {
+	easyModel, err := EasyModel.GetEasyModelInfo(that.ModelKey, "list")
 	if err != nil {
 		return condition, nil, 0
 	} else {
 		//设置url参数查询条件
 		for _, urlParam := range easyModel.UrlParams {
 			if urlParam.ParamKey != "" && urlParam.FieldKey != "" {
-				urlValue := util2.GetValue(pageData.GetHttpRequest(), urlParam.ParamKey)
+				urlValue := util.GetValue(pageData.GetHttpRequest(), urlParam.ParamKey)
 				if urlValue == "" && urlParam.DefaultValue != "" {
 					urlValue = urlParam.DefaultValue
 				}
@@ -169,8 +169,8 @@ func (that EasyModel) NodeListCondition(pageData *EasyApp.PageData, condition []
 }
 
 // NodeListData 重写列表数据
-func (that EasyModel) NodeListData(pageData *EasyApp.PageData, data []gorose.Data) ([]gorose.Data, error, int) {
-	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey, "list")
+func (that EasyModelHandle) NodeListData(pageData *EasyApp.PageData, data []gorose.Data) ([]gorose.Data, error, int) {
+	easyModel, err := EasyModel.GetEasyModelInfo(that.ModelKey, "list")
 	if err != nil {
 		return data, nil, 0
 	} else {
@@ -202,7 +202,7 @@ func (that EasyModel) NodeListData(pageData *EasyApp.PageData, data []gorose.Dat
 				//循环所有数据
 				for k, v := range data {
 					//转换同键的数据
-					data[k][field.FieldKey] = util2.Money(v[field.FieldKey].(int64))
+					data[k][field.FieldKey] = util.Money(v[field.FieldKey].(int64))
 				}
 			}
 		}
@@ -210,7 +210,7 @@ func (that EasyModel) NodeListData(pageData *EasyApp.PageData, data []gorose.Dat
 		for _, field := range easyModel.Fields {
 			if field.FieldAugment != "" {
 				for k, v := range data {
-					data[k][field.FieldKey] = strings.Replace(field.FieldAugment, "{{this}}", util2.Interface2String(v[field.FieldKey]), -1)
+					data[k][field.FieldKey] = strings.Replace(field.FieldAugment, "{{this}}", util.Interface2String(v[field.FieldKey]), -1)
 				}
 			}
 		}
@@ -219,19 +219,19 @@ func (that EasyModel) NodeListData(pageData *EasyApp.PageData, data []gorose.Dat
 			if field.Attach2Field != "" {
 				for k, v := range data {
 					if _, ok := v[field.Attach2Field]; ok {
-						data[k][field.Attach2Field] = util2.Interface2String(v[field.Attach2Field]) + "<br>" + util2.Interface2String(v[field.FieldKey])
+						data[k][field.Attach2Field] = util.Interface2String(v[field.Attach2Field]) + "<br>" + util.Interface2String(v[field.FieldKey])
 					}
 				}
 			}
 		}
 		return data, nil, 0
 	}
-
+	
 }
 
 // NodeForm 初始化表单
-func (that EasyModel) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
-	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey, util2.Is(id == 0, "add", "edit").(string))
+func (that EasyModelHandle) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
+	easyModel, err := EasyModel.GetEasyModelInfo(that.ModelKey, util.Is(id == 0, "add", "edit").(string))
 	if err != nil {
 		return err, 500
 	} else {
@@ -265,8 +265,8 @@ func (that EasyModel) NodeForm(pageData *EasyApp.PageData, id int64) (error, int
 						//转一下类型
 						var FieldOptionsCopy []gorose.Data
 						for _, v := range FieldOptions {
-							v["id"] = int64(util2.String2Int(util2.Interface2String(v["id"])))
-							v["pid"] = int64(util2.String2Int(util2.Interface2String(v["pid"])))
+							v["id"] = int64(util.String2Int(util.Interface2String(v["id"])))
+							v["pid"] = int64(util.String2Int(util.Interface2String(v["pid"])))
 							FieldOptionsCopy = append(FieldOptionsCopy, v)
 						}
 						//执行缩进
@@ -322,8 +322,8 @@ func (that EasyModel) NodeForm(pageData *EasyApp.PageData, id int64) (error, int
 						//转一下类型
 						var FieldOptionsCopy []gorose.Data
 						for _, v := range FieldOptions {
-							v["id"] = int64(util2.String2Int(util2.Interface2String(v["id"])))
-							v["pid"] = int64(util2.String2Int(util2.Interface2String(v["pid"])))
+							v["id"] = int64(util.String2Int(util.Interface2String(v["id"])))
+							v["pid"] = int64(util.String2Int(util.Interface2String(v["pid"])))
 							FieldOptionsCopy = append(FieldOptionsCopy, v)
 						}
 						//执行缩进
@@ -351,14 +351,14 @@ func (that EasyModel) NodeForm(pageData *EasyApp.PageData, id int64) (error, int
 				}
 			}
 		}
-
+		
 		return nil, 0
 	}
 }
 
 // NodeFormData 表单显示前修改数据
-func (that EasyModel) NodeFormData(pageData *EasyApp.PageData, data gorose.Data, id int64) (gorose.Data, error, int) {
-	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey, util2.Is(id == 0, "add", "edit").(string))
+func (that EasyModelHandle) NodeFormData(pageData *EasyApp.PageData, data gorose.Data, id int64) (gorose.Data, error, int) {
+	easyModel, err := EasyModel.GetEasyModelInfo(that.ModelKey, util.Is(id == 0, "add", "edit").(string))
 	if err != nil {
 		return data, nil, 0
 	} else {
@@ -367,14 +367,14 @@ func (that EasyModel) NodeFormData(pageData *EasyApp.PageData, data gorose.Data,
 			for _, field := range easyModel.Fields {
 				//当前键需要元和分互转
 				if field.SaveTransRule == "yuan2fen" {
-					data[field.FieldKey] = util2.Money(data[field.FieldKey].(int64))
+					data[field.FieldKey] = util.Money(data[field.FieldKey].(int64))
 				}
 			}
 		} else {
 			//新增页链接参数透传
 			for _, urlParam := range easyModel.UrlParams {
 				field := urlParam.FieldKey
-				value := util2.GetValue(pageData.GetHttpRequest(), field)
+				value := util.GetValue(pageData.GetHttpRequest(), field)
 				data[field] = value
 			}
 		}
@@ -383,15 +383,15 @@ func (that EasyModel) NodeFormData(pageData *EasyApp.PageData, data gorose.Data,
 }
 
 // NodeSaveData 表单保存数据前使用
-func (that EasyModel) NodeSaveData(pageData *EasyApp.PageData, oldData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
-	easyModel, err := EasyModel2.GetEasyModelInfo(that.ModelKey, util2.Is(oldData["id"].(int64) == 0, "add", "edit").(string))
+func (that EasyModelHandle) NodeSaveData(pageData *EasyApp.PageData, oldData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
+	easyModel, err := EasyModel.GetEasyModelInfo(that.ModelKey, util.Is(oldData["id"].(int64) == 0, "add", "edit").(string))
 	if err != nil {
 		return postData, nil, 0
 	} else {
 		for _, field := range easyModel.Fields {
 			//当前键需要元和分互转
 			if field.SaveTransRule == "yuan2fen" {
-				v, err := util2.Money2Cent(postData[field.FieldKey].(string))
+				v, err := util.Money2Cent(postData[field.FieldKey].(string))
 				if err != nil {
 					return nil, errors.New("金额格式错误"), 500
 				}

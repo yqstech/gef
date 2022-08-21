@@ -16,7 +16,7 @@ import (
 	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
-	util2 "github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/config"
 	"net/http"
 )
@@ -33,7 +33,7 @@ func (that EasyModels) PageInit(pageData *EasyApp.PageData) {
 
 // NodeBegin 开始
 func (that EasyModels) NodeBegin(pageData *EasyApp.PageData) (error, int) {
-	pageData.SetTitle("后台模型 EasyModel")
+	pageData.SetTitle("后台模型 EasyModelHandle")
 	pageData.SetPageName("模型")
 	pageData.SetTbName("tb_easy_models")
 	return nil, 0
@@ -164,7 +164,7 @@ func (that EasyModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, in
 
 // ExportInsertData 导出内置数据
 func (that EasyModels) ExportInsertData(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	id := util2.GetValue(r, "id")
+	id := util.GetValue(r, "id")
 
 	easyModel, err := db.New().Table("tb_easy_models").Where("id", id).First()
 	if err != nil {
@@ -183,7 +183,7 @@ func (that EasyModels) ExportInsertData(pageData *EasyApp.PageData, w http.Respo
 {
 	TableName: "tb_easy_models",
 	Condition: [][]interface{}{{"model_key", "` + easyModel["model_key"].(string) + `"}},
-	Data: map[string]interface{}` + util2.JsonEncode(easyModel) + `,
+	Data: map[string]interface{}` + util.JsonEncode(easyModel) + `,
 	Children:[]interface{}{
 		//!后台模型的字段
 		
@@ -221,7 +221,7 @@ func (that EasyModels) ExportInsertData(pageData *EasyApp.PageData, w http.Respo
 gef.InsideData{
 	TableName: "tb_easy_models_fields",
 	Condition: [][]interface{}{{"model_id", "__PID__"},{"field_key", "` + Item["field_key"].(string) + `"}},
-	Data: map[string]interface{}` + util2.JsonEncode(Item) + `,
+	Data: map[string]interface{}` + util.JsonEncode(Item) + `,
 },
 `
 		fmt.Fprint(w, content)

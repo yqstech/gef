@@ -15,7 +15,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/Utils/db"
-	util2 "github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/Utils/util"
 	"net/http"
 	"strings"
 )
@@ -146,8 +146,8 @@ func (that *EasyCurd) Find(w http.ResponseWriter, r *http.Request, ps httprouter
 	resultData := map[string]interface{}{
 		"data":       data,
 		"_extend":    that.DbModel.ResultExtend,
-		"_time":      util2.TimeNow(),
-		"_unix_time": util2.Str2UnixTime(util2.TimeNow()),
+		"_time":      util.TimeNow(),
+		"_unix_time": util.Str2UnixTime(util.TimeNow()),
 	}
 	if that.DbModel.CompleteResultData != nil {
 		that.ApiResult(w, 200, "success", that.DbModel.CompleteResultData(resultData, FindAction))
@@ -182,8 +182,8 @@ func (that *EasyCurd) Create(w http.ResponseWriter, r *http.Request, ps httprout
 	resultData := map[string]interface{}{
 		"id":         insertId,
 		"_extend":    that.DbModel.ResultExtend,
-		"_time":      util2.TimeNow(),
-		"_unix_time": util2.Str2UnixTime(util2.TimeNow()),
+		"_time":      util.TimeNow(),
+		"_unix_time": util.Str2UnixTime(util.TimeNow()),
 	}
 	that.ApiResult(w, 200, "success", resultData)
 
@@ -215,8 +215,8 @@ func (that *EasyCurd) Update(w http.ResponseWriter, r *http.Request, ps httprout
 	resultData := map[string]interface{}{
 		"update":     update,
 		"_extend":    that.DbModel.ResultExtend,
-		"_time":      util2.TimeNow(),
-		"_unix_time": util2.Str2UnixTime(util2.TimeNow()),
+		"_time":      util.TimeNow(),
+		"_unix_time": util.Str2UnixTime(util.TimeNow()),
 	}
 
 	that.ApiResult(w, 200, "success", resultData)
@@ -233,7 +233,7 @@ func (that *EasyCurd) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 	if !that.DbModel.SoftDeleteDisable {
 		//使用软删除
 		update, err := conn.Update(map[string]interface{}{
-			"update_time": util2.TimeNow(),
+			"update_time": util.TimeNow(),
 			"is_delete":   1,
 		})
 		logger.Alert(conn.LastSql())
@@ -250,8 +250,8 @@ func (that *EasyCurd) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 		resultData := map[string]interface{}{
 			"delete":     update, //数量
 			"_extend":    that.DbModel.ResultExtend,
-			"_time":      util2.TimeNow(),
-			"_unix_time": util2.Str2UnixTime(util2.TimeNow()),
+			"_time":      util.TimeNow(),
+			"_unix_time": util.Str2UnixTime(util.TimeNow()),
 		}
 
 		that.ApiResult(w, 200, "success", resultData)
@@ -270,8 +270,8 @@ func (that *EasyCurd) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 		resultData := map[string]interface{}{
 			"delete":     delete, //数量
 			"_extend":    that.DbModel.ResultExtend,
-			"_time":      util2.TimeNow(),
-			"_unix_time": util2.Str2UnixTime(util2.TimeNow()),
+			"_time":      util.TimeNow(),
+			"_unix_time": util.Str2UnixTime(util.TimeNow()),
 		}
 		that.ApiResult(w, 200, "success", resultData)
 	}
@@ -318,7 +318,7 @@ func (that *EasyCurd) getOrm(ps httprouter.Params) gorose.IOrm {
 					w = append(w, v)
 				}
 				// in 处理
-				if util2.Interface2String(w[1]) == "in" {
+				if util.Interface2String(w[1]) == "in" {
 					if len(w) > 2 {
 						switch w[2].(type) {
 						case string:
@@ -348,7 +348,7 @@ func (that *EasyCurd) getOrm(ps httprouter.Params) gorose.IOrm {
 func (that *EasyCurd) verifyData(isUpdate bool) {
 	for k, v := range that.DbModel.Data {
 		//数组转为json数据
-		that.DbModel.Data[k] = util2.Array2String(v)
+		that.DbModel.Data[k] = util.Array2String(v)
 	}
 	//设置默认主键名称
 	if that.DbModel.PkName == "" {
@@ -401,5 +401,5 @@ type ResultData struct {
 
 func (that *EasyCurd) ApiResult(w http.ResponseWriter, code int, msg string, data interface{}) {
 	resultData := ResultData{Code: code, Msg: msg, Data: data}
-	fmt.Fprint(w, util2.JsonEncode(resultData))
+	fmt.Fprint(w, util.JsonEncode(resultData))
 }

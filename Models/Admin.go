@@ -9,7 +9,7 @@ package Models
 
 import (
 	"github.com/yqstech/gef/Utils/db"
-	util2 "github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/Utils/util"
 	
 	"github.com/wonderivan/logger"
 )
@@ -21,7 +21,7 @@ func (that Admin) GetAccountInfoByToken(token string) map[string]interface{} {
 	conn := db.New()
 	tokenInfo, err := conn.Table("tb_admin_token").
 		Where(map[string]interface{}{"token": token, "status": 1, "is_delete": 0}).
-		Where("create_time", ">", util2.TimeNowFormat("2006-01-02 15:04:05", 0, 0, -15)).
+		Where("create_time", ">", util.TimeNowFormat("2006-01-02 15:04:05", 0, 0, -15)).
 		First()
 	if err != nil {
 		logger.Error(err.Error())
@@ -93,7 +93,7 @@ func (that Admin) CheckAuth(rule_name string, accountID int) bool {
 			return false
 		}
 		if groupInfo != nil {
-			util2.JsonDecode(groupInfo["rules"].(string), &ruleIDs)
+			util.JsonDecode(groupInfo["rules"].(string), &ruleIDs)
 		}
 	}
 	conn := db.New().Table("tb_admin_rules")

@@ -11,7 +11,7 @@ package adminHandle
 
 import (
 	"github.com/yqstech/gef/EasyApp"
-	Models2 "github.com/yqstech/gef/Models"
+	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/util"
 	
 	"github.com/gohouse/gorose/v2"
@@ -34,24 +34,24 @@ func (ar AdminRules) NodeList(pageData *EasyApp.PageData) (error, int) {
 	//列表查询条件
 	pageData.SetListPageSize(200)
 	pageData.SetListOrder("index_num,id asc")
-
+	
 	//设置列表项
 	pageData.ListColumnAdd("name", "权限名称", "html", nil)
 	pageData.ListColumnAdd("route", "权限地址", "", nil)
 	pageData.ListColumnAdd("icon", "图标", "icon", nil)
-	pageData.ListColumnAdd("status", "状态", "array", Models2.OptionModels{}.ByKey("status", true))
-	pageData.ListColumnAdd("is_compel", "必选", "array", Models2.OptionModels{}.ByKey("is", true))
-	pageData.ListColumnAdd("type", "权限类型", "array", Models2.OptionModels{}.ByKey("rule_type", true))
+	pageData.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ByKey("status", true))
+	pageData.ListColumnAdd("is_compel", "必选", "array", Models.OptionModels{}.ByKey("is", true))
+	pageData.ListColumnAdd("type", "权限类型", "array", Models.OptionModels{}.ByKey("rule_type", true))
 	pageData.ListColumnAdd("open_log", "日志", "switch::text=开启|关闭", nil)
 	pageData.ListColumnAdd("index_num", "排序", "input::width=50px&type=number", nil)
-
+	
 	//设置搜索表单
 	//pageData.ListSearchFieldAdd("time_type", "select", "按订单时间", "1", nil, "width:auto;min-width:0px", nil)
 	//pageData.ListSearchFieldAdd("start_time", "datetime", "", util.TimeNowFormat("2006-01-02 00:00:00", 0, 0, -2), nil, "", nil)
 	//pageData.ListSearchFieldAdd("end_time", "datetime", "-", util.TimeNowFormat("2006-01-02 00:00:00", 0, 0, +1), nil, "", nil)
 	pageData.ListSearchFieldAdd("id", "text", "ID", "", "", nil, "", nil)
-	pageData.ListSearchFieldAdd("status", "select", "状态", "-1", "-1", Models2.OptionModels{}.ByKey("status", false), "", nil)
-	pageData.ListSearchFieldAdd("type", "select", "类型", "0", "0", Models2.OptionModels{}.ByKey("rule_type", false), "", nil)
+	pageData.ListSearchFieldAdd("status", "select", "状态", "-1", "-1", Models.OptionModels{}.ByKey("status", false), "", nil)
+	pageData.ListSearchFieldAdd("type", "select", "类型", "0", "0", Models.OptionModels{}.ByKey("rule_type", false), "", nil)
 	return nil, 0
 }
 
@@ -82,7 +82,7 @@ func (ar AdminRules) NodeListCondition(pageData *EasyApp.PageData, data [][]inte
 // NodeListData 重写数据
 func (ar AdminRules) NodeListData(pageData *EasyApp.PageData, data []gorose.Data) ([]gorose.Data, error, int) {
 	//将数据按上下级顺序重新排列
-	data = Models2.Model{}.GoroseDataLevelOrder(data, "id", "pid", 0, 0)
+	data = Models.Model{}.GoroseDataLevelOrder(data, "id", "pid", 0, 0)
 	for k, v := range data {
 		if v["level"] == int64(0) {
 			data[k]["name"] = "<i class=\"layui-icon " + v["icon"].(string) + "\"></i>&nbsp;&nbsp;" + v["name"].(string)
@@ -102,7 +102,7 @@ func (ar AdminRules) NodeListData(pageData *EasyApp.PageData, data []gorose.Data
 // NodeForm 表单初始化数据
 func (ar AdminRules) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
 	//获取上级菜单
-	parentsMenus, err := Models2.AdminRules{}.GetParentMenus(0)
+	parentsMenus, err := Models.AdminRules{}.GetParentMenus(0)
 	if err != nil {
 		return err, 120
 	}
@@ -111,10 +111,10 @@ func (ar AdminRules) NodeForm(pageData *EasyApp.PageData, id int64) (error, int)
 	pageData.FormFieldsAdd("pid", "select", "上级权限", "", "0", true, parentsMenus, "", nil)
 	pageData.FormFieldsAdd("route", "text", "链接地址", "例如:/index/index", "", false, nil, "", nil)
 	pageData.FormFieldsAdd("icon", "icon", "Icon图标", "请选择图标（remixicon）", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("type", "radio", "权限类型", "", "1", false, Models2.OptionModels{}.ByKey("rule_type", false), "", nil)
-	pageData.FormFieldsAdd("is_compel", "radio", "必选权限", "", "0", true, Models2.AdminRules{}.AllIsCompels(), "", nil)
+	pageData.FormFieldsAdd("type", "radio", "权限类型", "", "1", false, Models.OptionModels{}.ByKey("rule_type", false), "", nil)
+	pageData.FormFieldsAdd("is_compel", "radio", "必选权限", "", "0", true, Models.AdminRules{}.AllIsCompels(), "", nil)
 	pageData.FormFieldsAdd("index_num", "number-xxs", "菜单排序", "值越小越靠前", "200", true, nil, "", nil)
-
+	
 	return nil, 0
 }
 

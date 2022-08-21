@@ -17,7 +17,7 @@ import (
 	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
-	util2 "github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/Utils/util"
 	"net/http"
 	"strings"
 )
@@ -84,10 +84,10 @@ func (that OptionModels) NodeListData(pageData *EasyApp.PageData, data []gorose.
 	for k, v := range data {
 		staticData := []map[string]interface{}{}
 		if v["static_data"].(string) != "" {
-			util2.JsonDecode(v["static_data"].(string), &staticData)
+			util.JsonDecode(v["static_data"].(string), &staticData)
 			transData := []string{}
 			for _, opt := range staticData {
-				transData = append(transData, opt["name"].(string)+" : "+util2.Interface2String(opt["value"]))
+				transData = append(transData, opt["name"].(string)+" : "+util.Interface2String(opt["value"]))
 			}
 			data[k]["static_data"] = strings.Join(transData, "<br>")
 		}
@@ -187,10 +187,10 @@ func (that OptionModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 			logger.Error(err.Error())
 			return err, 500
 		}
-		indexNum = util2.Int642Int(num) + 1
+		indexNum = util.Int642Int(num) + 1
 	}
 	pageData.FormFieldsAdd("match_fields", "textarea", "自动匹配字段", "每个字段占一行，支持全匹配字段和半匹配字段,例如is_*", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("index_num", "text-xs", "排序", "", util2.Int2String(indexNum), true, nil, "", nil)
+	pageData.FormFieldsAdd("index_num", "text-xs", "排序", "", util.Int2String(indexNum), true, nil, "", nil)
 
 	return nil, 0
 }
@@ -218,7 +218,7 @@ func (that OptionModels) NodeSaveData(pageData *EasyApp.PageData, oldData gorose
 
 // Dynamic 动态获取选项集
 func (that OptionModels) Dynamic(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	optionModelKey := util2.PostValue(r, "_dynamic_option_model_key")
+	optionModelKey := util.PostValue(r, "_dynamic_option_model_key")
 	if optionModelKey == "" {
 		that.ApiResult(w, 201, "参数不全", nil)
 		return
@@ -226,7 +226,7 @@ func (that OptionModels) Dynamic(pageData *EasyApp.PageData, w http.ResponseWrit
 	DynamicParams := Models.OptionModels{}.DynamicParams(optionModelKey)
 	var wheres []string
 	for _, dp := range DynamicParams {
-		v := util2.PostValue(r, dp.ParamKey)
+		v := util.PostValue(r, dp.ParamKey)
 		if v == "" {
 			wheres = append(wheres, dp.FieldKey+" = '"+dp.DefValue+"'")
 		} else {
@@ -261,7 +261,7 @@ func (that OptionModels) ExportInsertData(pageData *EasyApp.PageData, w http.Res
 {
 	TableName: "tb_option_models",
 	Condition: [][]interface{}{{"unique_key", "` + Item["unique_key"].(string) + `"}},
-	Data: map[string]interface{}` + util2.JsonEncode(Item) + `,
+	Data: map[string]interface{}` + util.JsonEncode(Item) + `,
 },
 `
 		fmt.Fprint(w, content)

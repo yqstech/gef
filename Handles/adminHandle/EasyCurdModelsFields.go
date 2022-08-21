@@ -15,7 +15,7 @@ import (
 	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
-	util2 "github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/config"
 	"strings"
 )
@@ -31,8 +31,8 @@ func (that EasyCurdModelsFields) NodeBegin(pageData *EasyApp.PageData) (error, i
 	pageData.SetTbName("tb_easy_curd_models_fields")
 	if pageData.GetHttpRequest().Method == "GET" {
 		//同步数据库字段
-		id := util2.GetValue(pageData.GetHttpRequest(), "id")
-		that.syncModelFields(util2.String2Int(id))
+		id := util.GetValue(pageData.GetHttpRequest(), "id")
+		that.syncModelFields(util.String2Int(id))
 	}
 	return nil, 0
 }
@@ -56,9 +56,9 @@ func (that EasyCurdModelsFields) NodeList(pageData *EasyApp.PageData) (error, in
 // NodeListCondition 修改查询条件
 func (that EasyCurdModelsFields) NodeListCondition(pageData *EasyApp.PageData, condition [][]interface{}) ([][]interface{}, error, int) {
 	modelID := 0
-	modelId := util2.GetValue(pageData.GetHttpRequest(), "id")
+	modelId := util.GetValue(pageData.GetHttpRequest(), "id")
 	if modelId != "" {
-		modelID = util2.String2Int(modelId)
+		modelID = util.String2Int(modelId)
 		//追加查询条件
 		condition = append(condition, []interface{}{
 			"model_id", "=", modelID,
@@ -123,7 +123,7 @@ func (that EasyCurdModelsFields) syncModelFields(easyModelId int) {
 	for _, field := range fields {
 		fieldsMap[field["field_key"].(string)] = field
 	}
-	timeNow := util2.TimeNow()
+	timeNow := util.TimeNow()
 	//对比更新模型字段信息
 	for _, fieldInfo := range query {
 		//字段key
@@ -140,12 +140,12 @@ func (that EasyCurdModelsFields) syncModelFields(easyModelId int) {
 		}
 		//是否默认设置成私密
 		isPrivate := 0
-		if util2.IsInArray(fieldKey, defaultPrivateFields) {
+		if util.IsInArray(fieldKey, defaultPrivateFields) {
 			isPrivate = 1
 		}
 		//是否默认设置成锁定
 		isLock := 0
-		if util2.IsInArray(fieldKey, defaultLockFields) {
+		if util.IsInArray(fieldKey, defaultLockFields) {
 			isLock = 1
 		}
 		//是否存在字段

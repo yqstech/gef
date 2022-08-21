@@ -15,7 +15,7 @@ import (
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Utils/db"
-	util2 "github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/Utils/util"
 	"net/http"
 )
 
@@ -72,7 +72,7 @@ func (that ConfigsGroup) NodeForm(pageData *EasyApp.PageData, id int64) (error, 
 
 // ExportInsertData 导出内置数据
 func (that ConfigsGroup) ExportInsertData(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	id := util2.GetValue(r, "id")
+	id := util.GetValue(r, "id")
 
 	configGroup, err := db.New().Table("tb_configs_group").Where("id", id).First()
 	if err != nil {
@@ -91,7 +91,7 @@ func (that ConfigsGroup) ExportInsertData(pageData *EasyApp.PageData, w http.Res
 {
 	TableName: "tb_configs_group",
 	Condition: [][]interface{}{{"group_key", "` + configGroup["group_key"].(string) + `"}},
-	Data: map[string]interface{}` + util2.JsonEncode(configGroup) + `,
+	Data: map[string]interface{}` + util.JsonEncode(configGroup) + `,
 	Children:[]interface{}{
 		//!当前分组内的设置项
 		
@@ -129,7 +129,7 @@ func (that ConfigsGroup) ExportInsertData(pageData *EasyApp.PageData, w http.Res
 gef.InsideData{
 	TableName: "tb_configs",
 	Condition: [][]interface{}{{"group_id", "__PID__"},{"name", "` + Item["name"].(string) + `"}},
-	Data: map[string]interface{}` + util2.JsonEncode(Item) + `,
+	Data: map[string]interface{}` + util.JsonEncode(Item) + `,
 },
 `
 		fmt.Fprint(w, content)
@@ -162,7 +162,7 @@ gef.InsideData{
 gef.InsideData{
 	TableName: "tb_app_configs",
 	Condition: [][]interface{}{{"group_id", "__PID__"},{"name", "` + Item["name"].(string) + `"}},
-	Data: map[string]interface{}` + util2.JsonEncode(Item) + `,
+	Data: map[string]interface{}` + util.JsonEncode(Item) + `,
 },
 `
 		fmt.Fprint(w, content)

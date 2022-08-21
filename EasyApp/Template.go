@@ -13,7 +13,7 @@ import (
 	"bytes"
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/Templates"
-	util2 "github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/Utils/util"
 	"html"
 	"io/fs"
 	"strings"
@@ -109,16 +109,16 @@ func (t *Template) PageData2Display(pageData *PageData) {
 		if fkey != "" {
 			//初始化表单项的原始数据值
 			if dbvalue, ok := pageData.formData[fkey]; ok {
-				pageData.formFields[k].Value = util2.Interface2String(dbvalue)
+				pageData.formFields[k].Value = util.Interface2String(dbvalue)
 			}
 			//修正checkbox默认值
-			if util2.IsInArray(ftype, []interface{}{"checkbox", "checkbox_level", "tags", "images"}) {
+			if util.IsInArray(ftype, []interface{}{"checkbox", "checkbox_level", "tags", "images"}) {
 				if pageData.formFields[k].Value == "" {
 					pageData.formFields[k].Value = "[]"
 				}
 			}
 			//文本类组件需要转义双引号
-			if util2.IsInArray(ftype, []interface{}{"text", "textarea", "text-disabled", "textarea-disabled", "wangEditor"}) {
+			if util.IsInArray(ftype, []interface{}{"text", "textarea", "text-disabled", "textarea-disabled", "wangEditor"}) {
 				pageData.formFields[k].Value = strings.ReplaceAll(pageData.formFields[k].Value, "\"", "\\\"")
 			}
 			//文本域,换行\n 避免被html解析造成换行错乱
@@ -200,8 +200,8 @@ func (t *Template) Display() (string, error) {
 
 func (t *Template) Functions() template.FuncMap {
 	return template.FuncMap{
-		"toString": util2.Interface2String,
-		"inArray":  util2.IsInArray,
+		"toString": util.Interface2String,
+		"inArray":  util.IsInArray,
 		"inMap": func(k string, data map[string]interface{}) bool {
 			if _, ok := data[k]; ok {
 				return true
@@ -215,7 +215,7 @@ func (t *Template) Functions() template.FuncMap {
 			return nil
 		},
 		"json_encode": func(data interface{}, trans bool) string {
-			str := util2.JsonEncode(data)
+			str := util.JsonEncode(data)
 			if trans {
 				//模板里使用需要转义
 				str = strings.Replace(str, "\"", "&#34;", -1)
@@ -237,8 +237,8 @@ func (t *Template) Functions() template.FuncMap {
 			return false
 		},
 		"jsValue": func(value interface{}) interface{} {
-			s := util2.Interface2String(value)
-			if util2.IsNum(s) {
+			s := util.Interface2String(value)
+			if util.IsNum(s) {
 				return s
 			} else {
 				return "'" + s + "'"
