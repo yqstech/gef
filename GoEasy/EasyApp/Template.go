@@ -20,8 +20,7 @@ import (
 	"text/template"
 )
 
-//节点流匹配的模板
-
+// Template 节点流匹配的模板
 type Template struct {
 	DisplayData  map[string]interface{}
 	TplName      string
