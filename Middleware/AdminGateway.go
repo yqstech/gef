@@ -2,7 +2,7 @@
  * @Author: 云起时
  * @Email: limingxiang@yqstech.com
  * @Description: 后台应用启动器，封装应用的前置校验，并启动应用
- * @File: AdminBoot
+ * @File: AdminGateway
  * @Version: 1.0.0
  * @Date: 2021/10/14 5:33 下午
  */
@@ -24,71 +24,56 @@ import (
 	"github.com/wonderivan/logger"
 )
 
-// AdminBoot
-// 后台应用启动器,继承自EasyApp应用启动器
-// 封装应用的前置校验，并启动应用
-type AdminBoot struct {
-	EasyApp.AppBoot
-	AppPages map[string]EasyApp.AppPage
+// AdminGateway 后台网关,校验token、校验权限、启动nodePage或空白页
+type AdminGateway struct {
+	NodePages map[string]EasyApp.AppPage
 }
 
-// BindPages 绑定页面列表
-func (admin *AdminBoot) BindPages(s map[string]EasyApp.AppPage) {
-	for k, v := range s {
-		admin.AppPages[k] = v
-	}
-}
-
-//
-// Gateway
-// 后台入口，一个普通的Handel
-// 中间件封装BootHandle
-func (admin *AdminBoot) Gateway(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	//嵌套中间件，执行BootHandle方法
-	admin.SafeHandle(
-		admin.checkToken(
-			admin.checkAuth(
-				admin.log(
-					admin.EasyModel(
-						admin.Run,
-					),
+// Gateway 网关入口
+func (admin *AdminGateway) Gateway(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	//功能封装
+	admin.checkToken(
+		admin.checkAuth(
+			admin.log(
+				admin.EasyModel(
+					//启动注册的nodePage或空白页
+					admin.Run,
 				),
 			),
 		),
-	)(admin.AppPages, w, r, ps)
+	)(w, r, ps)
 }
 
 // EasyModel em_开头的未定义页面都转发到easyModel页面
-func (admin AdminBoot) EasyModel(next EasyApp.BootHandle) EasyApp.BootHandle {
-	return func(appPages map[string]EasyApp.AppPage, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (admin *AdminGateway) EasyModel(next httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		pageName := ps.ByName("pageName")
 		//校验是否设置了对应的页面
-		if _, ok := admin.AppPages[pageName]; !ok {
+		if _, ok := admin.NodePages[pageName]; !ok {
 			//em_开头的未定义页面，都设置到EasyModel页面
 			if pageName[0:3] == "em_" {
-				admin.AppPages[pageName] = adminHandle.EasyModelHandle{ModelKey: pageName[3:]}
+				admin.NodePages[pageName] = adminHandle.EasyModelHandle{ModelKey: pageName[3:]}
 			}
 		}
-		next(appPages, w, r, ps)
+		next(w, r, ps)
 	}
 }
 
 //校验登录身份token
-func (admin AdminBoot) checkToken(next EasyApp.BootHandle) EasyApp.BootHandle {
-	return func(appPages map[string]EasyApp.AppPage, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		//校验后台域名
-		//adminDomain := models.GroupConfigs{}.ConfigValue("admin_domain")
-		//if adminDomain != "" {
-		//	//判断域名
-		//
-		//}
+func (admin *AdminGateway) checkToken(next httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		//defer func() {
+		//	if r := recover(); r != nil {
+		//		fmt.Fprint(w, "程序异常：", r)
+		//	}
+		//}()
 		
 		//获取当前链接
 		url := ps.ByName("pageName") + "/" + ps.ByName("actionName")
 		//token是否免检
 		checkTokenExclude := []interface{}{"account/login", "account/verifyCode"}
 		if util.IsInArray(url, checkTokenExclude) {
-			next(appPages, w, r, ps)
+			next(w, r, ps)
 			return
 		}
 		//获取token
@@ -104,14 +89,12 @@ func (admin AdminBoot) checkToken(next EasyApp.BootHandle) EasyApp.BootHandle {
 		}
 		//token为空
 		if token == "" {
-			logger.Info("token为空")
 			admin.toLogin(w, r)
 			return
 		}
 		//根据token获取用户信息
 		userinfo := Models.Admin{}.GetAccountInfoByToken(token)
 		if userinfo == nil {
-			logger.Info("token无效")
 			admin.toLogin(w, r)
 			return
 		}
@@ -143,7 +126,7 @@ func (admin AdminBoot) checkToken(next EasyApp.BootHandle) EasyApp.BootHandle {
 		uploadUserID := httprouter.Param{Key: "uploadUserID", Value: util.Int642String(userinfo["account_id"].(int64))}
 		ps = append(ps, uploadUserID)
 		
-		next(appPages, w, r, ps)
+		next(w, r, ps)
 	}
 }
 
@@ -154,26 +137,26 @@ func (admin AdminBoot) checkToken(next EasyApp.BootHandle) EasyApp.BootHandle {
 //  @param next
 //  @return BootHandle
 //
-func (admin AdminBoot) checkAuth(next EasyApp.BootHandle) EasyApp.BootHandle {
-	return func(appPages map[string]EasyApp.AppPage, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (admin *AdminGateway) checkAuth(next httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		
 		accountId := ps.ByName("account_id")
 		mainAccountId := ps.ByName("main_account_id")
 		//未登录的无需检查
 		if mainAccountId == "" && accountId == "" {
-			next(appPages, w, r, ps)
+			next(w, r, ps)
 			return
 		}
 		//校验权限
 		if mainAccountId == accountId {
 			//主账户登录不校验权限
-			next(appPages, w, r, ps)
+			next(w, r, ps)
 			return
 		}
 		//子账户登录查询权限
 		url := "/" + ps.ByName("pageName") + "/" + ps.ByName("actionName")
 		if (Models.Admin{}).CheckAuth(url, util.String2Int(accountId)) {
-			next(appPages, w, r, ps)
+			next(w, r, ps)
 		} else {
 			EasyApp.Page{}.ErrResult(w, r, 120, "您无权进行此操作！", "")
 		}
@@ -181,8 +164,8 @@ func (admin AdminBoot) checkAuth(next EasyApp.BootHandle) EasyApp.BootHandle {
 }
 
 //记录操作日志
-func (admin AdminBoot) log(next EasyApp.BootHandle) EasyApp.BootHandle {
-	return func(appPages map[string]EasyApp.AppPage, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (admin *AdminGateway) log(next httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		if r.Method == "POST" {
 			//操作地址
 			url := "/" + ps.ByName("pageName") + "/" + ps.ByName("actionName")
@@ -195,14 +178,6 @@ func (admin AdminBoot) log(next EasyApp.BootHandle) EasyApp.BootHandle {
 				return
 			}
 			if ruleInfo != nil {
-				
-				//记录Request信息
-				// rdump, err := httputil.DumpRequest(r, true)
-				// if err != nil {
-				// 	logger.Error(err.Error())
-				// 	nodeFlow.EasyApp{}.ErrResult(w, r, 500, "系统出错了！", "")
-				// 	return
-				// }
 				//整理日志信息
 				logInfo := map[string]interface{}{
 					"rule":         url,
@@ -228,12 +203,25 @@ func (admin AdminBoot) log(next EasyApp.BootHandle) EasyApp.BootHandle {
 				ps = append(ps, logId)
 			}
 		}
-		next(appPages, w, r, ps)
+		next(w, r, ps)
+	}
+}
+
+func (admin *AdminGateway) Run(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	//根据url链接，获取当前页面名称
+	pageName := ps.ByName("pageName")
+	//在页面集中检索页面，并执行页面的Run方法
+	if activePage, ok := admin.NodePages[pageName]; ok {
+		activePage.Run(&activePage, w, r, ps)
+	} else {
+		//检索不到，转发到空白页
+		activePage = EasyApp.EmptyPage{}
+		activePage.Run(&activePage, w, r, ps)
 	}
 }
 
 // 跳转到登录页面或者返回需要登录信息
-func (admin AdminBoot) toLogin(w http.ResponseWriter, r *http.Request) {
+func (admin *AdminGateway) toLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		commHandle.Base{}.ApiResult(w, 100, "no token", nil)
 	} else {
@@ -241,3 +229,10 @@ func (admin AdminBoot) toLogin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(302)
 	}
 }
+
+// BindPages 绑定页面列表
+//func (admin *AdminGateway) BindPages(s map[string]EasyApp.AppPage) {
+//	for k, v := range s {
+//		admin.NodePages[k] = v
+//	}
+//}

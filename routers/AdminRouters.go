@@ -11,7 +11,6 @@ package routers
 
 import (
 	"github.com/julienschmidt/httprouter"
-	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Handles/commHandle"
 	"github.com/yqstech/gef/Middleware"
 	"github.com/yqstech/gef/Registry"
@@ -44,11 +43,10 @@ func AdminRouters() *httprouter.Router {
 	router.GET("/server/manage/restart", commHandle.Server{}.Restart) //重启
 	
 	//!后台页面
-	//创建后台网关并绑定页面
-	AdminBoot := Middleware.AdminBoot{AppPages: map[string]EasyApp.AppPage{}}
-	AdminBoot.BindPages(Registry.AdminPages)
-	//后台全部请求，引导到后台启动器的入口
-	router.POST(config.AdminPath+"/:pageName/:actionName", AdminBoot.Gateway)
-	router.GET(config.AdminPath+"/:pageName/:actionName", AdminBoot.Gateway)
+	//创建后台网关,传入注册的
+	AdminGateway := Middleware.AdminGateway{NodePages: Registry.AdminPages}
+	router.POST(config.AdminPath+"/:pageName/:actionName", AdminGateway.Gateway)
+	router.GET(config.AdminPath+"/:pageName/:actionName", AdminGateway.Gateway)
+	
 	return router
 }
