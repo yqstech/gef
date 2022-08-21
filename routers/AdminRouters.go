@@ -11,11 +11,11 @@ package routers
 
 import (
 	"github.com/julienschmidt/httprouter"
-	"github.com/yqstech/gef/GoEasy/EasyApp"
-	"github.com/yqstech/gef/GoEasy/Handles/commHandle"
-	"github.com/yqstech/gef/GoEasy/Middleware"
-	"github.com/yqstech/gef/GoEasy/Registry"
-	"github.com/yqstech/gef/GoEasy/Utils/util"
+	"github.com/yqstech/gef/EasyApp"
+	commHandle2 "github.com/yqstech/gef/Handles/commHandle"
+	"github.com/yqstech/gef/Middleware"
+	"github.com/yqstech/gef/Registry"
+	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/config"
 	"github.com/yqstech/gef/static"
 	"net/http"
@@ -37,11 +37,11 @@ func AdminRouters() *httprouter.Router {
 	router.ServeFiles("/uploads/*filepath", http.Dir("data/uploads/"))
 
 	//工具包，打印post提交信息
-	router.POST("/utils/requestPrint", commHandle.Utils{}.RequestPrint)
+	router.POST("/utils/requestPrint", commHandle2.Utils{}.RequestPrint)
 
 	//当前服务控制
-	router.GET("/server/manage/pid", commHandle.Server{}.Pid)         //PID
-	router.GET("/server/manage/restart", commHandle.Server{}.Restart) //重启
+	router.GET("/server/manage/pid", commHandle2.Server{}.Pid)         //PID
+	router.GET("/server/manage/restart", commHandle2.Server{}.Restart) //重启
 
 	//后台模块启动器
 	AdminBoot := Middleware.AdminBoot{AppPages: map[string]EasyApp.AppPage{}}

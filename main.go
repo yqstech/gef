@@ -15,15 +15,15 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Event"
-	"github.com/yqstech/gef/GoEasy/EasyApp"
-	"github.com/yqstech/gef/GoEasy/Registry"
-	"github.com/yqstech/gef/GoEasy/Templates"
-	"github.com/yqstech/gef/GoEasy/Utils/db"
-	"github.com/yqstech/gef/GoEasy/Utils/gdb"
-	"github.com/yqstech/gef/GoEasy/Utils/pool"
-	"github.com/yqstech/gef/GoEasy/Utils/serv"
-	"github.com/yqstech/gef/GoEasy/Utils/util"
+	"github.com/yqstech/gef/Registry"
+	"github.com/yqstech/gef/Templates"
+	"github.com/yqstech/gef/Utils/db"
+	"github.com/yqstech/gef/Utils/gdb"
+	pool2 "github.com/yqstech/gef/Utils/pool"
+	"github.com/yqstech/gef/Utils/serv"
+	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/config"
 	"github.com/yqstech/gef/routers"
 	"github.com/yqstech/gef/static"
@@ -58,9 +58,9 @@ func init() {
 	dbm.AutoInsideData(insideData)
 
 	//! 初始化Redis
-	pool.RedisInit()
+	pool2.RedisInit()
 	//! 初始化GoCache
-	pool.GocacheInit()
+	pool2.GocacheInit()
 }
 
 // New 创建新的Gef应用

@@ -11,9 +11,9 @@ package gef
 
 import (
 	"github.com/wonderivan/logger"
-	"github.com/yqstech/gef/GoEasy/Utils/db"
-	"github.com/yqstech/gef/GoEasy/Utils/gdb"
-	"github.com/yqstech/gef/GoEasy/Utils/util"
+	"github.com/yqstech/gef/Utils/db"
+	"github.com/yqstech/gef/Utils/gdb"
+	util2 "github.com/yqstech/gef/Utils/util"
 	"strings"
 )
 
@@ -65,8 +65,8 @@ func setAdminRules(pid int64, rules []map[string]interface{}) {
 				"icon":        rule["icon"],
 				"route":       rule["route"],
 				"index_num":   IndexNum,
-				"create_time": util.TimeNow(),
-				"update_time": util.TimeNow(),
+				"create_time": util2.TimeNow(),
+				"update_time": util2.TimeNow(),
 			}
 			//存在状态字段，则设置状态，否则是默认的1
 			if ruleStatus, ok := rule["status"]; ok {
@@ -86,7 +86,7 @@ func setAdminRules(pid int64, rules []map[string]interface{}) {
 				"is_compel":   rule["is_compel"],
 				"icon":        rule["icon"],
 				"index_num":   IndexNum,
-				"update_time": util.TimeNow(),
+				"update_time": util2.TimeNow(),
 			}
 			//存在状态字段，则更新状态
 			if ruleStatus, ok := rule["status"]; ok {
@@ -165,12 +165,12 @@ func (that DbManager) AutoInsideData(data []InsideData) {
 				var newInsideDataList []InsideData
 				for childIndex, childData := range d.Children {
 					//处理下级的查询条件
-					ccJson := util.JsonEncode(childData.(InsideData).Condition)
-					ccJson = strings.Replace(ccJson, "__PID__", util.Int642String(DataId), -1)
+					ccJson := util2.JsonEncode(childData.(InsideData).Condition)
+					ccJson = strings.Replace(ccJson, "__PID__", util2.Int642String(DataId), -1)
 					var ccArr [][]interface{}
-					util.JsonDecode(ccJson, &ccArr)
+					util2.JsonDecode(ccJson, &ccArr)
 					for ck, cv := range childData.(InsideData).Data {
-						if util.Interface2String(cv) == "__PID__" {
+						if util2.Interface2String(cv) == "__PID__" {
 							childData.(InsideData).Data[ck] = DataId
 						}
 					}
