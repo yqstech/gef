@@ -7,7 +7,7 @@
  * @Date: 2022/3/8 12:44 下午
  */
 
-package Routers
+package routers
 
 import (
 	"github.com/julienschmidt/httprouter"

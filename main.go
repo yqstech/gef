@@ -18,7 +18,6 @@ import (
 	"github.com/yqstech/gef/GoEasy/EasyApp"
 	"github.com/yqstech/gef/GoEasy/Event"
 	"github.com/yqstech/gef/GoEasy/Registry"
-	"github.com/yqstech/gef/GoEasy/Routers"
 	"github.com/yqstech/gef/GoEasy/Templates"
 	"github.com/yqstech/gef/GoEasy/Utils/db"
 	"github.com/yqstech/gef/GoEasy/Utils/gdb"
@@ -167,7 +166,7 @@ func (g *Gef) Run() {
 		g.Servers = append(g.Servers, Server{
 			Name:       "gef-admin",
 			Port:       config.AdminPort,
-			Router:     Routers.AdminRouters(),
+			Router:     routers.AdminRouters(),
 			RouterType: 0,
 		})
 	}
