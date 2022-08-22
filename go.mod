@@ -1,6 +1,6 @@
 module github.com/yqstech/gef
 
-go 1.17
+go 1.19
 
 require (
 	github.com/facebookgo/grace v0.0.0-20180706040059-75cf19382434

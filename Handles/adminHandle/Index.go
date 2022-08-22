@@ -30,7 +30,6 @@ type Index struct {
 func (that *Index) NodeInit(pageBuilder *builder.PageBuilder) {
 	that.NodePageActions["get_menus"] = that.GetMenus
 	that.NodePageActions["main"] = that.Main
-	logger.Debug("zheli")
 }
 
 // Index 后台主页框架
@@ -57,13 +56,13 @@ func (that *Index) Main(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 // GetMenus 获取菜单接口，支持顶部菜单，左侧菜单，右侧菜单
 func (that Index) GetMenus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//主账户ID
-	main_account_id := ps.ByName("main_account_id")
+	mainAccountId := ps.ByName("main_account_id")
 	//当前账户ID
-	account_id := ps.ByName("account_id")
-	account_name := ps.ByName("account_name")
+	accountId := ps.ByName("account_id")
+	accountName := ps.ByName("account_name")
 	account := ps.ByName("account")
 	//当前账户所属分组角色
-	group_id := ps.ByName("group_id")
+	groupId := ps.ByName("group_id")
 
 	//定义权限表
 	var rules interface{}
@@ -83,14 +82,14 @@ func (that Index) GetMenus(w http.ResponseWriter, r *http.Request, ps httprouter
 			"target": "main_area",
 		},
 		{
-			"name":   account_name,
+			"name":   accountName,
 			"icon":   "layui-icon-username",
 			"url":    config.AdminPath + "/account/userinfo",
 			"target": "main_area",
 		},
 	}
 
-	if account_id == main_account_id {
+	if accountId == mainAccountId {
 		//当为主账户时，获取所有菜单
 		rules, err = db.New().Table("tb_admin_rules").
 			Where("is_delete", "=", 0).
@@ -105,10 +104,10 @@ func (that Index) GetMenus(w http.ResponseWriter, r *http.Request, ps httprouter
 		}
 	} else {
 		//否则，获取账户角色的菜单
-		if group_id != "" && group_id != "0" {
-			logger.Info(group_id, "子账户角色ID")
+		if groupId != "" && groupId != "0" {
+			logger.Info(groupId, "子账户角色ID")
 			groupInfo, err := db.New().Table("tb_admin_group").
-				Where("id", int64(util.String2Int(group_id))).
+				Where("id", int64(util.String2Int(groupId))).
 				First()
 			if err != nil {
 				logger.Error(err.Error())
@@ -119,10 +118,10 @@ func (that Index) GetMenus(w http.ResponseWriter, r *http.Request, ps httprouter
 				that.ApiResult(w, 110, "error", "角色无效！")
 				return
 			}
-			rule_ids := []int64{}
-			util.JsonDecode(groupInfo["rules"].(string), &rule_ids)
-			ruleIDs := []int64{}
-			for _, v := range rule_ids {
+			var ruleIds []int64
+			util.JsonDecode(groupInfo["rules"].(string), &ruleIds)
+			var ruleIDs []int64
+			for _, v := range ruleIds {
 				ruleIDs = append(ruleIDs, v)
 			}
 			//获取有效菜单
@@ -170,7 +169,7 @@ func (that Index) GetMenus(w http.ResponseWriter, r *http.Request, ps httprouter
 
 	//获取顶部一级菜单，并确定选中的菜单ID =》topMenuActiveID
 	//topMenus
-	topMenus := []map[string]interface{}{}
+	var topMenus []map[string]interface{}
 	topMenuActiveID := int64(0)
 	for _, rule := range rules.([]gorose.Data) {
 		if rule["pid"].(int64) == 0 {
@@ -203,7 +202,7 @@ func (that Index) GetMenus(w http.ResponseWriter, r *http.Request, ps httprouter
 	//菜单结构
 	ruleMap := map[int64]map[string]interface{}{}
 	//记录一级菜单顺序，map是无序的
-	ruleIndex := []int64{}
+	var ruleIndex []int64
 	for _, rule := range rules.([]gorose.Data) {
 		if rule["pid"].(int64) == topMenuActiveID {
 			ruleIndex = append(ruleIndex, rule["id"].(int64))
@@ -243,7 +242,7 @@ func (that Index) GetMenus(w http.ResponseWriter, r *http.Request, ps httprouter
 		}
 	}
 	//转换成菜单结构
-	menuArr := []interface{}{}
+	var menuArr []interface{}
 	for _, Index := range ruleIndex {
 		menuArr = append(menuArr, ruleMap[Index])
 	}
@@ -253,6 +252,6 @@ func (that Index) GetMenus(w http.ResponseWriter, r *http.Request, ps httprouter
 		"topMenus":     topMenus,
 		"userMenus":    userMenus,
 		"account":      account,
-		"account_name": account_name,
+		"account_name": accountName,
 	})
 }
