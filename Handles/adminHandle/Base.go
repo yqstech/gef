@@ -11,9 +11,9 @@ package adminHandle
 
 import (
 	"github.com/wonderivan/logger"
-	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Handles/commHandle"
 	"github.com/yqstech/gef/Models"
+	"github.com/yqstech/gef/builder"
 )
 
 type Base struct {
@@ -21,7 +21,7 @@ type Base struct {
 }
 
 // NodeCheckAuth 重写校验权限节点
-func (b Base) NodeCheckAuth(pageData *EasyApp.PageData, btnRule string, accountID int) (bool, error) {
+func (b Base) NodeCheckAuth(pageBuilder *builder.PageBuilder, btnRule string, accountID int) (bool, error) {
 	return Models.Admin{}.CheckAuth(btnRule, accountID), nil
 }
 

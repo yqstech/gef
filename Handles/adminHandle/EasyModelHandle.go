@@ -13,10 +13,10 @@ import (
 	"errors"
 	"github.com/gohouse/gorose/v2"
 	"github.com/wonderivan/logger"
-	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/builder"
 	"strings"
 	"sync"
 	"time"
@@ -28,46 +28,46 @@ type EasyModelHandle struct {
 }
 
 // NodeBegin 开始
-func (that EasyModelHandle) NodeBegin(pageData *EasyApp.PageData) (error, int) {
+func (that EasyModelHandle) NodeBegin(pageBuilder *builder.PageBuilder) (error, int) {
 	easyModel, err := GetEasyModelInfo(that.ModelKey, "begin")
 	if err != nil {
 		return err, 500
 	} else {
-		pageData.SetTitle(easyModel.ModelName + "管理")
-		pageData.SetPageName(easyModel.ModelName)
-		pageData.SetTbName(easyModel.TableName)
+		pageBuilder.SetTitle(easyModel.ModelName + "管理")
+		pageBuilder.SetPageName(easyModel.ModelName)
+		pageBuilder.SetTbName(easyModel.TableName)
 		return nil, 0
 	}
 }
 
 // NodeList 初始化列表
-func (that EasyModelHandle) NodeList(pageData *EasyApp.PageData) (error, int) {
+func (that EasyModelHandle) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 	easyModel, err := GetEasyModelInfo(that.ModelKey, "list")
 	if err != nil {
 		return err, 500
 	} else {
 		//!排序、分页、列表页面提示
-		pageData.SetListOrder(easyModel.OrderType)
+		pageBuilder.SetListOrder(easyModel.OrderType)
 		if easyModel.PageSize > 0 {
-			pageData.SetListPageSize(easyModel.PageSize)
+			pageBuilder.SetListPageSize(easyModel.PageSize)
 		}
 		if easyModel.PageNotice != "" {
-			pageData.SetPageNotice(easyModel.PageNotice)
+			pageBuilder.SetPageNotice(easyModel.PageNotice)
 		}
 		//!设置tabs列表和选中项
-		validUrl := util.UrlScreenParam(pageData.GetHttpRequest(), []string{"id"}, false, true)
+		validUrl := util.UrlScreenParam(pageBuilder.GetHttpRequest(), []string{"id"}, false, true)
 		for index, tab := range easyModel.ListTabs {
-			pageData.PageTabAdd(tab.TabName, validUrl+"tab="+util.Int2String(index))
+			pageBuilder.PageTabAdd(tab.TabName, validUrl+"tab="+util.Int2String(index))
 		}
 		//获取第几页
-		tabIndex := that.GetTabIndex(pageData, "tab")
-		pageData.SetPageTabSelect(tabIndex)
-		
+		tabIndex := that.GetTabIndex(pageBuilder, "tab")
+		pageBuilder.SetPageTabSelect(tabIndex)
+
 		//!获取自定义按钮列表
 		for btnName, Btn := range easyModel.Buttons {
-			pageData.SetButton(btnName, Btn)
+			pageBuilder.SetButton(btnName, Btn)
 		}
-		
+
 		//!顶部按钮
 		topBtns := easyModel.TopButtons
 		//新增
@@ -78,12 +78,12 @@ func (that EasyModelHandle) NodeList(pageData *EasyApp.PageData) (error, int) {
 				}
 			}
 		}
-		pageData.SetListTopBtns(topBtns...)
+		pageBuilder.SetListTopBtns(topBtns...)
 		//!URL参数透传到顶部按钮上
 		for _, urlParam := range easyModel.UrlParams {
 			for _, btn := range topBtns {
-				urlAppend := urlParam.FieldKey + "=" + util.GetValue(pageData.GetHttpRequest(), urlParam.ParamKey)
-				pageData.SetButtonActionUrl(btn, urlAppend, true)
+				urlAppend := urlParam.FieldKey + "=" + util.GetValue(pageBuilder.GetHttpRequest(), urlParam.ParamKey)
+				pageBuilder.SetButtonActionUrl(btn, urlAppend, true)
 			}
 		}
 		//!右侧按钮
@@ -112,11 +112,11 @@ func (that EasyModelHandle) NodeList(pageData *EasyApp.PageData) (error, int) {
 				}
 			}
 		}
-		pageData.SetListRightBtns(rightBtns...)
+		pageBuilder.SetListRightBtns(rightBtns...)
 		//ID列同步到字段管理了，统一不显示默认id列了
-		pageData.ListColumnClear()
+		pageBuilder.ListColumnClear()
 		if easyModel.BatchAction {
-			pageData.SetListBatchAction(true)
+			pageBuilder.SetListBatchAction(true)
 		}
 		//增加列表列
 		for _, field := range easyModel.Fields {
@@ -125,10 +125,10 @@ func (that EasyModelHandle) NodeList(pageData *EasyApp.PageData) (error, int) {
 				if field.FieldNameReset != "" {
 					field.FieldName = field.FieldNameReset
 				}
-				pageData.ListColumnAdd(field.FieldKey, field.FieldName, field.DataTypeOnList+"::"+field.DataTypeCommandOnList, field.FieldOptions)
+				pageBuilder.ListColumnAdd(field.FieldKey, field.FieldName, field.DataTypeOnList+"::"+field.DataTypeCommandOnList, field.FieldOptions)
 				//自定义列样式
 				if field.FieldStyleReset != "" {
-					pageData.SetListColumnStyle(field.FieldKey, field.FieldStyleReset)
+					pageBuilder.SetListColumnStyle(field.FieldKey, field.FieldStyleReset)
 				}
 			}
 		}
@@ -137,7 +137,7 @@ func (that EasyModelHandle) NodeList(pageData *EasyApp.PageData) (error, int) {
 }
 
 // NodeListCondition 修改查询条件
-func (that EasyModelHandle) NodeListCondition(pageData *EasyApp.PageData, condition [][]interface{}) ([][]interface{}, error, int) {
+func (that EasyModelHandle) NodeListCondition(pageBuilder *builder.PageBuilder, condition [][]interface{}) ([][]interface{}, error, int) {
 	easyModel, err := GetEasyModelInfo(that.ModelKey, "list")
 	if err != nil {
 		return condition, nil, 0
@@ -145,7 +145,7 @@ func (that EasyModelHandle) NodeListCondition(pageData *EasyApp.PageData, condit
 		//设置url参数查询条件
 		for _, urlParam := range easyModel.UrlParams {
 			if urlParam.ParamKey != "" && urlParam.FieldKey != "" {
-				urlValue := util.GetValue(pageData.GetHttpRequest(), urlParam.ParamKey)
+				urlValue := util.GetValue(pageBuilder.GetHttpRequest(), urlParam.ParamKey)
 				if urlValue == "" && urlParam.DefaultValue != "" {
 					urlValue = urlParam.DefaultValue
 				}
@@ -158,7 +158,7 @@ func (that EasyModelHandle) NodeListCondition(pageData *EasyApp.PageData, condit
 			}
 		}
 		//设置tab查询条件
-		tabIndex := that.GetTabIndex(pageData, "tab")
+		tabIndex := that.GetTabIndex(pageBuilder, "tab")
 		if len(easyModel.ListTabs) > tabIndex {
 			if easyModel.ListTabs[tabIndex].SelectCondition != "" {
 				condition = append(condition, []interface{}{
@@ -172,7 +172,7 @@ func (that EasyModelHandle) NodeListCondition(pageData *EasyApp.PageData, condit
 }
 
 // NodeListData 重写列表数据
-func (that EasyModelHandle) NodeListData(pageData *EasyApp.PageData, data []gorose.Data) ([]gorose.Data, error, int) {
+func (that EasyModelHandle) NodeListData(pageBuilder *builder.PageBuilder, data []gorose.Data) ([]gorose.Data, error, int) {
 	easyModel, err := GetEasyModelInfo(that.ModelKey, "list")
 	if err != nil {
 		return data, nil, 0
@@ -229,11 +229,11 @@ func (that EasyModelHandle) NodeListData(pageData *EasyApp.PageData, data []goro
 		}
 		return data, nil, 0
 	}
-	
+
 }
 
 // NodeForm 初始化表单
-func (that EasyModelHandle) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
+func (that EasyModelHandle) NodeForm(pageBuilder *builder.PageBuilder, id int64) (error, int) {
 	easyModel, err := GetEasyModelInfo(that.ModelKey, util.Is(id == 0, "add", "edit").(string))
 	if err != nil {
 		return err, 500
@@ -252,7 +252,7 @@ func (that EasyModelHandle) NodeForm(pageData *EasyApp.PageData, id int64) (erro
 						expand["dynamic_option_model_key"] = field.ExpandDynamicOptionModelsKey
 					}
 					if field.GroupTitle != "" {
-						pageData.FormFieldsAdd("", "block", field.GroupTitle, "", "", false, nil, "", nil)
+						pageBuilder.FormFieldsAdd("", "block", field.GroupTitle, "", "", false, nil, "", nil)
 					}
 					//选项缩进
 					var FieldOptions []map[string]interface{}
@@ -293,7 +293,7 @@ func (that EasyModelHandle) NodeForm(pageData *EasyApp.PageData, id int64) (erro
 						}
 					}
 					//增加表单项
-					pageData.FormFieldsAdd(field.FieldKey, field.DataTypeOnCreate, field.FieldName, field.FieldNotice, field.DefaultValue, field.IsMust, FieldOptions, "", expand)
+					pageBuilder.FormFieldsAdd(field.FieldKey, field.DataTypeOnCreate, field.FieldName, field.FieldNotice, field.DefaultValue, field.IsMust, FieldOptions, "", expand)
 				}
 			}
 		} else {
@@ -309,7 +309,7 @@ func (that EasyModelHandle) NodeForm(pageData *EasyApp.PageData, id int64) (erro
 						expand["dynamic_option_model_key"] = field.ExpandDynamicOptionModelsKey
 					}
 					if field.GroupTitle != "" {
-						pageData.FormFieldsAdd("", "block", field.GroupTitle, "", "", false, nil, "", nil)
+						pageBuilder.FormFieldsAdd("", "block", field.GroupTitle, "", "", false, nil, "", nil)
 					}
 					//选项缩进
 					var FieldOptions []map[string]interface{}
@@ -350,17 +350,17 @@ func (that EasyModelHandle) NodeForm(pageData *EasyApp.PageData, id int64) (erro
 						}
 					}
 					//增加表单项
-					pageData.FormFieldsAdd(field.FieldKey, field.DataTypeOnUpdate, field.FieldName, field.FieldNotice, field.DefaultValue, field.IsMust, FieldOptions, "", expand)
+					pageBuilder.FormFieldsAdd(field.FieldKey, field.DataTypeOnUpdate, field.FieldName, field.FieldNotice, field.DefaultValue, field.IsMust, FieldOptions, "", expand)
 				}
 			}
 		}
-		
+
 		return nil, 0
 	}
 }
 
 // NodeFormData 表单显示前修改数据
-func (that EasyModelHandle) NodeFormData(pageData *EasyApp.PageData, data gorose.Data, id int64) (gorose.Data, error, int) {
+func (that EasyModelHandle) NodeFormData(pageBuilder *builder.PageBuilder, data gorose.Data, id int64) (gorose.Data, error, int) {
 	easyModel, err := GetEasyModelInfo(that.ModelKey, util.Is(id == 0, "add", "edit").(string))
 	if err != nil {
 		return data, nil, 0
@@ -377,7 +377,7 @@ func (that EasyModelHandle) NodeFormData(pageData *EasyApp.PageData, data gorose
 			//新增页链接参数透传
 			for _, urlParam := range easyModel.UrlParams {
 				field := urlParam.FieldKey
-				value := util.GetValue(pageData.GetHttpRequest(), field)
+				value := util.GetValue(pageBuilder.GetHttpRequest(), field)
 				data[field] = value
 			}
 		}
@@ -386,7 +386,7 @@ func (that EasyModelHandle) NodeFormData(pageData *EasyApp.PageData, data gorose
 }
 
 // NodeSaveData 表单保存数据前使用
-func (that EasyModelHandle) NodeSaveData(pageData *EasyApp.PageData, oldData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
+func (that EasyModelHandle) NodeSaveData(pageBuilder *builder.PageBuilder, oldData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
 	easyModel, err := GetEasyModelInfo(that.ModelKey, util.Is(oldData["id"].(int64) == 0, "add", "edit").(string))
 	if err != nil {
 		return postData, nil, 0
@@ -405,9 +405,6 @@ func (that EasyModelHandle) NodeSaveData(pageData *EasyApp.PageData, oldData gor
 	return postData, nil, 0
 }
 
-
-
-
 // EasyModel 定义模型信息结构体
 type EasyModel struct {
 	ModelKey     string                    //模型关键字
@@ -422,7 +419,7 @@ type EasyModel struct {
 	OrderType    string                    //排序方式
 	PageSize     int                       //分页大小
 	PageNotice   string                    //页面备注
-	Buttons      map[string]EasyApp.Button //页面
+	Buttons      map[string]builder.Button //页面
 	TopButtons   []string                  //顶部按钮
 	RightButtons []string                  //右侧操作按钮
 	UrlParams    []EasyModelUrlParam       //链接参数
@@ -505,7 +502,7 @@ func GetEasyModelInfo(modelKey string, actionName string) (EasyModel, error) {
 			OrderType:    modelInfo["order_type"].(string),
 			PageSize:     util.Int642Int(modelInfo["page_size"].(int64)),
 			PageNotice:   modelInfo["page_notice"].(string),
-			Buttons:      map[string]EasyApp.Button{},
+			Buttons:      map[string]builder.Button{},
 			TopButtons:   []string{},
 			RightButtons: []string{},
 			UrlParams:    []EasyModelUrlParam{},
@@ -561,7 +558,7 @@ func GetEasyModelInfo(modelKey string, actionName string) (EasyModel, error) {
 				return EasyModel{}, errors.New("系统运行错误！")
 			}
 			for _, btnInfo := range selfButtonList {
-				easyModel.Buttons[btnInfo["button_key"].(string)] = EasyApp.Button{
+				easyModel.Buttons[btnInfo["button_key"].(string)] = builder.Button{
 					ButtonName: btnInfo["button_name"].(string),
 					Action:     btnInfo["action"].(string),
 					ActionType: util.Int642Int(btnInfo["action_type"].(int64)),
@@ -579,7 +576,7 @@ func GetEasyModelInfo(modelKey string, actionName string) (EasyModel, error) {
 				}
 			}
 		}
-		
+
 		//!格式化url参数
 		urlParams := strings.Split(modelInfo["url_params"].(string), "\n")
 		for _, urlParam := range urlParams {
@@ -654,7 +651,7 @@ func GetEasyModelInfo(modelKey string, actionName string) (EasyModel, error) {
 			}
 			easyModel.Fields = append(easyModel.Fields, modelField)
 		}
-		
+
 		//!保存并返回
 		easyModelList[saveKey] = easyModel
 		//!定时删除数据

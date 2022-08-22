@@ -13,10 +13,10 @@ import (
 	"github.com/gohouse/gorose/v2"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
-	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/builder"
 	"net/http"
 )
 
@@ -25,8 +25,8 @@ type AppConfigs struct {
 	Base
 }
 
-func (that AppConfigs) PageInit(pageData *EasyApp.PageData) {
-	pageData.ActionAdd("edit2", that.Edit2)
+func (that *AppConfigs) NodeInit(pageBuilder *builder.PageBuilder) {
+	that.NodePageActions["edit2"] = that.Edit2
 }
 
 // 查询分组名
@@ -43,11 +43,11 @@ func (that AppConfigs) GroupName() string {
 }
 
 // NodeBegin 开始
-func (that AppConfigs) NodeBegin(pageData *EasyApp.PageData) (error, int) {
+func (that AppConfigs) NodeBegin(pageBuilder *builder.PageBuilder) (error, int) {
 	
-	pageData.SetTitle(that.GroupName())
-	pageData.SetPageName("设置")
-	pageData.SetTbName("tb_app_configs")
+	pageBuilder.SetTitle(that.GroupName())
+	pageBuilder.SetPageName("设置")
+	pageBuilder.SetTbName("tb_app_configs")
 	
 	//自动清理重复项
 	that.ClearAppConfigs()
@@ -87,22 +87,22 @@ func (that AppConfigs) ClearAppConfigs() {
 }
 
 // NodeList 初始化列表
-func (that AppConfigs) NodeList(pageData *EasyApp.PageData) (error, int) {
-	pageData.ListRightBtnsClear()
-	pageData.ListTopBtnsClear()
+func (that AppConfigs) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
+	pageBuilder.ListRightBtnsClear()
+	pageBuilder.ListTopBtnsClear()
 	//列表清除
-	pageData.ListColumnClear()
+	pageBuilder.ListColumnClear()
 	//添加两列信息
-	pageData.ListColumnAdd("name", "名称", "text", nil)
-	pageData.ListColumnAdd("key", "关键字", "text", nil)
-	pageData.ListColumnAdd("value", "内容", "html", nil)
-	pageData.SetListColumnStyle("name", "width:150px")
-	pageData.SetListColumnStyle("key", "width:150px")
+	pageBuilder.ListColumnAdd("name", "名称", "text", nil)
+	pageBuilder.ListColumnAdd("key", "关键字", "text", nil)
+	pageBuilder.ListColumnAdd("value", "内容", "html", nil)
+	pageBuilder.SetListColumnStyle("name", "width:150px")
+	pageBuilder.SetListColumnStyle("key", "width:150px")
 	//隐藏分页
-	pageData.SetListPageHide()
+	pageBuilder.SetListPageHide()
 	
 	//新增右侧日志开启关闭按钮
-	pageData.SetButton("edit2", EasyApp.Button{
+	pageBuilder.SetButton("edit2", builder.Button{
 		ButtonName: "编辑" + that.GroupName(),
 		Action:     "edit2",
 		ActionType: 2,
@@ -115,13 +115,13 @@ func (that AppConfigs) NodeList(pageData *EasyApp.PageData) (error, int) {
 			"h": "98%",
 		},
 	})
-	pageData.SetListTopBtns("edit2")
+	pageBuilder.SetListTopBtns("edit2")
 	
 	return nil, 0
 }
 
 // NodeListCondition 修改查询条件
-func (that AppConfigs) NodeListCondition(pageData *EasyApp.PageData, condition [][]interface{}) ([][]interface{}, error, int) {
+func (that AppConfigs) NodeListCondition(pageBuilder *builder.PageBuilder, condition [][]interface{}) ([][]interface{}, error, int) {
 	//追加查询条件
 	condition = append(condition, []interface{}{
 		"group_id", that.GroupId,
@@ -130,7 +130,7 @@ func (that AppConfigs) NodeListCondition(pageData *EasyApp.PageData, condition [
 }
 
 // NodeListData 重写列表数据
-func (that AppConfigs) NodeListData(pageData *EasyApp.PageData, data []gorose.Data) ([]gorose.Data, error, int) {
+func (that AppConfigs) NodeListData(pageBuilder *builder.PageBuilder, data []gorose.Data) ([]gorose.Data, error, int) {
 	//查询出的数据转化一下
 	configValue := map[string]interface{}{}
 	for _, v := range data {
@@ -171,9 +171,9 @@ func (that AppConfigs) NodeListData(pageData *EasyApp.PageData, data []gorose.Da
 	return result, nil, 0
 }
 
-func (that AppConfigs) Edit2(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	that.NodeBegin(pageData)
-	pageData.SetActionName("修改")
+func (that *AppConfigs) Edit2(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	that.NodeBegin(that.PageBuilder)
+	that.PageBuilder.SetActionName("修改")
 	appConfigs := Models.Configs{}.GroupConfigs(that.GroupId)
 	if len(appConfigs) > 0 {
 		for _, config := range appConfigs {
@@ -181,7 +181,7 @@ func (that AppConfigs) Edit2(pageData *EasyApp.PageData, w http.ResponseWriter, 
 			if config["if"].(string) != "" {
 				expand["if"] = config["if"]
 			}
-			pageData.FormFieldsAdd(config["name"].(string), config["field_type"].(string),
+			that.PageBuilder.FormFieldsAdd(config["name"].(string), config["field_type"].(string),
 				config["title"].(string),
 				config["notice"].(string),
 				config["value"].(string), false, config["options"].([]map[string]interface{}), "", expand)
@@ -246,9 +246,9 @@ func (that AppConfigs) Edit2(pageData *EasyApp.PageData, w http.ResponseWriter, 
 	for _, cfg := range cfgs {
 		odata[cfg["name"].(string)] = cfg["value"]
 	}
-	pageData.SetFormData(odata)
+	that.PageBuilder.SetFormData(odata)
 	
-	that.ActShow(w, EasyApp.Template{
+	that.ActShow(w, builder.Displayer{
 		TplName: "edit.html",
-	}, pageData)
+	}, that.PageBuilder)
 }

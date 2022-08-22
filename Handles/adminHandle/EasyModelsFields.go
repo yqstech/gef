@@ -12,10 +12,10 @@ package adminHandle
 import (
 	"github.com/gohouse/gorose/v2"
 	"github.com/wonderivan/logger"
-	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/builder"
 	"github.com/yqstech/gef/config"
 	"strings"
 )
@@ -83,13 +83,13 @@ var dataTransRulesForDB = []map[string]interface{}{
 }
 
 // NodeBegin 开始
-func (that EasyModelsFields) NodeBegin(pageData *EasyApp.PageData) (error, int) {
-	pageData.SetTitle("模型字段管理")
-	pageData.SetPageName("模型字段")
-	pageData.SetTbName("tb_easy_models_fields")
-	if pageData.GetHttpRequest().Method == "POST" {
+func (that EasyModelsFields) NodeBegin(pageBuilder *builder.PageBuilder) (error, int) {
+	pageBuilder.SetTitle("模型字段管理")
+	pageBuilder.SetPageName("模型字段")
+	pageBuilder.SetTbName("tb_easy_models_fields")
+	if pageBuilder.GetHttpRequest().Method == "POST" {
 		//自动同步数据库字段
-		id := util.GetValue(pageData.GetHttpRequest(), "id")
+		id := util.GetValue(pageBuilder.GetHttpRequest(), "id")
 		that.syncModelFields(util.String2Int(id))
 		//不在表单的项目，都设置成非必填项
 		db.New().Table("tb_easy_models_fields").
@@ -104,81 +104,81 @@ func (that EasyModelsFields) NodeBegin(pageData *EasyApp.PageData) (error, int) 
 }
 
 // NodeList 初始化列表
-func (that EasyModelsFields) NodeList(pageData *EasyApp.PageData) (error, int) {
+func (that EasyModelsFields) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 	//隐藏新增按钮
-	pageData.SetListTopBtns()
+	pageBuilder.SetListTopBtns()
 	//删除ID字段
-	pageData.ListColumnClear()
+	pageBuilder.ListColumnClear()
 
 	//!设置tab列表
 	//获取页面地址，允许参数有参数id
-	validUrl := util.UrlScreenParam(pageData.GetHttpRequest(), []string{"id"}, false, true)
-	pageData.PageTabAdd("全部字段", validUrl)
-	pageData.PageTabAdd("列表页预览", validUrl+"tab=1")
-	pageData.PageTabAdd("新增页", validUrl+"tab=2")
-	pageData.PageTabAdd("编辑页", validUrl+"tab=3")
+	validUrl := util.UrlScreenParam(pageBuilder.GetHttpRequest(), []string{"id"}, false, true)
+	pageBuilder.PageTabAdd("全部字段", validUrl)
+	pageBuilder.PageTabAdd("列表页预览", validUrl+"tab=1")
+	pageBuilder.PageTabAdd("新增页", validUrl+"tab=2")
+	pageBuilder.PageTabAdd("编辑页", validUrl+"tab=3")
 	//获取第几页
-	tabIndex := that.GetTabIndex(pageData, "tab")
-	pageData.SetPageTabSelect(tabIndex)
+	tabIndex := that.GetTabIndex(pageBuilder, "tab")
+	pageBuilder.SetPageTabSelect(tabIndex)
 
 	if tabIndex == 0 {
 		//重新设置排序
-		pageData.SetListOrder("index_num asc,id asc")
+		pageBuilder.SetListOrder("index_num asc,id asc")
 
-		//pageData.ListColumnAdd("field_key", "字段关键字", "text", nil)
-		pageData.ListColumnAdd("field_name", "字段和提示", "html", nil)
-		//pageData.ListColumnAdd("field_notice", "字段提示", "text", nil)
-		pageData.ListColumnAdd("is_show_on_list", "列表页", "switch::text=显示|隐藏", nil)
-		pageData.ListColumnAdd("allow_create", "新增页", "switch::text=显示|隐藏", nil)
-		pageData.ListColumnAdd("allow_update", "修改页", "switch::text=显示|隐藏", nil)
-		pageData.ListColumnAdd("is_must", "必填项", "switch::text=是|否", nil)
-		pageData.ListColumnAdd("option_models_key", "选项集", "array", that.OptionModelsList())
-		pageData.ListColumnAdd("dynamic_option_models_key", "联动选项集", "array", that.DynamicOptionModelsList())
-		pageData.ListColumnAdd("default_value", "默认值", "input::width=60px", nil)
-		pageData.ListColumnAdd("index_num", "排序", "input::type=number&width=50px", nil)
+		//pageBuilder.ListColumnAdd("field_key", "字段关键字", "text", nil)
+		pageBuilder.ListColumnAdd("field_name", "字段和提示", "html", nil)
+		//pageBuilder.ListColumnAdd("field_notice", "字段提示", "text", nil)
+		pageBuilder.ListColumnAdd("is_show_on_list", "列表页", "switch::text=显示|隐藏", nil)
+		pageBuilder.ListColumnAdd("allow_create", "新增页", "switch::text=显示|隐藏", nil)
+		pageBuilder.ListColumnAdd("allow_update", "修改页", "switch::text=显示|隐藏", nil)
+		pageBuilder.ListColumnAdd("is_must", "必填项", "switch::text=是|否", nil)
+		pageBuilder.ListColumnAdd("option_models_key", "选项集", "array", that.OptionModelsList())
+		pageBuilder.ListColumnAdd("dynamic_option_models_key", "联动选项集", "array", that.DynamicOptionModelsList())
+		pageBuilder.ListColumnAdd("default_value", "默认值", "input::width=60px", nil)
+		pageBuilder.ListColumnAdd("index_num", "排序", "input::type=number&width=50px", nil)
 	} else if tabIndex == 1 {
 		//重新设置排序
-		pageData.SetListOrder("is_show_on_list desc,index_num asc,id asc")
-		pageData.ListColumnAdd("field_name", "字段和提示", "html", nil)
-		pageData.ListColumnAdd("is_show_on_list", "是否显示", "switch::text=显示|隐藏", nil)
-		pageData.ListColumnAdd("data_type_on_list", "列表页数据类型", "array", listDataType)
-		pageData.ListColumnAdd("data_type_command_on_list", "数据指令", "text", nil)
-		pageData.ListColumnAdd("option_models_key", "选项集", "array", that.OptionModelsList())
-		pageData.ListColumnAdd("index_num", "排序值", "input::type=number&width=50px", nil)
+		pageBuilder.SetListOrder("is_show_on_list desc,index_num asc,id asc")
+		pageBuilder.ListColumnAdd("field_name", "字段和提示", "html", nil)
+		pageBuilder.ListColumnAdd("is_show_on_list", "是否显示", "switch::text=显示|隐藏", nil)
+		pageBuilder.ListColumnAdd("data_type_on_list", "列表页数据类型", "array", listDataType)
+		pageBuilder.ListColumnAdd("data_type_command_on_list", "数据指令", "text", nil)
+		pageBuilder.ListColumnAdd("option_models_key", "选项集", "array", that.OptionModelsList())
+		pageBuilder.ListColumnAdd("index_num", "排序值", "input::type=number&width=50px", nil)
 	} else if tabIndex == 2 {
 		//重新设置排序
-		pageData.SetListOrder("allow_create desc,index_num asc,id asc")
+		pageBuilder.SetListOrder("allow_create desc,index_num asc,id asc")
 
-		pageData.ListColumnAdd("field_name", "字段和提示", "html", nil)
-		pageData.ListColumnAdd("allow_create", "是否显示", "switch::text=显示|隐藏", nil)
-		pageData.ListColumnAdd("is_must", "必填项", "switch::text=是|否", nil)
-		pageData.ListColumnAdd("data_type_on_create", "数据类型", "array", formDataType)
-		pageData.ListColumnAdd("option_models_key", "选项集", "array", that.OptionModelsList())
-		pageData.ListColumnAdd("dynamic_option_models_key", "联动选项集", "array", that.DynamicOptionModelsList())
-		pageData.ListColumnAdd("default_value", "默认值", "input::width=60px", nil)
-		pageData.ListColumnAdd("index_num", "排序值", "input::type=number&width=50px", nil)
+		pageBuilder.ListColumnAdd("field_name", "字段和提示", "html", nil)
+		pageBuilder.ListColumnAdd("allow_create", "是否显示", "switch::text=显示|隐藏", nil)
+		pageBuilder.ListColumnAdd("is_must", "必填项", "switch::text=是|否", nil)
+		pageBuilder.ListColumnAdd("data_type_on_create", "数据类型", "array", formDataType)
+		pageBuilder.ListColumnAdd("option_models_key", "选项集", "array", that.OptionModelsList())
+		pageBuilder.ListColumnAdd("dynamic_option_models_key", "联动选项集", "array", that.DynamicOptionModelsList())
+		pageBuilder.ListColumnAdd("default_value", "默认值", "input::width=60px", nil)
+		pageBuilder.ListColumnAdd("index_num", "排序值", "input::type=number&width=50px", nil)
 
 	} else if tabIndex == 3 {
 		//重新设置排序
-		pageData.SetListOrder("allow_update desc,index_num asc,id asc")
+		pageBuilder.SetListOrder("allow_update desc,index_num asc,id asc")
 
-		pageData.ListColumnAdd("field_name", "字段和提示", "html", nil)
-		pageData.ListColumnAdd("allow_update", "是否显示", "switch::text=显示|隐藏", nil)
-		pageData.ListColumnAdd("is_must", "必填项", "switch::text=是|否", nil)
-		pageData.ListColumnAdd("data_type_on_update", "数据类型", "array", formDataType)
-		pageData.ListColumnAdd("option_models_key", "选项集", "array", that.OptionModelsList())
-		pageData.ListColumnAdd("dynamic_option_models_key", "联动选项集", "array", that.DynamicOptionModelsList())
-		pageData.ListColumnAdd("default_value", "默认值", "input::width=60px", nil)
-		pageData.ListColumnAdd("index_num", "排序值", "input::type=number&width=50px", nil)
+		pageBuilder.ListColumnAdd("field_name", "字段和提示", "html", nil)
+		pageBuilder.ListColumnAdd("allow_update", "是否显示", "switch::text=显示|隐藏", nil)
+		pageBuilder.ListColumnAdd("is_must", "必填项", "switch::text=是|否", nil)
+		pageBuilder.ListColumnAdd("data_type_on_update", "数据类型", "array", formDataType)
+		pageBuilder.ListColumnAdd("option_models_key", "选项集", "array", that.OptionModelsList())
+		pageBuilder.ListColumnAdd("dynamic_option_models_key", "联动选项集", "array", that.DynamicOptionModelsList())
+		pageBuilder.ListColumnAdd("default_value", "默认值", "input::width=60px", nil)
+		pageBuilder.ListColumnAdd("index_num", "排序值", "input::type=number&width=50px", nil)
 	}
 	return nil, 0
 
 }
 
 // NodeListCondition 修改查询条件
-func (that EasyModelsFields) NodeListCondition(pageData *EasyApp.PageData, condition [][]interface{}) ([][]interface{}, error, int) {
+func (that EasyModelsFields) NodeListCondition(pageBuilder *builder.PageBuilder, condition [][]interface{}) ([][]interface{}, error, int) {
 	modelID := 0
-	modelId := util.GetValue(pageData.GetHttpRequest(), "id")
+	modelId := util.GetValue(pageBuilder.GetHttpRequest(), "id")
 	if modelId != "" {
 		modelID = util.String2Int(modelId)
 		//追加查询条件
@@ -191,7 +191,7 @@ func (that EasyModelsFields) NodeListCondition(pageData *EasyApp.PageData, condi
 }
 
 // NodeListData 重写列表数据
-func (that EasyModelsFields) NodeListData(pageData *EasyApp.PageData, data []gorose.Data) ([]gorose.Data, error, int) {
+func (that EasyModelsFields) NodeListData(pageBuilder *builder.PageBuilder, data []gorose.Data) ([]gorose.Data, error, int) {
 	for k, v := range data {
 		data[k]["field_name"] = "<strong style='color:#FF9900; font-size:13px'>" + v["field_key"].(string) + "</strong><br>" +
 			v["field_name"].(string) +
@@ -201,72 +201,72 @@ func (that EasyModelsFields) NodeListData(pageData *EasyApp.PageData, data []gor
 }
 
 // NodeForm 初始化表单
-func (that EasyModelsFields) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
-	//pageData.FormFieldsAdd("model_id", "select-disabled", "所属模型", "", "", false, that.EasyModels(), "", nil)
-	//pageData.FormFieldsAdd("field_key", "text-disabled", "数据表字段", "必须和数据表内的字段一致", "", false, nil, "", nil)
-	//pageData.FormFieldsAdd("field_name", "text-disabled", "字段名称", "字段自定义名称", "", false, nil, "", nil)
-	//pageData.FormFieldsAdd("field_notice", "text-disabled", "提示信息", "表单数据项的提示信息", "", false, nil, "", nil)
-	//pageData.FormFieldsAdd("is_show_on_list", "radio", "列表页显示", "是否在列表页显示此字段", "1", true, Models.DefaultIsOrNot, "", nil)
+func (that EasyModelsFields) NodeForm(pageBuilder *builder.PageBuilder, id int64) (error, int) {
+	//pageBuilder.FormFieldsAdd("model_id", "select-disabled", "所属模型", "", "", false, that.EasyModels(), "", nil)
+	//pageBuilder.FormFieldsAdd("field_key", "text-disabled", "数据表字段", "必须和数据表内的字段一致", "", false, nil, "", nil)
+	//pageBuilder.FormFieldsAdd("field_name", "text-disabled", "字段名称", "字段自定义名称", "", false, nil, "", nil)
+	//pageBuilder.FormFieldsAdd("field_notice", "text-disabled", "提示信息", "表单数据项的提示信息", "", false, nil, "", nil)
+	//pageBuilder.FormFieldsAdd("is_show_on_list", "radio", "列表页显示", "是否在列表页显示此字段", "1", true, Models.DefaultIsOrNot, "", nil)
 
 	//数据类型和选项
-	pageData.FormFieldsAdd("", "block", "字段基础信息", "", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("data_type_on_list", "select", "列表数据类型", "列表页显示的组件", "text", false, listDataType, "", nil)
-	pageData.FormFieldsAdd("data_type_command_on_list", "text", "数据指令", "列表页字段组件的配置信息，switch组件/input组件需要", "", false, nil, "", map[string]interface{}{
+	pageBuilder.FormFieldsAdd("", "block", "字段基础信息", "", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("data_type_on_list", "select", "列表数据类型", "列表页显示的组件", "text", false, listDataType, "", nil)
+	pageBuilder.FormFieldsAdd("data_type_command_on_list", "text", "数据指令", "列表页字段组件的配置信息，switch组件/input组件需要", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type_on_list=='switch' || formFields.data_type_on_list=='input'",
 	})
-	pageData.FormFieldsAdd("data_type_on_create", "select", "新增页数据类型", "新增页的数据类型", "text", false, formDataType, "", nil)
-	pageData.FormFieldsAdd("data_type_on_update", "select", "编辑页数据类型", "修改页的数据类型", "text", false, formDataType, "", nil)
-	pageData.FormFieldsAdd("option_models_key", "select", "关联选项集", "", "", false, that.OptionModelsList(), "", nil)
-	pageData.FormFieldsAdd("option_beautify", "radio", "选项集美化", "", "1", false, []map[string]interface{}{
+	pageBuilder.FormFieldsAdd("data_type_on_create", "select", "新增页数据类型", "新增页的数据类型", "text", false, formDataType, "", nil)
+	pageBuilder.FormFieldsAdd("data_type_on_update", "select", "编辑页数据类型", "修改页的数据类型", "text", false, formDataType, "", nil)
+	pageBuilder.FormFieldsAdd("option_models_key", "select", "关联选项集", "", "", false, that.OptionModelsList(), "", nil)
+	pageBuilder.FormFieldsAdd("option_beautify", "radio", "选项集美化", "", "1", false, []map[string]interface{}{
 		{"name": "是", "value": "1"},
 		{"name": "否", "value": "0"},
 		{"name": "仅列表美化", "value": "2"},
 	}, "", map[string]interface{}{
 		"if": "formFields.option_models_key!=''",
 	})
-	pageData.FormFieldsAdd("default_value", "text", "字段默认值", "", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("save_trans_rule", "select", "存储格式转换", "", "", false, dataTransRulesForDB, "", nil)
+	pageBuilder.FormFieldsAdd("default_value", "text", "字段默认值", "", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("save_trans_rule", "select", "存储格式转换", "", "", false, dataTransRulesForDB, "", nil)
 
-	pageData.FormFieldsAdd("", "block", "联动设置", "", "", false, nil, "", map[string]interface{}{
+	pageBuilder.FormFieldsAdd("", "block", "联动设置", "", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type_on_create=='select' || formFields.data_type_on_update=='select' || formFields.data_type_on_create=='radio' || formFields.data_type_on_update=='radio' ",
 	})
-	pageData.FormFieldsAdd("watch_fields", "text", "监听字段", "联动监听的字段，多个字段用英文逗号,分割", "", false, nil, "", map[string]interface{}{
+	pageBuilder.FormFieldsAdd("watch_fields", "text", "监听字段", "联动监听的字段，多个字段用英文逗号,分割", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type_on_create=='select' || formFields.data_type_on_update=='select' || formFields.data_type_on_create=='radio' || formFields.data_type_on_update=='radio' ",
 	})
-	pageData.FormFieldsAdd("dynamic_option_models_key", "select", "关联选项集", "", "", false, that.DynamicOptionModelsList(), "", map[string]interface{}{
+	pageBuilder.FormFieldsAdd("dynamic_option_models_key", "select", "关联选项集", "", "", false, that.DynamicOptionModelsList(), "", map[string]interface{}{
 		"if": "formFields.data_type_on_create=='select' || formFields.data_type_on_update=='select' || formFields.data_type_on_create=='radio' || formFields.data_type_on_update=='radio' ",
 	})
 
 	//列表列装饰
-	pageData.FormFieldsAdd("", "block", "列表页装饰", "", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("set_as_tabs", "radio", "选项集设为Tabs", "", "0", false, Models.OptionModels{}.ByKey("is", false), "", map[string]interface{}{
+	pageBuilder.FormFieldsAdd("", "block", "列表页装饰", "", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("set_as_tabs", "radio", "选项集设为Tabs", "", "0", false, Models.OptionModels{}.ByKey("is", false), "", map[string]interface{}{
 		"if": "formFields.option_models_key!=''",
 	})
 
-	pageData.FormFieldsAdd("field_name_reset", "text", "重置列标题", "重新设置列表页中此字段的标题", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("field_style_reset", "text", "重置列样式", "设置列表页此列的样式，例如：width:20%", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("field_augment", "textarea", "美化原始数据", "支持html代码，列表数据类型需要改为html，{{this}}代表原数据", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("attach_to_field", "text", "多字段合并显示", "将此字段数据合并到其他字段", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("field_name_reset", "text", "重置列标题", "重新设置列表页中此字段的标题", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("field_style_reset", "text", "重置列样式", "设置列表页此列的样式，例如：width:20%", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("field_augment", "textarea", "美化原始数据", "支持html代码，列表数据类型需要改为html，{{this}}代表原数据", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("attach_to_field", "text", "多字段合并显示", "将此字段数据合并到其他字段", "", false, nil, "", nil)
 
 	//数据分组
-	pageData.FormFieldsAdd("", "block", "表单页装饰", "", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("option_indent", "radio", "选项按上下级缩进", "", "0", false, Models.OptionModels{}.ByKey("is", false), "", map[string]interface{}{
+	pageBuilder.FormFieldsAdd("", "block", "表单页装饰", "", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("option_indent", "radio", "选项按上下级缩进", "", "0", false, Models.OptionModels{}.ByKey("is", false), "", map[string]interface{}{
 		"if": "formFields.option_models_key!=''",
 	})
-	pageData.FormFieldsAdd("group_title", "text", "创建一个分组", "填写分组名称，会从当前项的前面创建一个新分组", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("expand_if", "text", "联动if条件", "例如：formFields.data_type==1", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("group_title", "text", "创建一个分组", "填写分组名称，会从当前项的前面创建一个新分组", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("expand_if", "text", "联动if条件", "例如：formFields.data_type==1", "", false, nil, "", nil)
 	return nil, 0
 }
 
 // NodeFormData 表单显示前修改数据
-func (that EasyModelsFields) NodeFormData(pageData *EasyApp.PageData, data gorose.Data, id int64) (gorose.Data, error, int) {
+func (that EasyModelsFields) NodeFormData(pageBuilder *builder.PageBuilder, data gorose.Data, id int64) (gorose.Data, error, int) {
 	if id > 0 {
 	}
 	return data, nil, 0
 }
 
 // NodeSaveData 表单保存数据前使用
-func (that EasyModelsFields) NodeSaveData(pageData *EasyApp.PageData, oldData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
+func (that EasyModelsFields) NodeSaveData(pageBuilder *builder.PageBuilder, oldData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
 	if postData["set_as_tabs"] == "1" {
 		_, err := db.New().Table("tb_easy_models_fields").
 			Where("model_id", oldData["model_id"]).

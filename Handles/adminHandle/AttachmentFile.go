@@ -11,9 +11,9 @@ package adminHandle
 
 import (
 	"github.com/gohouse/gorose/v2"
-	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/builder"
 	"os"
 	"strings"
 )
@@ -54,28 +54,28 @@ var FileExtImage = map[string]string{
 }
 
 // NodeBegin 开始
-func (that AttachmentFile) NodeBegin(pageData *EasyApp.PageData) (error, int) {
-	pageData.SetTitle("文件附件管理")
-	pageData.SetPageName("附件")
-	pageData.SetTbName("tb_attachment")
+func (that AttachmentFile) NodeBegin(pageBuilder *builder.PageBuilder) (error, int) {
+	pageBuilder.SetTitle("文件附件管理")
+	pageBuilder.SetPageName("附件")
+	pageBuilder.SetTbName("tb_attachment")
 	return nil, 0
 }
 
 // NodeList 初始化列表
-func (that AttachmentFile) NodeList(pageData *EasyApp.PageData) (error, int) {
-	pageData.ListColumnClear()
-	pageData.SetListRightBtns("delete")
-	pageData.ListTopBtnsClear()
-	pageData.ListColumnAdd("ext_image", "文件类型", "image60", nil)
-	pageData.ListColumnAdd("file_name", "文件名称", "text", nil)
-	pageData.ListColumnAdd("ext", "文件后缀", "text", nil)
-	pageData.ListColumnAdd("file_size", "文件大小", "text", nil)
-	pageData.ListColumnAdd("create_time", "上传时间", "text", nil)
+func (that AttachmentFile) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
+	pageBuilder.ListColumnClear()
+	pageBuilder.SetListRightBtns("delete")
+	pageBuilder.ListTopBtnsClear()
+	pageBuilder.ListColumnAdd("ext_image", "文件类型", "image60", nil)
+	pageBuilder.ListColumnAdd("file_name", "文件名称", "text", nil)
+	pageBuilder.ListColumnAdd("ext", "文件后缀", "text", nil)
+	pageBuilder.ListColumnAdd("file_size", "文件大小", "text", nil)
+	pageBuilder.ListColumnAdd("create_time", "上传时间", "text", nil)
 	return nil, 0
 }
 
 // NodeListCondition 修改查询条件
-func (that AttachmentFile) NodeListCondition(pageData *EasyApp.PageData, condition [][]interface{}) ([][]interface{}, error, int) {
+func (that AttachmentFile) NodeListCondition(pageBuilder *builder.PageBuilder, condition [][]interface{}) ([][]interface{}, error, int) {
 	//追加查询条件
 	condition = append(condition, []interface{}{
 		"ext", "not in", ImageExts,
@@ -84,7 +84,7 @@ func (that AttachmentFile) NodeListCondition(pageData *EasyApp.PageData, conditi
 }
 
 // NodeListData 重写列表数据
-func (that AttachmentFile) NodeListData(pageData *EasyApp.PageData, data []gorose.Data) ([]gorose.Data, error, int) {
+func (that AttachmentFile) NodeListData(pageBuilder *builder.PageBuilder, data []gorose.Data) ([]gorose.Data, error, int) {
 	for k, v := range data {
 		data[k]["id"] = util.Int642String(v["id"].(int64))
 		if src, ok := FileExtImage[strings.ToLower(v["ext"].(string))]; ok {
@@ -97,7 +97,7 @@ func (that AttachmentFile) NodeListData(pageData *EasyApp.PageData, data []goros
 }
 
 //NodeDeleteBefore 删除前操作
-func (that AttachmentFile) NodeDeleteBefore(pageData *EasyApp.PageData, id int64) (error, int) {
+func (that AttachmentFile) NodeDeleteBefore(pageBuilder *builder.PageBuilder, id int64) (error, int) {
 	first, err := db.New().Table("tb_attachment").Where("id", id).First()
 	if err != nil {
 		return err, 0

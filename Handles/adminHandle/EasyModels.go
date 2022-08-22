@@ -13,10 +13,10 @@ import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
-	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/builder"
 	"github.com/yqstech/gef/config"
 	"net/http"
 )
@@ -25,23 +25,23 @@ type EasyModels struct {
 	Base
 }
 
-// PageInit 初始化
-func (that EasyModels) PageInit(pageData *EasyApp.PageData) {
+// NodeInit 初始化
+func (that *EasyModels) NodeInit(pageBuilder *builder.PageBuilder) {
 	//注册handle
-	pageData.ActionAdd("export_insert_data", that.ExportInsertData)
+	that.NodePageActions["export_insert_data"] = that.ExportInsertData
 }
 
 // NodeBegin 开始
-func (that EasyModels) NodeBegin(pageData *EasyApp.PageData) (error, int) {
-	pageData.SetTitle("后台模型 EasyModelHandle")
-	pageData.SetPageName("模型")
-	pageData.SetTbName("tb_easy_models")
+func (that EasyModels) NodeBegin(pageBuilder *builder.PageBuilder) (error, int) {
+	pageBuilder.SetTitle("后台模型 EasyModelHandle")
+	pageBuilder.SetPageName("模型")
+	pageBuilder.SetTbName("tb_easy_models")
 	return nil, 0
 }
 
 // NodeList 初始化列表
-func (that EasyModels) NodeList(pageData *EasyApp.PageData) (error, int) {
-	pageData.SetButton("buttons", EasyApp.Button{
+func (that EasyModels) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
+	pageBuilder.SetButton("buttons", builder.Button{
 		ButtonName: "自定义按钮",
 		Action:     "easy_models_buttons",
 		ActionType: 2,
@@ -57,10 +57,10 @@ func (that EasyModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 	})
 
 	//!重置顶部按钮
-	pageData.SetListTopBtns("add", "buttons")
+	pageBuilder.SetListTopBtns("add", "buttons")
 	//!重置右侧按钮
 	//重新设置编辑按钮
-	pageData.SetButton("edit", EasyApp.Button{
+	pageBuilder.SetButton("edit", builder.Button{
 		ButtonName: "编辑模型",
 		Action:     "edit",
 		ActionType: 2,
@@ -74,7 +74,7 @@ func (that EasyModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 		},
 	})
 	//新增右侧字段管理按钮
-	pageData.SetButton("fields", EasyApp.Button{
+	pageBuilder.SetButton("fields", builder.Button{
 		ButtonName: "模型字段",
 		Action:     "/easy_models_fields/index",
 		ActionType: 2,
@@ -89,7 +89,7 @@ func (that EasyModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 		},
 	})
 	//导出结构
-	pageData.SetButton("export_insert_data", EasyApp.Button{
+	pageBuilder.SetButton("export_insert_data", builder.Button{
 		ButtonName: "",
 		Action:     "/easy_models/export_insert_data",
 		ActionType: 2,
@@ -104,23 +104,23 @@ func (that EasyModels) NodeList(pageData *EasyApp.PageData) (error, int) {
 		},
 	})
 	//!重置右侧按钮
-	pageData.SetListRightBtns("edit", "fields", "export_insert_data", "disable", "enable", "delete")
+	pageBuilder.SetListRightBtns("edit", "fields", "export_insert_data", "disable", "enable", "delete")
 
-	pageData.SetListOrder("id asc")
-	pageData.ListColumnAdd("model_key", "模型Key", "text", nil)
-	pageData.ListColumnAdd("model_name", "模型名称", "text", nil)
-	//pageData.ListColumnAdd("table_name", "数据表名", "text", nil)
-	pageData.ListColumnAdd("note", "备注", "text", nil)
-	pageData.ListColumnAdd("allow_create", "新增按钮", "switch::text=显示|隐藏", nil)
-	pageData.ListColumnAdd("allow_update", "修改按钮", "switch::text=显示|隐藏", nil)
-	pageData.ListColumnAdd("allow_status", "状态按钮", "switch::text=显示|隐藏", nil)
-	pageData.ListColumnAdd("allow_delete", "删除按钮", "switch::text=显示|隐藏", nil)
-	pageData.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ByKey("status", true))
+	pageBuilder.SetListOrder("id asc")
+	pageBuilder.ListColumnAdd("model_key", "模型Key", "text", nil)
+	pageBuilder.ListColumnAdd("model_name", "模型名称", "text", nil)
+	//pageBuilder.ListColumnAdd("table_name", "数据表名", "text", nil)
+	pageBuilder.ListColumnAdd("note", "备注", "text", nil)
+	pageBuilder.ListColumnAdd("allow_create", "新增按钮", "switch::text=显示|隐藏", nil)
+	pageBuilder.ListColumnAdd("allow_update", "修改按钮", "switch::text=显示|隐藏", nil)
+	pageBuilder.ListColumnAdd("allow_status", "状态按钮", "switch::text=显示|隐藏", nil)
+	pageBuilder.ListColumnAdd("allow_delete", "删除按钮", "switch::text=显示|隐藏", nil)
+	pageBuilder.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ByKey("status", true))
 	return nil, 0
 }
 
 // NodeForm 初始化表单
-func (that EasyModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
+func (that EasyModels) NodeForm(pageBuilder *builder.PageBuilder, id int64) (error, int) {
 	//设置默认按钮tags列表
 	buttonList := []map[string]interface{}{
 		{"text": "add", "class": "tag-3"},
@@ -142,28 +142,28 @@ func (that EasyModels) NodeForm(pageData *EasyApp.PageData, id int64) (error, in
 	for _, btn := range buttons {
 		buttonList = append(buttonList, map[string]interface{}{"text": btn["button_key"], "class": "tag-2"})
 	}
-	pageData.FormFieldsAdd("", "block", "基础信息", "", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("model_key", "text", "模型Key", "支持英文、数字、下划线，不能以下划线开头", "", true, nil, "", nil)
-	pageData.FormFieldsAdd("model_name", "text", "模型名称", "模型名称即是管理页面的关键字", "", true, nil, "", nil)
-	pageData.FormFieldsAdd("table_name", "text", "关联数据表名", "关联操作的数据表名称", "", true, nil, "", nil)
-	pageData.FormFieldsAdd("order_type", "text", "排序方式", "列表页默认排序方式", "id desc", true, nil, "", nil)
-	pageData.FormFieldsAdd("page_size", "number", "分页大小", "列表页每页的数据条数，最小值为1", "20", true, nil, "", nil)
-	pageData.FormFieldsAdd("batch_action", "radio", "支持批量操作", "", "0", true, Models.OptionModels{}.ByKey("is", false), "", nil)
-	pageData.FormFieldsAdd("note", "text", "模型备注", "", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("", "block", "页面元素", "", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("top_buttons", "tags", "顶部按钮", "", "[{'classes':'tag-3','text':'add'}]", false, buttonList, "", nil)
+	pageBuilder.FormFieldsAdd("", "block", "基础信息", "", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("model_key", "text", "模型Key", "支持英文、数字、下划线，不能以下划线开头", "", true, nil, "", nil)
+	pageBuilder.FormFieldsAdd("model_name", "text", "模型名称", "模型名称即是管理页面的关键字", "", true, nil, "", nil)
+	pageBuilder.FormFieldsAdd("table_name", "text", "关联数据表名", "关联操作的数据表名称", "", true, nil, "", nil)
+	pageBuilder.FormFieldsAdd("order_type", "text", "排序方式", "列表页默认排序方式", "id desc", true, nil, "", nil)
+	pageBuilder.FormFieldsAdd("page_size", "number", "分页大小", "列表页每页的数据条数，最小值为1", "20", true, nil, "", nil)
+	pageBuilder.FormFieldsAdd("batch_action", "radio", "支持批量操作", "", "0", true, Models.OptionModels{}.ByKey("is", false), "", nil)
+	pageBuilder.FormFieldsAdd("note", "text", "模型备注", "", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("", "block", "页面元素", "", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("top_buttons", "tags", "顶部按钮", "", "[{'classes':'tag-3','text':'add'}]", false, buttonList, "", nil)
 	rightBtn := "[{'classes':'tag-1','text':'edit'},{'classes':'tag-1','text':'disable'},{'classes':'tag-1','text':'enable'},{'classes':'tag-1','text':'delete'}]"
-	pageData.FormFieldsAdd("right_buttons", "tags", "操作按钮", "", rightBtn, false, buttonList, "", nil)
-	pageData.FormFieldsAdd("page_notice", "textarea", "页面公告", "列表页面顶部的提示信息", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("tabs_for_list", "textarea", "列表选项卡", "格式:tab名称|查询条件，每行一个", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("", "block", "高级用法", "", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("level_indent", "text", "字段按级缩进", "列表页支持按字段1的上下级关系缩进字段2，格式为:级别字段key:缩进字段key，例如pid:name", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("url_params", "textarea", "Url传参", "Url参数转为列表查询条件 并 透传顶部按钮链接 \n格式为 参数:数据库字段:默认值，例如：id:model_id:0\n默认值为空自动忽略，每行一个转换规则", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("right_buttons", "tags", "操作按钮", "", rightBtn, false, buttonList, "", nil)
+	pageBuilder.FormFieldsAdd("page_notice", "textarea", "页面公告", "列表页面顶部的提示信息", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("tabs_for_list", "textarea", "列表选项卡", "格式:tab名称|查询条件，每行一个", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("", "block", "高级用法", "", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("level_indent", "text", "字段按级缩进", "列表页支持按字段1的上下级关系缩进字段2，格式为:级别字段key:缩进字段key，例如pid:name", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("url_params", "textarea", "Url传参", "Url参数转为列表查询条件 并 透传顶部按钮链接 \n格式为 参数:数据库字段:默认值，例如：id:model_id:0\n默认值为空自动忽略，每行一个转换规则", "", false, nil, "", nil)
 	return nil, 0
 }
 
 // ExportInsertData 导出内置数据
-func (that EasyModels) ExportInsertData(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (that EasyModels) ExportInsertData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := util.GetValue(r, "id")
 
 	easyModel, err := db.New().Table("tb_easy_models").Where("id", id).First()

@@ -12,10 +12,10 @@ package adminHandle
 import (
 	"github.com/gohouse/gorose/v2"
 	"github.com/wonderivan/logger"
-	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/builder"
 	"github.com/yqstech/gef/config"
 	"strings"
 )
@@ -25,38 +25,38 @@ type EasyCurdModelsFields struct {
 }
 
 // NodeBegin 开始
-func (that EasyCurdModelsFields) NodeBegin(pageData *EasyApp.PageData) (error, int) {
-	pageData.SetTitle("easyCurd接口模型字段管理")
-	pageData.SetPageName("模型字段")
-	pageData.SetTbName("tb_easy_curd_models_fields")
-	if pageData.GetHttpRequest().Method == "GET" {
+func (that EasyCurdModelsFields) NodeBegin(pageBuilder *builder.PageBuilder) (error, int) {
+	pageBuilder.SetTitle("easyCurd接口模型字段管理")
+	pageBuilder.SetPageName("模型字段")
+	pageBuilder.SetTbName("tb_easy_curd_models_fields")
+	if pageBuilder.GetHttpRequest().Method == "GET" {
 		//同步数据库字段
-		id := util.GetValue(pageData.GetHttpRequest(), "id")
+		id := util.GetValue(pageBuilder.GetHttpRequest(), "id")
 		that.syncModelFields(util.String2Int(id))
 	}
 	return nil, 0
 }
 
 // NodeList 初始化列表
-func (that EasyCurdModelsFields) NodeList(pageData *EasyApp.PageData) (error, int) {
-	pageData.SetListOrder("index_num asc,id asc")
-	pageData.SetListTopBtns()
-	pageData.ListColumnAdd("field_key", "字段Key", "text", nil)
-	pageData.ListColumnAdd("field_name", "字段名称", "text", nil)
-	pageData.ListColumnAdd("field_note", "字段备注", "text", nil)
-	pageData.ListColumnAdd("option_models_key", "关联选项集", "array", that.OptionModelsList())
-	pageData.ListColumnAdd("is_private", "私密数据", "switch::text=私密|公开", nil)
-	pageData.ListColumnAdd("is_lock", "锁定数据", "switch::text=锁定|可改", nil)
-	pageData.ListColumnAdd("index_num", "排序", "input::type=number&width=50px", nil)
-	pageData.ListColumnAdd("update_time", "最后同步", "text", nil)
-	pageData.SetListRightBtns("edit")
+func (that EasyCurdModelsFields) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
+	pageBuilder.SetListOrder("index_num asc,id asc")
+	pageBuilder.SetListTopBtns()
+	pageBuilder.ListColumnAdd("field_key", "字段Key", "text", nil)
+	pageBuilder.ListColumnAdd("field_name", "字段名称", "text", nil)
+	pageBuilder.ListColumnAdd("field_note", "字段备注", "text", nil)
+	pageBuilder.ListColumnAdd("option_models_key", "关联选项集", "array", that.OptionModelsList())
+	pageBuilder.ListColumnAdd("is_private", "私密数据", "switch::text=私密|公开", nil)
+	pageBuilder.ListColumnAdd("is_lock", "锁定数据", "switch::text=锁定|可改", nil)
+	pageBuilder.ListColumnAdd("index_num", "排序", "input::type=number&width=50px", nil)
+	pageBuilder.ListColumnAdd("update_time", "最后同步", "text", nil)
+	pageBuilder.SetListRightBtns("edit")
 	return nil, 0
 }
 
 // NodeListCondition 修改查询条件
-func (that EasyCurdModelsFields) NodeListCondition(pageData *EasyApp.PageData, condition [][]interface{}) ([][]interface{}, error, int) {
+func (that EasyCurdModelsFields) NodeListCondition(pageBuilder *builder.PageBuilder, condition [][]interface{}) ([][]interface{}, error, int) {
 	modelID := 0
-	modelId := util.GetValue(pageData.GetHttpRequest(), "id")
+	modelId := util.GetValue(pageBuilder.GetHttpRequest(), "id")
 	if modelId != "" {
 		modelID = util.String2Int(modelId)
 		//追加查询条件
@@ -69,8 +69,8 @@ func (that EasyCurdModelsFields) NodeListCondition(pageData *EasyApp.PageData, c
 }
 
 // NodeForm 初始化表单
-func (that EasyCurdModelsFields) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
-	pageData.FormFieldsAdd("option_models_key", "select", "关联选项集", "", "", true, that.OptionModelsList(), "", nil)
+func (that EasyCurdModelsFields) NodeForm(pageBuilder *builder.PageBuilder, id int64) (error, int) {
+	pageBuilder.FormFieldsAdd("option_models_key", "select", "关联选项集", "", "", true, that.OptionModelsList(), "", nil)
 	return nil, 0
 }
 

@@ -10,11 +10,11 @@ package adminHandle
 
 import (
 	"errors"
-	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/util"
-	
+	"github.com/yqstech/gef/builder"
+
 	"github.com/gohouse/gorose/v2"
 	"github.com/wonderivan/logger"
 )
@@ -23,20 +23,20 @@ type AdminGroup struct {
 	Base
 }
 
-func (ad AdminGroup) NodeBegin(pageData *EasyApp.PageData) (error, int) {
-	pageData.SetPageName("角色")
-	pageData.SetTitle("角色管理")
-	pageData.SetTbName("tb_admin_group")
+func (ad AdminGroup) NodeBegin(pageBuilder *builder.PageBuilder) (error, int) {
+	pageBuilder.SetPageName("角色")
+	pageBuilder.SetTitle("角色管理")
+	pageBuilder.SetTbName("tb_admin_group")
 	return nil, 0
 }
 
-func (ad AdminGroup) NodeList(pageData *EasyApp.PageData) (error, int) {
-	pageData.ListColumnAdd("group_name", "角色名称", "text", nil)
-	pageData.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ByKey("status", true))
+func (ad AdminGroup) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
+	pageBuilder.ListColumnAdd("group_name", "角色名称", "text", nil)
+	pageBuilder.ListColumnAdd("status", "状态", "array", Models.OptionModels{}.ByKey("status", true))
 	return nil, 0
 }
 
-func (ad AdminGroup) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
+func (ad AdminGroup) NodeForm(pageBuilder *builder.PageBuilder, id int64) (error, int) {
 	//获取所有权限列表
 	conn := db.New().Table("tb_admin_rules")
 	rules, err := conn.Where("is_delete", 0).
@@ -69,8 +69,8 @@ func (ad AdminGroup) NodeForm(pageData *EasyApp.PageData, id int64) (error, int)
 	//[]map转成上下级结构
 	data, _, _ = util.ArrayMap2Tree(data, 0, "value", "pid", "_child")
 	//表单信息
-	pageData.FormFieldsAdd("group_name", "text", "角色名称", "", "", true, nil, "", nil)
-	pageData.FormFieldsAdd("rules", "checkbox_level", "配置权限", "", "", false, data, "", nil)
+	pageBuilder.FormFieldsAdd("group_name", "text", "角色名称", "", "", true, nil, "", nil)
+	pageBuilder.FormFieldsAdd("rules", "checkbox_level", "配置权限", "", "", false, data, "", nil)
 	return nil, 0
 }
 
@@ -80,7 +80,7 @@ func (ad AdminGroup) NodeForm(pageData *EasyApp.PageData, id int64) (error, int)
  * @param {map[string]interface{}} postData
  * @return {*}
  */
-func (ad AdminGroup) NodeSaveData(pageData *EasyApp.PageData, formData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
+func (ad AdminGroup) NodeSaveData(pageBuilder *builder.PageBuilder, formData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
 	postData["rules"] = util.JsonEncode(postData["rules"])
 	return postData, nil, 0
 }

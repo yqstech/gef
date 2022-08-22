@@ -15,16 +15,16 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
-	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Event"
-	"github.com/yqstech/gef/Registry"
-	"github.com/yqstech/gef/Templates"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/gdb"
 	"github.com/yqstech/gef/Utils/pool"
 	"github.com/yqstech/gef/Utils/serv"
 	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/builder"
+	"github.com/yqstech/gef/builder/adminTemplates"
 	"github.com/yqstech/gef/config"
+	"github.com/yqstech/gef/registry"
 	"github.com/yqstech/gef/routers"
 	"github.com/yqstech/gef/static"
 	"net/http"
@@ -47,20 +47,19 @@ func init() {
 			panic(errors.New("获取日志配置信息失败！"))
 		}
 	}
+	//! 初始化Redis
+	pool.RedisInit()
+	//! 初始化GoCache
+	pool.GocacheInit()
+	
 	//! 初始化数据库
 	db.Init()
 	gdb.Init()
-
 	//! 自动维护数据库
 	dbm := DbManager{}
 	dbm.AutoTable(tables)
 	dbm.AutoAdminRules(adminRules)
 	dbm.AutoInsideData(insideData)
-
-	//! 初始化Redis
-	pool.RedisInit()
-	//! 初始化GoCache
-	pool.GocacheInit()
 }
 
 // New 创建新的Gef应用
@@ -86,9 +85,9 @@ type Server struct {
 }
 
 // SetAdminPages 设置后台页面，支持追加
-func (g *Gef) SetAdminPages(pages map[string]EasyApp.AppPage) {
+func (g *Gef) SetAdminPages(pages map[string]builder.NodePager) {
 	for k, v := range pages {
-		Registry.AdminPages[k] = v
+		registry.AdminPages[k] = v
 	}
 }
 
@@ -151,7 +150,7 @@ func (g *Gef) SetAdminStatic(f embed.FS) {
 
 // SetAdminTemplate 设置后台静态文件，支持追加
 func (g *Gef) SetAdminTemplate(f embed.FS) {
-	Templates.FilesAdds = append(Templates.FilesAdds, f)
+	adminTemplates.AdminTemplatesAdd = append(adminTemplates.AdminTemplatesAdd, f)
 }
 
 // SetServer 设置服务器，支持追加
@@ -181,7 +180,7 @@ func (g *Gef) Run() {
 	for _, server := range g.selfServers {
 		g.Servers = append(g.Servers, server)
 	}
-
+	
 	//!启动web服务组
 	HttpServers := serv.Server{}
 	for _, serv := range g.Servers {

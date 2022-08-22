@@ -9,26 +9,26 @@
 package adminHandle
 
 import (
-	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/builder"
 )
 
 type AdminLog struct {
 	Base
 }
 
-func (a AdminLog) NodeBegin(pageData *EasyApp.PageData) (error, int) {
-	pageData.SetTitle("后台操作日志")
-	pageData.SetPageName("操作认知")
-	pageData.SetTbName("tb_admin_log")
+func (a AdminLog) NodeBegin(pageBuilder *builder.PageBuilder) (error, int) {
+	pageBuilder.SetTitle("后台操作日志")
+	pageBuilder.SetPageName("操作认知")
+	pageBuilder.SetTbName("tb_admin_log")
 	return nil, 0
 }
 
-func (a AdminLog) NodeList(pageData *EasyApp.PageData) (error, int) {
+func (a AdminLog) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 	//清除顶部和右侧按钮
-	pageData.ListRightBtnsClear()
-	pageData.ListTopBtnsClear()
+	pageBuilder.ListRightBtnsClear()
+	pageBuilder.ListTopBtnsClear()
 
 	adminList, err, code := Models.Model{}.SelectOptionsData("tb_admin", map[string]string{
 		"id":   "value",
@@ -37,18 +37,18 @@ func (a AdminLog) NodeList(pageData *EasyApp.PageData) (error, int) {
 	if err != nil {
 		return err, code
 	}
-	pageData.ListSearchFieldAdd("account_id", "select", "操作人", "", "", adminList, "", nil)
+	pageBuilder.ListSearchFieldAdd("account_id", "select", "操作人", "", "", adminList, "", nil)
 
-	pageData.ListColumnAdd("account_id", "操作人ID", "text", nil)
-	pageData.ListColumnAdd("account_name", "操作人名称", "text", nil)
-	pageData.ListColumnAdd("account", "操作人账号", "text", nil)
-	pageData.ListColumnAdd("url", "链接地址", "text", nil)
-	pageData.ListColumnAdd("rule_name", "执行操作", "text", nil)
-	pageData.ListColumnAdd("notice", "备注", "text", nil)
+	pageBuilder.ListColumnAdd("account_id", "操作人ID", "text", nil)
+	pageBuilder.ListColumnAdd("account_name", "操作人名称", "text", nil)
+	pageBuilder.ListColumnAdd("account", "操作人账号", "text", nil)
+	pageBuilder.ListColumnAdd("url", "链接地址", "text", nil)
+	pageBuilder.ListColumnAdd("rule_name", "执行操作", "text", nil)
+	pageBuilder.ListColumnAdd("notice", "备注", "text", nil)
 	return nil, 0
 }
 
-func (a AdminLog) NodeListCondition(pageData *EasyApp.PageData, condition [][]interface{}) ([][]interface{}, error, int) {
+func (a AdminLog) NodeListCondition(pageBuilder *builder.PageBuilder, condition [][]interface{}) ([][]interface{}, error, int) {
 
 	for k, v := range condition {
 		if v[0].(string) == "account_id" {

@@ -13,10 +13,10 @@ import (
 	"errors"
 	"github.com/gohouse/gorose/v2"
 	"github.com/wonderivan/logger"
-	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/builder"
 	"html"
 	"strings"
 )
@@ -76,15 +76,15 @@ var ConfigFieldTypes = []map[string]interface{}{
 }
 
 // NodeBegin 开始
-func (that Configs) NodeBegin(pageData *EasyApp.PageData) (error, int) {
-	pageData.SetTitle("应用设置项管理")
-	pageData.SetPageName("应用设置项")
-	pageData.SetTbName("tb_configs")
+func (that Configs) NodeBegin(pageBuilder *builder.PageBuilder) (error, int) {
+	pageBuilder.SetTitle("应用设置项管理")
+	pageBuilder.SetPageName("应用设置项")
+	pageBuilder.SetTbName("tb_configs")
 	return nil, 0
 }
 
 // NodeList 初始化列表
-func (that Configs) NodeList(pageData *EasyApp.PageData) (error, int) {
+func (that Configs) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 	//获取配置组列表
 	ConfigsGroups, err, code := Models.Model{}.SelectOptionsData("tb_configs_group", map[string]string{
 		"id":         "value",
@@ -93,28 +93,28 @@ func (that Configs) NodeList(pageData *EasyApp.PageData) (error, int) {
 	if err != nil {
 		return err, code
 	}
-	pageData.SetListOrder("group_id asc,index_num asc,id asc")
-	pageData.ListColumnClear()
-	pageData.ListColumnAdd("group_id", "分组", "array", ConfigsGroups)
-	pageData.ListColumnAdd("name", "关键字", "text", nil)
-	pageData.ListColumnAdd("title", "配置项名称", "text", nil)
-	pageData.ListColumnAdd("value", "当前值/默认值", "html", nil)
-	pageData.ListColumnAdd("notice", "说明", "text", nil)
-	pageData.ListColumnAdd("index_num", "排序", "text", nil)
-	//pageData.ListColumnAdd("status", "状态", "array", models.DefaultStatus)
-	
-	pageData.SetListColumnStyle("notice", "width:20%")
-	pageData.SetListColumnStyle("value", "width:20%")
-	pageData.SetListColumnStyle("action", "width:20%")
-	
+	pageBuilder.SetListOrder("group_id asc,index_num asc,id asc")
+	pageBuilder.ListColumnClear()
+	pageBuilder.ListColumnAdd("group_id", "分组", "array", ConfigsGroups)
+	pageBuilder.ListColumnAdd("name", "关键字", "text", nil)
+	pageBuilder.ListColumnAdd("title", "配置项名称", "text", nil)
+	pageBuilder.ListColumnAdd("value", "当前值/默认值", "html", nil)
+	pageBuilder.ListColumnAdd("notice", "说明", "text", nil)
+	pageBuilder.ListColumnAdd("index_num", "排序", "text", nil)
+	//pageBuilder.ListColumnAdd("status", "状态", "array", models.DefaultStatus)
+
+	pageBuilder.SetListColumnStyle("notice", "width:20%")
+	pageBuilder.SetListColumnStyle("value", "width:20%")
+	pageBuilder.SetListColumnStyle("action", "width:20%")
+
 	//搜索表单
-	pageData.ListSearchFieldAdd("group_id", "select", "选择分组", "", "", ConfigsGroups, "", nil)
-	pageData.ListSearchFieldAdd("status", "select", "选择状态", "", "", Models.OptionModels{}.ByKey("status", false), "", nil)
+	pageBuilder.ListSearchFieldAdd("group_id", "select", "选择分组", "", "", ConfigsGroups, "", nil)
+	pageBuilder.ListSearchFieldAdd("status", "select", "选择状态", "", "", Models.OptionModels{}.ByKey("status", false), "", nil)
 	return nil, 0
 }
 
 // NodeListData 重写列表数据
-func (that Configs) NodeListData(pageData *EasyApp.PageData, data []gorose.Data) ([]gorose.Data, error, int) {
+func (that Configs) NodeListData(pageBuilder *builder.PageBuilder, data []gorose.Data) ([]gorose.Data, error, int) {
 	for key, value := range data {
 		if value["field_type"].(string) == "image" || strings.Contains(value["value"].(string), ".png") {
 			data[key]["value"] = "<img style=\"width:80px;max-hight:80px\" src=\"" + value["value"].(string) + "\"/>"
@@ -134,7 +134,7 @@ func (that Configs) NodeListData(pageData *EasyApp.PageData, data []gorose.Data)
 }
 
 // NodeForm 初始化表单
-func (that Configs) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
+func (that Configs) NodeForm(pageBuilder *builder.PageBuilder, id int64) (error, int) {
 	//获取配置组列表
 	ConfigsGroups, err, code := Models.Model{}.SelectOptionsData("tb_configs_group", map[string]string{
 		"id":         "value",
@@ -145,22 +145,22 @@ func (that Configs) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) 
 	}
 	jsonDemo := html.EscapeString("[{\"name\":\"\",\"value\":\"\"}]")
 	if id == 0 {
-		pageData.FormFieldsAdd("group_id", "select", "选择分组", "", "1", true, ConfigsGroups, "", nil)
+		pageBuilder.FormFieldsAdd("group_id", "select", "选择分组", "", "1", true, ConfigsGroups, "", nil)
 	}
-	
-	pageData.FormFieldsAdd("title", "text", "配置项名称", "中文名称", "", true, nil, "", nil)
-	pageData.FormFieldsAdd("name", "text", "关键字", "推荐格式小写字母下划线拼接：app_domain", "", true, nil, "", nil)
-	pageData.FormFieldsAdd("value", "text", "默认值", "", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("notice", "textarea", "配置项说明", "补充说明", "", false, nil, "", nil)
-	pageData.FormFieldsAdd("field_type", "select", "表单类型", "", "text", true, ConfigFieldTypes, "", nil)
-	pageData.FormFieldsAdd("options", "textarea", "下拉选项", "下拉单选类型的表单需要配置，JSON格式："+jsonDemo, "", false, nil, "", nil)
-	pageData.FormFieldsAdd("index_num", "text", "排序", "", "200", true, nil, "", nil)
-	pageData.FormFieldsAdd("if", "text", "联动展示", "例如：formFields.xxx>0", "", false, nil, "", nil)
+
+	pageBuilder.FormFieldsAdd("title", "text", "配置项名称", "中文名称", "", true, nil, "", nil)
+	pageBuilder.FormFieldsAdd("name", "text", "关键字", "推荐格式小写字母下划线拼接：app_domain", "", true, nil, "", nil)
+	pageBuilder.FormFieldsAdd("value", "text", "默认值", "", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("notice", "textarea", "配置项说明", "补充说明", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("field_type", "select", "表单类型", "", "text", true, ConfigFieldTypes, "", nil)
+	pageBuilder.FormFieldsAdd("options", "textarea", "下拉选项", "下拉单选类型的表单需要配置，JSON格式："+jsonDemo, "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("index_num", "text", "排序", "", "200", true, nil, "", nil)
+	pageBuilder.FormFieldsAdd("if", "text", "联动展示", "例如：formFields.xxx>0", "", false, nil, "", nil)
 	return nil, 0
 }
 
 // NodeFormData 表单显示前修改数据
-func (that Configs) NodeFormData(pageData *EasyApp.PageData, data gorose.Data, id int64) (gorose.Data, error, int) {
+func (that Configs) NodeFormData(pageBuilder *builder.PageBuilder, data gorose.Data, id int64) (gorose.Data, error, int) {
 	if id > 0 {
 		//data["options"] = strings.ReplaceAll(data["options"].(string), "\"", "\\\"")
 	}
@@ -168,7 +168,7 @@ func (that Configs) NodeFormData(pageData *EasyApp.PageData, data gorose.Data, i
 }
 
 // NodeSaveSuccess 保存成功后操作
-func (that Configs) NodeSaveSuccess(pageData *EasyApp.PageData, postData map[string]interface{}, id int64) (bool, error, int) {
+func (that Configs) NodeSaveSuccess(pageBuilder *builder.PageBuilder, postData map[string]interface{}, id int64) (bool, error, int) {
 	if id > 0 {
 		//查询配置项信息
 		configInfo, err := db.New().Table("tb_configs").Where("id", id).First()

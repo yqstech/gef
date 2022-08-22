@@ -10,12 +10,12 @@
 package Middleware
 
 import (
-	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Handles/adminHandle"
 	"github.com/yqstech/gef/Handles/commHandle"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/builder"
 	"github.com/yqstech/gef/config"
 	"net/http"
 	"time"
@@ -24,35 +24,35 @@ import (
 	"github.com/wonderivan/logger"
 )
 
-// AdminGateway 后台网关,校验token、校验权限、启动nodePage或空白页
+// AdminGateway 后台网关,校验token、校验权限、easyModel自动注册   ====> Run() 启动nodePage或空白页
 type AdminGateway struct {
-	NodePages map[string]EasyApp.AppPage
+	NodePages map[string]builder.NodePager
 }
 
 // Gateway 网关入口
-func (admin *AdminGateway) Gateway(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (that *AdminGateway) Gateway(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//功能封装
-	admin.checkToken(
-		admin.checkAuth(
-			admin.log(
-				admin.EasyModel(
+	that.checkToken(
+		that.checkAuth(
+			that.log(
+				that.EasyModelAutoRegister(
 					//启动注册的nodePage或空白页
-					admin.Run,
+					that.Run,
 				),
 			),
 		),
 	)(w, r, ps)
 }
 
-// EasyModel em_开头的未定义页面都转发到easyModel页面
-func (admin *AdminGateway) EasyModel(next httprouter.Handle) httprouter.Handle {
+// EasyModelAutoRegister 动态注册页面；判断页面名称是em_开头，且页面集未定义，则自动注册到页面集中
+func (that *AdminGateway) EasyModelAutoRegister(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		pageName := ps.ByName("pageName")
 		//校验是否设置了对应的页面
-		if _, ok := admin.NodePages[pageName]; !ok {
+		if _, ok := that.NodePages[pageName]; !ok {
 			//em_开头的未定义页面，都设置到EasyModel页面
 			if pageName[0:3] == "em_" {
-				admin.NodePages[pageName] = adminHandle.EasyModelHandle{ModelKey: pageName[3:]}
+				that.NodePages[pageName] = &adminHandle.EasyModelHandle{ModelKey: pageName[3:]}
 			}
 		}
 		next(w, r, ps)
@@ -60,7 +60,7 @@ func (admin *AdminGateway) EasyModel(next httprouter.Handle) httprouter.Handle {
 }
 
 //校验登录身份token
-func (admin *AdminGateway) checkToken(next httprouter.Handle) httprouter.Handle {
+func (that *AdminGateway) checkToken(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		//defer func() {
 		//	if r := recover(); r != nil {
@@ -89,13 +89,13 @@ func (admin *AdminGateway) checkToken(next httprouter.Handle) httprouter.Handle 
 		}
 		//token为空
 		if token == "" {
-			admin.toLogin(w, r)
+			that.toLogin(w, r)
 			return
 		}
 		//根据token获取用户信息
 		userinfo := Models.Admin{}.GetAccountInfoByToken(token)
 		if userinfo == nil {
-			admin.toLogin(w, r)
+			that.toLogin(w, r)
 			return
 		}
 		//用户信息传递到处理程序
@@ -137,7 +137,7 @@ func (admin *AdminGateway) checkToken(next httprouter.Handle) httprouter.Handle 
 //  @param next
 //  @return BootHandle
 //
-func (admin *AdminGateway) checkAuth(next httprouter.Handle) httprouter.Handle {
+func (that *AdminGateway) checkAuth(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		
 		accountId := ps.ByName("account_id")
@@ -158,13 +158,13 @@ func (admin *AdminGateway) checkAuth(next httprouter.Handle) httprouter.Handle {
 		if (Models.Admin{}).CheckAuth(url, util.String2Int(accountId)) {
 			next(w, r, ps)
 		} else {
-			EasyApp.Page{}.ErrResult(w, r, 120, "您无权进行此操作！", "")
+			builder.NodePage{}.ErrResult(w, r, 120, "您无权进行此操作！", "")
 		}
 	}
 }
 
 //记录操作日志
-func (admin *AdminGateway) log(next httprouter.Handle) httprouter.Handle {
+func (that *AdminGateway) log(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		if r.Method == "POST" {
 			//操作地址
@@ -174,7 +174,7 @@ func (admin *AdminGateway) log(next httprouter.Handle) httprouter.Handle {
 			ruleInfo, err := conn.Where("is_delete", 0).Where("status", 1).Where("open_log", 1).Where("route", url).First()
 			if err != nil {
 				logger.Error(err.Error())
-				EasyApp.Page{}.ErrResult(w, r, 500, "系统出错了！", "")
+				builder.NodePage{}.ErrResult(w, r, 500, "系统出错了！", "")
 				return
 			}
 			if ruleInfo != nil {
@@ -196,7 +196,7 @@ func (admin *AdminGateway) log(next httprouter.Handle) httprouter.Handle {
 				insertId, err := db.New().Table("tb_admin_log").InsertGetId(logInfo)
 				if err != nil {
 					logger.Error(err.Error())
-					EasyApp.Page{}.ErrResult(w, r, 500, "系统出错了！", "")
+					builder.NodePage{}.ErrResult(w, r, 500, "系统出错了！", "")
 					return
 				}
 				logId := httprouter.Param{Key: "_log_id", Value: util.Int642String(insertId)}
@@ -207,21 +207,8 @@ func (admin *AdminGateway) log(next httprouter.Handle) httprouter.Handle {
 	}
 }
 
-func (admin *AdminGateway) Run(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	//根据url链接，获取当前页面名称
-	pageName := ps.ByName("pageName")
-	//在页面集中检索页面，并执行页面的Run方法
-	if activePage, ok := admin.NodePages[pageName]; ok {
-		activePage.Run(&activePage, w, r, ps)
-	} else {
-		//检索不到，转发到空白页
-		activePage = EasyApp.EmptyPage{}
-		activePage.Run(&activePage, w, r, ps)
-	}
-}
-
 // 跳转到登录页面或者返回需要登录信息
-func (admin *AdminGateway) toLogin(w http.ResponseWriter, r *http.Request) {
+func (that *AdminGateway) toLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		commHandle.Base{}.ApiResult(w, 100, "no token", nil)
 	} else {
@@ -231,8 +218,33 @@ func (admin *AdminGateway) toLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 // BindPages 绑定页面列表
-//func (admin *AdminGateway) BindPages(s map[string]EasyApp.AppPage) {
+//func (that *AdminGateway) BindPages(s map[string]EasyApp.AppPage) {
 //	for k, v := range s {
-//		admin.NodePages[k] = v
+//		that.NodePages[k] = v
 //	}
 //}
+
+func (that *AdminGateway) Run(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	//新建页面构建器
+	pageBuilder := builder.PageBuilder{
+		RequestID:          ps.ByName("requestID"),
+		HttpResponseWriter: w,
+		HttpRequest:        r,
+		HttpParams:         ps,
+	}
+	//数据初始化
+	pageBuilder.DataReset()
+	
+	//在页面集中查找页面
+	if nodePage, ok := that.NodePages[ps.ByName("pageName")]; ok {
+		//拷贝一个节点页面对象
+		nodePageCopy := builder.NodePageCopy(nodePage)
+		//页面运行
+		nodePageCopy.Run(&pageBuilder, nodePageCopy)
+	} else {
+		//检索不到，创建一个空白页
+		nodePage = &builder.EmptyPage{}
+		//运行空白页
+		nodePage.Run(&pageBuilder, nodePage)
+	}
+}

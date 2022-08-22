@@ -13,9 +13,9 @@ import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
-	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/builder"
 	"net/http"
 )
 
@@ -23,24 +23,24 @@ type ConfigsGroup struct {
 	Base
 }
 
-// PageInit 初始化
-func (that ConfigsGroup) PageInit(pageData *EasyApp.PageData) {
+// NodeInit 初始化
+func (that *ConfigsGroup) NodeInit(pageBuilder *builder.PageBuilder) {
 	//注册handle
-	pageData.ActionAdd("export_insert_data", that.ExportInsertData)
+	that.NodePageActions["export_insert_data"] = that.ExportInsertData
 }
 
 // NodeBegin 开始
-func (that ConfigsGroup) NodeBegin(pageData *EasyApp.PageData) (error, int) {
-	pageData.SetTitle("设置分组管理")
-	pageData.SetPageName("设置分组")
-	pageData.SetTbName("tb_configs_group")
+func (that ConfigsGroup) NodeBegin(pageBuilder *builder.PageBuilder) (error, int) {
+	pageBuilder.SetTitle("设置分组管理")
+	pageBuilder.SetPageName("设置分组")
+	pageBuilder.SetTbName("tb_configs_group")
 	return nil, 0
 }
 
 // NodeList 初始化列表
-func (that ConfigsGroup) NodeList(pageData *EasyApp.PageData) (error, int) {
+func (that ConfigsGroup) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 	//导出结构
-	pageData.SetButton("export_insert_data", EasyApp.Button{
+	pageBuilder.SetButton("export_insert_data", builder.Button{
 		ButtonName: "导出分组和设置项",
 		Action:     "export_insert_data",
 		ActionType: 2,
@@ -54,24 +54,24 @@ func (that ConfigsGroup) NodeList(pageData *EasyApp.PageData) (error, int) {
 			"h": "98%",
 		},
 	})
-	pageData.SetListRightBtns("edit", "export_insert_data")
-	pageData.SetListOrder("id asc")
-	pageData.ListColumnAdd("group_key", "分组标识", "text", nil)
-	pageData.ListColumnAdd("group_name", "分组名称", "text", nil)
-	pageData.ListColumnAdd("note", "分组备注", "text", nil)
+	pageBuilder.SetListRightBtns("edit", "export_insert_data")
+	pageBuilder.SetListOrder("id asc")
+	pageBuilder.ListColumnAdd("group_key", "分组标识", "text", nil)
+	pageBuilder.ListColumnAdd("group_name", "分组名称", "text", nil)
+	pageBuilder.ListColumnAdd("note", "分组备注", "text", nil)
 	return nil, 0
 }
 
 // NodeForm 初始化表单
-func (that ConfigsGroup) NodeForm(pageData *EasyApp.PageData, id int64) (error, int) {
-	pageData.FormFieldsAdd("group_key", "text-xs", "分组标识", "配置项分组的唯一标识", "", true, nil, "", nil)
-	pageData.FormFieldsAdd("group_name", "text-xs", "分组名称", "配置项分组的名称", "", true, nil, "", nil)
-	pageData.FormFieldsAdd("note", "text", "分组备注", "", "", true, nil, "", nil)
+func (that ConfigsGroup) NodeForm(pageBuilder *builder.PageBuilder, id int64) (error, int) {
+	pageBuilder.FormFieldsAdd("group_key", "text-xs", "分组标识", "配置项分组的唯一标识", "", true, nil, "", nil)
+	pageBuilder.FormFieldsAdd("group_name", "text-xs", "分组名称", "配置项分组的名称", "", true, nil, "", nil)
+	pageBuilder.FormFieldsAdd("note", "text", "分组备注", "", "", true, nil, "", nil)
 	return nil, 0
 }
 
 // ExportInsertData 导出内置数据
-func (that ConfigsGroup) ExportInsertData(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (that ConfigsGroup) ExportInsertData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := util.GetValue(r, "id")
 
 	configGroup, err := db.New().Table("tb_configs_group").Where("id", id).First()

@@ -10,11 +10,11 @@
 package adminHandle
 
 import (
-	"github.com/yqstech/gef/EasyApp"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/pool"
 	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/Utils/util/captcha"
+	"github.com/yqstech/gef/builder"
 	"github.com/yqstech/gef/config"
 	"net/http"
 	"time"
@@ -27,19 +27,20 @@ type Account struct {
 	Base
 }
 
-// PageInit 初始化
-func (ac Account) PageInit(pageData *EasyApp.PageData) {
+// NodeInit 初始化
+func (ac *Account) NodeInit(pageBuilder *builder.PageBuilder) {
 	//清除默认handle
-	pageData.ActionClear()
-	pageData.ActionAdd("resetpwd", ac.ResetPwd)
-	pageData.ActionAdd("login", ac.Login)
-	pageData.ActionAdd("logout", ac.LogOut)
-	pageData.ActionAdd("userinfo", ac.UserInfo)
-	pageData.ActionAdd("verifyCode", ac.verifyCode)
+	ac.NodePageActions = map[string]httprouter.Handle{
+		"resetpwd":   ac.ResetPwd,
+		"login":      ac.Login,
+		"logout":     ac.LogOut,
+		"userinfo":   ac.UserInfo,
+		"verifyCode": ac.verifyCode,
+	}
 }
 
 // Login 登录页面
-func (ac Account) Login(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ac Account) Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	
 	if r.Method == "POST" {
 		//获取账户和密码
@@ -83,7 +84,7 @@ func (ac Account) Login(pageData *EasyApp.PageData, w http.ResponseWriter, r *ht
 			}
 		}
 		//按账户和密码查询账户
-		where := ac.WhereObj()
+		where := map[string]interface{}{"is_delete": 0}
 		where["account"] = account
 		where["password"] = util.GetPassword(pwd)
 		where["status"] = 1
@@ -138,7 +139,7 @@ func (ac Account) Login(pageData *EasyApp.PageData, w http.ResponseWriter, r *ht
 		})
 		return
 	}
-	tpl := EasyApp.Template{
+	tpl := builder.Displayer{
 		TplName: "login.html",
 	}
 	//默认不需要校验码
@@ -152,11 +153,13 @@ func (ac Account) Login(pageData *EasyApp.PageData, w http.ResponseWriter, r *ht
 	tpl.SetDate("verify", verify)
 	tpl.SetDate("title", "后台登录")
 	tpl.SetDate("submit_url", config.AdminPath+"/account/login")
-	ac.ActShow(w, tpl, pageData)
+	pageBuilder := builder.PageBuilder{}
+	pageBuilder.DataReset()
+	ac.ActShow(w, tpl, &pageBuilder)
 }
 
 // ResetPwd 修改密码页面
-func (ac Account) ResetPwd(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ac Account) ResetPwd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	
 	if r.Method == "POST" {
 		//当前账号ID
@@ -198,16 +201,18 @@ func (ac Account) ResetPwd(pageData *EasyApp.PageData, w http.ResponseWriter, r 
 		ac.ApiResult(w, 200, "success", "success")
 		return
 	}
-	tpl := EasyApp.Template{
+	tpl := builder.Displayer{
 		TplName: "resetpwd.html",
 	}
 	tpl.SetDate("title", "修改密码")
 	tpl.SetDate("postUrl", config.AdminPath+"/account/resetpwd")
 	tpl.SetDate("successUrl", config.AdminPath+"/account/logout")
-	ac.ActShow(w, tpl, pageData)
+	pageBuilder := builder.PageBuilder{}
+	pageBuilder.DataReset()
+	ac.ActShow(w, tpl, &pageBuilder)
 }
 
-func (ac Account) UserInfo(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ac Account) UserInfo( w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	
 	//当前账号ID
 	accountId := ps.ByName("account_id")
@@ -261,7 +266,7 @@ func (ac Account) UserInfo(pageData *EasyApp.PageData, w http.ResponseWriter, r 
 		ac.ApiResult(w, 200, "success", "success")
 		return
 	}
-	tpl := EasyApp.Template{
+	tpl := builder.Displayer{
 		TplName: "account_info.html",
 	}
 	tpl.SetDate("account_name", accountInfo["name"])
@@ -269,10 +274,12 @@ func (ac Account) UserInfo(pageData *EasyApp.PageData, w http.ResponseWriter, r 
 	tpl.SetDate("title", "修改资料")
 	tpl.SetDate("postUrl", config.AdminPath+"/account/userinfo")
 	tpl.SetDate("successUrl", config.AdminPath+"/index/index")
-	ac.ActShow(w, tpl, pageData)
+	pageBuilder := builder.PageBuilder{}
+	pageBuilder.DataReset()
+	ac.ActShow(w, tpl, &pageBuilder)
 }
 
-func (ac Account) LogOut(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ac Account) LogOut(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	
 	//清空账户Cookie
 	accountId := util.String2Int(ps.ByName("account_id"))
@@ -284,14 +291,17 @@ func (ac Account) LogOut(pageData *EasyApp.PageData, w http.ResponseWriter, r *h
 		MaxAge: -1,
 	}
 	w.Header().Set("set-cookie", ck.String())
-	tpl := EasyApp.Template{
+	tpl := builder.Displayer{
 		TplName: "logout.html",
 	}
 	tpl.SetDate("successUrl", config.AdminPath+"/account/login")
-	ac.ActShow(w, tpl, pageData)
+	
+	pageBuilder := builder.PageBuilder{}
+	pageBuilder.DataReset()
+	ac.ActShow(w, tpl, &pageBuilder)
 }
 
-func (ac Account) verifyCode(pageData *EasyApp.PageData, w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ac Account) verifyCode(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//数字验证码配置
 	captchaId, base64, err := captcha.GetCaptchaBase64("auto", 40, 130, 6, captcha.ColorWight)
 	if err != nil {
