@@ -4,7 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
-	"github.com/yqstech/gef/Utils/util/snowflake"
+	"github.com/yqstech/gef/util/snowflake"
 	"math"
 	"math/rand"
 	"os"

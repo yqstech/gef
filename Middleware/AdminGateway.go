@@ -14,12 +14,12 @@ import (
 	"github.com/yqstech/gef/Handles/commHandle"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
-	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/builder"
 	"github.com/yqstech/gef/config"
+	"github.com/yqstech/gef/util"
 	"net/http"
 	"time"
-	
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
 )
@@ -67,7 +67,7 @@ func (that *AdminGateway) checkToken(next httprouter.Handle) httprouter.Handle {
 		//		fmt.Fprint(w, "程序异常：", r)
 		//	}
 		//}()
-		
+
 		//获取当前链接
 		url := ps.ByName("pageName") + "/" + ps.ByName("actionName")
 		//token是否免检
@@ -114,18 +114,18 @@ func (that *AdminGateway) checkToken(next httprouter.Handle) httprouter.Handle {
 		ps = append(ps, account)
 		ps = append(ps, mainAccountId)
 		ps = append(ps, groupId)
-		
+
 		//新增请求ID编码
 		requestID := "admin_" + util.Int642String(userinfo["account_id"].(int64)) + "_" + util.Int642String(time.Now().UnixNano())
 		ps = append(ps, httprouter.Param{Key: "requestID", Value: requestID})
-		
+
 		//上传资源分组（1后台组）
 		uploadGroupID := httprouter.Param{Key: "uploadGroupID", Value: "1"}
 		ps = append(ps, uploadGroupID)
 		//上传资源用户
 		uploadUserID := httprouter.Param{Key: "uploadUserID", Value: util.Int642String(userinfo["account_id"].(int64))}
 		ps = append(ps, uploadUserID)
-		
+
 		next(w, r, ps)
 	}
 }
@@ -139,7 +139,7 @@ func (that *AdminGateway) checkToken(next httprouter.Handle) httprouter.Handle {
 //
 func (that *AdminGateway) checkAuth(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		
+
 		accountId := ps.ByName("account_id")
 		mainAccountId := ps.ByName("main_account_id")
 		//未登录的无需检查
@@ -234,7 +234,7 @@ func (that *AdminGateway) Run(w http.ResponseWriter, r *http.Request, ps httprou
 	}
 	//数据初始化
 	pageBuilder.DataReset()
-	
+
 	//在页面集中查找页面
 	if nodePage, ok := that.NodePages[ps.ByName("pageName")]; ok {
 		//拷贝一个节点页面对象

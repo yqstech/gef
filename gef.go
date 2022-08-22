@@ -20,13 +20,13 @@ import (
 	"github.com/yqstech/gef/Utils/gdb"
 	"github.com/yqstech/gef/Utils/pool"
 	"github.com/yqstech/gef/Utils/serv"
-	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/builder"
 	"github.com/yqstech/gef/builder/adminTemplates"
 	"github.com/yqstech/gef/config"
 	"github.com/yqstech/gef/registry"
 	"github.com/yqstech/gef/routers"
 	"github.com/yqstech/gef/static"
+	"github.com/yqstech/gef/util"
 	"net/http"
 	"os"
 )
@@ -51,7 +51,7 @@ func init() {
 	pool.RedisInit()
 	//! 初始化GoCache
 	pool.GocacheInit()
-	
+
 	//! 初始化数据库
 	db.Init()
 	gdb.Init()
@@ -180,7 +180,7 @@ func (g *Gef) Run() {
 	for _, server := range g.selfServers {
 		g.Servers = append(g.Servers, server)
 	}
-	
+
 	//!启动web服务组
 	HttpServers := serv.Server{}
 	for _, serv := range g.Servers {

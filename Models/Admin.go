@@ -9,7 +9,7 @@ package Models
 
 import (
 	"github.com/yqstech/gef/Utils/db"
-	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/util"
 
 	"github.com/wonderivan/logger"
 )

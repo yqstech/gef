@@ -12,7 +12,7 @@ package Models
 import (
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/Utils/db"
-	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/util"
 	"strings"
 	"sync"
 	"time"

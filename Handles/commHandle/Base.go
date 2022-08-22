@@ -10,8 +10,8 @@ package commHandle
 
 import (
 	"github.com/yqstech/gef/Utils/db"
-	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/builder"
+	"github.com/yqstech/gef/util"
 	"net/http"
 
 	"github.com/gohouse/gorose/v2"

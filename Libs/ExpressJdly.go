@@ -12,7 +12,7 @@ package Libs
 import (
 	"errors"
 	"github.com/wonderivan/logger"
-	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/util"
 	"strings"
 )
 

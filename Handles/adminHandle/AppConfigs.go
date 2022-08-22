@@ -15,8 +15,8 @@ import (
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
-	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/builder"
+	"github.com/yqstech/gef/util"
 	"net/http"
 )
 
@@ -44,14 +44,14 @@ func (that AppConfigs) GroupName() string {
 
 // NodeBegin 开始
 func (that AppConfigs) NodeBegin(pageBuilder *builder.PageBuilder) (error, int) {
-	
+
 	pageBuilder.SetTitle(that.GroupName())
 	pageBuilder.SetPageName("设置")
 	pageBuilder.SetTbName("tb_app_configs")
-	
+
 	//自动清理重复项
 	that.ClearAppConfigs()
-	
+
 	return nil, 0
 }
 
@@ -67,7 +67,7 @@ func (that AppConfigs) ClearAppConfigs() {
 	}
 	//删除所有无效的应用配置项
 	db.New().Table("tb_app_configs").WhereNotIn("name", configNames).Delete()
-	
+
 	//!清理重复项
 	appConfigs, err := db.New().Table("tb_app_configs").
 		Where("is_delete", 0).Order("id asc").Get()
@@ -100,7 +100,7 @@ func (that AppConfigs) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 	pageBuilder.SetListColumnStyle("key", "width:150px")
 	//隐藏分页
 	pageBuilder.SetListPageHide()
-	
+
 	//新增右侧日志开启关闭按钮
 	pageBuilder.SetButton("edit2", builder.Button{
 		ButtonName: "编辑" + that.GroupName(),
@@ -116,7 +116,7 @@ func (that AppConfigs) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 		},
 	})
 	pageBuilder.SetListTopBtns("edit2")
-	
+
 	return nil, 0
 }
 
@@ -136,7 +136,7 @@ func (that AppConfigs) NodeListData(pageBuilder *builder.PageBuilder, data []gor
 	for _, v := range data {
 		configValue[v["name"].(string)] = v["value"]
 	}
-	
+
 	//!按配置顺序显示出来
 	result := []gorose.Data{}
 	//获取所有应用内配置项
@@ -187,10 +187,10 @@ func (that *AppConfigs) Edit2(w http.ResponseWriter, r *http.Request, ps httprou
 				config["value"].(string), false, config["options"].([]map[string]interface{}), "", expand)
 		}
 	}
-	
+
 	if r.Method == "POST" {
 		PostData := util.PostJson(r, "formFields")
-		
+
 		for _, config := range appConfigs {
 			keyName := config["name"].(string)
 			value := PostData[keyName]
@@ -229,11 +229,11 @@ func (that *AppConfigs) Edit2(w http.ResponseWriter, r *http.Request, ps httprou
 				}
 			}
 		}
-		
+
 		that.ApiResult(w, 200, "修改成功!", "success")
 		return
 	}
-	
+
 	cfgs, err := db.New().Table("tb_app_configs").
 		Where("is_delete", 0).
 		Where("group_id", that.GroupId).Get()
@@ -247,7 +247,7 @@ func (that *AppConfigs) Edit2(w http.ResponseWriter, r *http.Request, ps httprou
 		odata[cfg["name"].(string)] = cfg["value"]
 	}
 	that.PageBuilder.SetFormData(odata)
-	
+
 	that.ActShow(w, builder.Displayer{
 		TplName: "edit.html",
 	}, that.PageBuilder)

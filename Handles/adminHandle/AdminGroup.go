@@ -12,8 +12,8 @@ import (
 	"errors"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
-	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/builder"
+	"github.com/yqstech/gef/util"
 
 	"github.com/gohouse/gorose/v2"
 	"github.com/wonderivan/logger"

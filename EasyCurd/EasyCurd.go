@@ -15,7 +15,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/Utils/db"
-	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/util"
 	"net/http"
 	"strings"
 )

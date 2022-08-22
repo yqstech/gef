@@ -16,8 +16,8 @@ import (
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
-	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/builder"
+	"github.com/yqstech/gef/util"
 	"net/http"
 	"strings"
 )
@@ -64,7 +64,7 @@ func (that OptionModels) NodeList(pageBuilder *builder.PageBuilder) (error, int)
 	})
 	//!重置顶部按钮
 	pageBuilder.SetListTopBtns("add", "export_insert_data")
-	
+
 	pageBuilder.SetListOrder("index_num,id asc")
 	pageBuilder.ListColumnAdd("unique_key", "标识符", "text", nil)
 	pageBuilder.ListColumnAdd("name", "名称", "text", nil)
@@ -125,24 +125,24 @@ func (that OptionModels) NodeForm(pageBuilder *builder.PageBuilder, id int64) (e
 	pageBuilder.FormFieldsAdd("select_where", "text-sm", "补充查询条件", "补充数据表查询条件", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
-	
+
 	//联动设置
 	pageBuilder.FormFieldsAdd("", "block", "选项集联动", "", "", false, nil, "", map[string]interface{}{
 		"if": "formFields.data_type==1",
 	})
-	
+
 	pageBuilder.FormFieldsAdd("dynamic_params", "textarea", "联动配置", "用来做数据联动的参数设置，程序根据设置的字段，查询post参数\n格式为 监听参数:选项集数据表字段:默认值，例如：group_id:group_id:0\n默认值为空自动忽略，每行一个转换规则", "", false,
 		nil, "", map[string]interface{}{
 			"if": "formFields.data_type==1",
 		})
-	
+
 	//多级、数据转换
 	pageBuilder.FormFieldsAdd("", "block", "多级、数据转换", "", "", false, nil, "", nil)
 	pageBuilder.FormFieldsAdd("parent_field", "text-xs", "上级字段", "设置上级，选项集中会多pid一项数据，值就是上级字段的值。", "", false, nil, "", nil)
 	pageBuilder.FormFieldsAdd("to_tree_array", "radio", "选项集转多维", "将选项集根据pid转为树形结构（多维数组）", "0", false, Models.OptionModels{}.ByKey("is", false), "", map[string]interface{}{
 		"if": "formFields.parent_field!=''",
 	})
-	
+
 	//!选择下级选项集，要排除自己
 	exceptOptionModelKey := ""
 	if id > 0 {
@@ -191,14 +191,14 @@ func (that OptionModels) NodeForm(pageBuilder *builder.PageBuilder, id int64) (e
 	}
 	pageBuilder.FormFieldsAdd("match_fields", "textarea", "自动匹配字段", "每个字段占一行，支持全匹配字段和半匹配字段,例如is_*", "", false, nil, "", nil)
 	pageBuilder.FormFieldsAdd("index_num", "text-xs", "排序", "", util.Int2String(indexNum), true, nil, "", nil)
-	
+
 	return nil, 0
 }
 
 // NodeFormData 表单显示前修改数据
 func (that OptionModels) NodeFormData(pageBuilder *builder.PageBuilder, data gorose.Data, id int64) (gorose.Data, error, int) {
 	if id > 0 {
-	
+
 	}
 	return data, nil, 0
 }
@@ -212,7 +212,7 @@ func (that OptionModels) NodeSaveData(pageBuilder *builder.PageBuilder, oldData 
 	} else {
 		postData["static_data"] = ""
 	}
-	
+
 	return postData, nil, 0
 }
 
@@ -234,7 +234,7 @@ func (that OptionModels) Dynamic(w http.ResponseWriter, r *http.Request, ps http
 		}
 	}
 	wheres = append(wheres, "unique_key = '"+optionModelKey+"'")
-	
+
 	ops := Models.OptionModels{}.Select(0, strings.Join(wheres, " and "), false)
 	that.ApiResult(w, 200, "success", ops)
 }
@@ -256,7 +256,7 @@ func (that OptionModels) ExportInsertData(w http.ResponseWriter, r *http.Request
 		delete(Item, "is_delete")
 		//按顺序添加排序字段
 		Item["index_num"] = index + 1
-		
+
 		content := `
 {
 	TableName: "tb_option_models",

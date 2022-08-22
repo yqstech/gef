@@ -11,7 +11,7 @@ package builder
 
 import (
 	"github.com/gohouse/gorose/v2"
-	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/util"
 )
 
 // ================  默认节点 ====================================

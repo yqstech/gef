@@ -15,7 +15,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/wonderivan/logger"
-	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/util"
 	"io"
 	"io/ioutil"
 	"net/http"

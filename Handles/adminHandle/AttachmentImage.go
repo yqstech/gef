@@ -12,8 +12,8 @@ package adminHandle
 import (
 	"github.com/gohouse/gorose/v2"
 	"github.com/yqstech/gef/Utils/db"
-	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/builder"
+	"github.com/yqstech/gef/util"
 	"os"
 )
 

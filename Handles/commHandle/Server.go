@@ -2,11 +2,11 @@ package commHandle
 
 import (
 	"fmt"
-	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/util"
 	"net/http"
 	"os"
 	"os/exec"
-	
+
 	"github.com/julienschmidt/httprouter"
 )
 

@@ -12,13 +12,13 @@ package adminHandle
 import (
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/pool"
-	"github.com/yqstech/gef/Utils/util"
-	"github.com/yqstech/gef/Utils/util/captcha"
 	"github.com/yqstech/gef/builder"
 	"github.com/yqstech/gef/config"
+	"github.com/yqstech/gef/util"
+	"github.com/yqstech/gef/util/captcha"
 	"net/http"
 	"time"
-	
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
 )
@@ -41,7 +41,7 @@ func (ac *Account) NodeInit(pageBuilder *builder.PageBuilder) {
 
 // Login 登录页面
 func (ac Account) Login(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	
+
 	if r.Method == "POST" {
 		//获取账户和密码
 		account := util.PostValue(r, "account")
@@ -160,7 +160,7 @@ func (ac Account) Login(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 
 // ResetPwd 修改密码页面
 func (ac Account) ResetPwd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	
+
 	if r.Method == "POST" {
 		//当前账号ID
 		accountId := ps.ByName("account_id")
@@ -212,11 +212,11 @@ func (ac Account) ResetPwd(w http.ResponseWriter, r *http.Request, ps httprouter
 	ac.ActShow(w, tpl, &pageBuilder)
 }
 
-func (ac Account) UserInfo( w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	
+func (ac Account) UserInfo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
 	//当前账号ID
 	accountId := ps.ByName("account_id")
-	
+
 	//查询当前账号信息
 	accountInfo, err := ac.DbModel("tb_admin").Where("id", accountId).First()
 	if err != nil {
@@ -280,7 +280,7 @@ func (ac Account) UserInfo( w http.ResponseWriter, r *http.Request, ps httproute
 }
 
 func (ac Account) LogOut(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	
+
 	//清空账户Cookie
 	accountId := util.String2Int(ps.ByName("account_id"))
 	db.New().Table("tb_admin_token").Where("account_id", accountId).Delete()
@@ -295,7 +295,7 @@ func (ac Account) LogOut(w http.ResponseWriter, r *http.Request, ps httprouter.P
 		TplName: "logout.html",
 	}
 	tpl.SetDate("successUrl", config.AdminPath+"/account/login")
-	
+
 	pageBuilder := builder.PageBuilder{}
 	pageBuilder.DataReset()
 	ac.ActShow(w, tpl, &pageBuilder)

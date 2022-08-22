@@ -13,10 +13,10 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/yqstech/gef/Handles/commHandle"
 	"github.com/yqstech/gef/Middleware"
-	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/config"
 	"github.com/yqstech/gef/registry"
 	"github.com/yqstech/gef/static"
+	"github.com/yqstech/gef/util"
 	"net/http"
 )
 

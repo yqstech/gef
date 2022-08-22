@@ -45,7 +45,7 @@ func (that *NodePage) Run(pageBuilder *PageBuilder, nodePage NodePager) {
 	// NodeInit 调用页面初始化节点
 	// 在这里可以注册自定义方法
 	that.NodePage.NodeInit(pageBuilder)
-	
+
 	// 查找页面方法
 	actionName := pageBuilder.HttpParams.ByName("actionName")
 	if pageAction, ok := that.NodePageActions[actionName]; ok {

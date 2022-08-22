@@ -11,7 +11,7 @@ package EasyCurd
 
 import (
 	"github.com/gohouse/gorose/v2"
-	"github.com/yqstech/gef/Utils/util"
+	"github.com/yqstech/gef/util"
 )
 
 // CompleteDataFunc 定义完善数据方法

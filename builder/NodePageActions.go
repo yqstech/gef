@@ -20,8 +20,8 @@ import (
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
-	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/config"
+	"github.com/yqstech/gef/util"
 	"io"
 	"net/http"
 	"os"
@@ -42,20 +42,20 @@ func (that *NodePage) Index(w http.ResponseWriter, r *http.Request, ps httproute
 		logger.Error("运行出错请刷新页面！")
 		return
 	}
-	
+
 	//! NodeBegin()
 	err, code := that.NodePage.NodeBegin(that.PageBuilder)
 	if err != nil {
 		that.ErrResult(w, r, code, err.Error(), nil)
 		return
 	}
-	
+
 	err, code = that.NodePage.NodeList(that.PageBuilder)
 	if err != nil {
 		that.ErrResult(w, r, code, err.Error(), nil)
 		return
 	}
-	
+
 	//! 校验权限隐藏不可用按钮
 	pageName := ps.ByName("pageName")                     //结构名
 	accountID := util.String2Int(ps.ByName("account_id")) //账户ID
@@ -129,7 +129,7 @@ func (that *NodePage) Index(w http.ResponseWriter, r *http.Request, ps httproute
 								that.ErrResult(w, r, code, err.Error(), nil)
 								return
 							}
-							
+
 							ok, err, code = that.NodePage.NodeSaveSuccess(that.PageBuilder, PostData, int64(util.String2Int(util.Interface2String(setId))))
 							if err != nil {
 								that.ErrResult(w, r, code, err.Error(), nil)
@@ -140,7 +140,7 @@ func (that *NodePage) Index(w http.ResponseWriter, r *http.Request, ps httproute
 							}
 							return
 						}
-						
+
 					}
 				}
 			}
@@ -191,7 +191,7 @@ func (that *NodePage) Index(w http.ResponseWriter, r *http.Request, ps httproute
 		if page != "" {
 			that.PageBuilder.SetListPage(util.String2Int(page))
 		}
-		
+
 		data, err := conn.Fields(that.PageBuilder.GetListFields()).Limit(that.PageBuilder.GetListPageSize()).Page(that.PageBuilder.GetListPage()).Order(that.PageBuilder.GetListOrder()).Get()
 		if err != nil {
 			logger.Error(err.Error())
@@ -208,7 +208,7 @@ func (that *NodePage) Index(w http.ResponseWriter, r *http.Request, ps httproute
 				}
 			}
 		}
-		
+
 		//!自定义列表数据操作
 		data, err, code = that.NodePage.NodeListData(that.PageBuilder, data)
 		if err != nil {
@@ -229,7 +229,7 @@ func (that *NodePage) Index(w http.ResponseWriter, r *http.Request, ps httproute
 	if that.PageBuilder.GetListDataURL() == "" {
 		that.PageBuilder.SetListDataURL(r.RequestURI)
 	}
-	
+
 	tpl := Displayer{
 		TplName: that.PageBuilder.GetListTplName(),
 	}
@@ -254,14 +254,14 @@ func (that *NodePage) Add(w http.ResponseWriter, r *http.Request, ps httprouter.
 		that.ErrResult(w, r, code, err.Error(), nil)
 		return
 	}
-	
+
 	//! NodeForm() 节点
 	err, code = that.NodePage.NodeForm(that.PageBuilder, 0)
 	if err != nil {
 		that.ErrResult(w, r, code, err.Error(), nil)
 		return
 	}
-	
+
 	//! NodeFormData() 数据转换节点
 	that.PageBuilder.formData, err, code = that.NodePage.NodeFormData(that.PageBuilder, gorose.Data{"id": int64(0)}, 0)
 	if err != nil {
@@ -320,13 +320,13 @@ func (that *NodePage) Add(w http.ResponseWriter, r *http.Request, ps httprouter.
 			that.ApiResult(w, 500, "插入数据失败！", "")
 			return
 		}
-		
+
 		ok, err, code := that.NodePage.NodeAddSuccess(that.PageBuilder, PostData, insertId)
 		if err != nil {
 			that.ErrResult(w, r, code, err.Error(), nil)
 			return
 		}
-		
+
 		ok, err, code = that.NodePage.NodeSaveSuccess(that.PageBuilder, PostData, insertId)
 		if err != nil {
 			that.ErrResult(w, r, code, err.Error(), nil)
@@ -379,7 +379,7 @@ func (that *NodePage) postDataCheckMust(PostData map[string]interface{}) (map[st
 			} else {
 				//有待选数据，判断必是其一
 				mustFieldVlues[formField.Key] = []interface{}{}
-				
+
 				//传入数据的格式修改为[]map[string]interface{} {name:"",value:""}
 				for _, dvalue := range formField.Data {
 					mustFieldVlues[formField.Key] = append(mustFieldVlues[formField.Key],
@@ -388,7 +388,7 @@ func (that *NodePage) postDataCheckMust(PostData map[string]interface{}) (map[st
 			}
 		}
 	}
-	
+
 	for postKey, postValue := range PostData {
 		if options, ok := mustFieldVlues[postKey]; ok {
 			//没有待选数据的，判断不可为空
@@ -424,28 +424,28 @@ func (that *NodePage) Edit(w http.ResponseWriter, r *http.Request, ps httprouter
 		logger.Error("运行出错请刷新页面！")
 		return
 	}
-	
+
 	//获取ID
 	id := int64(util.String2Int(util.GetValue(r, "id")))
 	if id <= 0 {
 		that.ErrResult(w, r, 103, "页面获取ID失败！", nil)
 		return
 	}
-	
+
 	//! NodeBegin()
 	err, code := that.NodePage.NodeBegin(that.PageBuilder)
 	if err != nil {
 		that.ErrResult(w, r, code, err.Error(), nil)
 		return
 	}
-	
+
 	//!NodeForm 初始化字段
 	err, code = that.NodePage.NodeForm(that.PageBuilder, id)
 	if err != nil {
 		that.ErrResult(w, r, code, err.Error(), nil)
 		return
 	}
-	
+
 	//!查询数据信息
 	editCondition := [][]interface{}{}
 	editCondition, err, code = that.NodePage.NodeAutoCondition(that.PageBuilder, editCondition)
@@ -468,7 +468,7 @@ func (that *NodePage) Edit(w http.ResponseWriter, r *http.Request, ps httprouter
 		return
 	}
 	//logger.Alert("Edit查询数据", conn.LastSql())
-	
+
 	//原始表信息转换
 	that.PageBuilder.formData, err, code = that.NodePage.NodeFormData(that.PageBuilder, info, id)
 	if err != nil {
@@ -521,7 +521,7 @@ func (that *NodePage) Edit(w http.ResponseWriter, r *http.Request, ps httprouter
 			that.ErrResult(w, r, code, err.Error(), nil)
 			return
 		}
-		
+
 		ok, err, code = that.NodePage.NodeSaveSuccess(that.PageBuilder, PostData, id)
 		if err != nil {
 			that.ErrResult(w, r, code, err.Error(), nil)
@@ -532,16 +532,16 @@ func (that *NodePage) Edit(w http.ResponseWriter, r *http.Request, ps httprouter
 		}
 		return
 	}
-	
+
 	//POST地址 含有链接内含有id
 	if that.PageBuilder.editDataUrl == "" {
 		that.PageBuilder.editDataUrl = r.RequestURI
 	}
-	
+
 	that.ActShow(w, Displayer{
 		TplName: that.PageBuilder.editTplName,
 	}, that.PageBuilder)
-	
+
 }
 
 //
@@ -557,7 +557,7 @@ func (that *NodePage) Status(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	status := int64(util.String2Int(util.GetValue(r, "status")))
 	id := int64(util.String2Int(util.PostValue(r, "id")))
-	
+
 	//批量操作
 	var ids []int64
 	if id <= 0 {
@@ -570,14 +570,14 @@ func (that *NodePage) Status(w http.ResponseWriter, r *http.Request, ps httprout
 	} else {
 		ids = append(ids, id)
 	}
-	
+
 	//! NodeBegin()
 	err, code := that.NodePage.NodeBegin(that.PageBuilder)
 	if err != nil {
 		that.ErrResult(w, r, code, err.Error(), nil)
 		return
 	}
-	
+
 	if status != 1 {
 		status = 0
 	}
@@ -592,17 +592,17 @@ func (that *NodePage) Status(w http.ResponseWriter, r *http.Request, ps httprout
 	for _, v := range editCondition {
 		conn = conn.Where(v...)
 	}
-	
+
 	//!转一下格式
 	var Ids []interface{}
 	for _, v := range ids {
 		Ids = append(Ids, v)
 	}
-	
+
 	rst, err := conn.WhereIn(that.PageBuilder.GetPK(), Ids).Update(map[string]interface{}{
 		"status": status,
 	})
-	
+
 	if err != nil {
 		logger.Error(err.Error())
 		that.ApiResult(w, 500, "修改数据出错！", nil)
@@ -621,7 +621,7 @@ func (that *NodePage) Status(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 	that.ApiResult(w, 200, "数据修改成功！", util.JsonEncode(ids))
-	
+
 }
 
 //
@@ -635,7 +635,7 @@ func (that *NodePage) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 	id := int64(util.String2Int(util.PostValue(r, "id")))
-	
+
 	//批量操作
 	var ids []int64
 	if id <= 0 {
@@ -648,14 +648,14 @@ func (that *NodePage) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 	} else {
 		ids = append(ids, id)
 	}
-	
+
 	//! NodeBegin()
 	err, code := that.NodePage.NodeBegin(that.PageBuilder)
 	if err != nil {
 		that.ErrResult(w, r, code, err.Error(), nil)
 		return
 	}
-	
+
 	editCondition := [][]interface{}{}
 	editCondition, err, code = that.NodePage.NodeAutoCondition(that.PageBuilder, editCondition)
 	if err != nil {
@@ -666,7 +666,7 @@ func (that *NodePage) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 	for _, v := range editCondition {
 		conn = conn.Where(v...)
 	}
-	
+
 	err, code = that.NodePage.NodeDeleteBefore(that.PageBuilder, id)
 	if err != nil {
 		that.ErrResult(w, r, code, err.Error(), nil)
@@ -675,13 +675,13 @@ func (that *NodePage) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 	if code == -1 {
 		return
 	}
-	
+
 	//!转一下格式
 	var Ids []interface{}
 	for _, v := range ids {
 		Ids = append(Ids, v)
 	}
-	
+
 	if that.PageBuilder.deleteField == "" {
 		rst, err := conn.WhereIn(that.PageBuilder.GetPK(), Ids).Delete()
 		if err != nil {
@@ -719,7 +719,7 @@ func (that *NodePage) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 		}
 		that.ApiResult(w, 200, "操作成功！", "1")
 	}
-	
+
 }
 
 // Upload 默认上传图片处理
@@ -779,14 +779,14 @@ func (that *NodePage) doUpload(w http.ResponseWriter, r *http.Request, ps httpro
 		return nil, errors.New("文件上传失败(1)！")
 	}
 	defer file.Close()
-	
+
 	//获取文件后缀
 	uploadFileName := fileHeader.Filename
 	fileExt := path.Ext(uploadFileName)
 	fileExt = strings.ToLower(fileExt)
 	//获取文件大小
 	fileSize := fileHeader.Size
-	
+
 	//允许上传的文件后缀,以.开头
 	var uploadAllowExts []interface{}
 	uploadExt := Models.AppConfigs{}.Value("upload_extension")
@@ -799,7 +799,7 @@ func (that *NodePage) doUpload(w http.ResponseWriter, r *http.Request, ps httpro
 	if !util.IsInArray(fileExt, uploadAllowExts) {
 		return nil, errors.New("不支持的文件类型！")
 	}
-	
+
 	buf := bytes.NewBuffer(nil)
 	if _, err := io.Copy(buf, file); err != nil {
 		return nil, errors.New("拷贝文件出错！")
@@ -808,7 +808,7 @@ func (that *NodePage) doUpload(w http.ResponseWriter, r *http.Request, ps httpro
 	md5er := md5.New()
 	md5er.Write(buf.Bytes())
 	md5value := hex.EncodeToString(md5er.Sum(nil))
-	
+
 	//!路径数据
 	//上传文件记录数据库
 	uploadDBName := config.UploadTableName
@@ -825,7 +825,7 @@ func (that *NodePage) doUpload(w http.ResponseWriter, r *http.Request, ps httpro
 	uploadGroupID := ps.ByName("uploadGroupID")
 	//用户id
 	uploadUserID := ps.ByName("uploadUserID")
-	
+
 	//重复文件截停
 	oldfile, err := db.New().Table(uploadDBName).
 		Where("md5", md5value).
@@ -840,19 +840,19 @@ func (that *NodePage) doUpload(w http.ResponseWriter, r *http.Request, ps httpro
 			"id":  util.Int642String(oldfile["id"].(int64)),
 		}, nil
 	}
-	
+
 	//定义文件名称
 	fileName := util.MD5(util.TimeNow() + util.GenValidateCode(6))
-	
+
 	//!创建目录
 	savePath := uploadPath + uploadSubPath
 	os.MkdirAll(savePath, os.ModePerm)
-	
+
 	//src
 	fileSrc := uploadUrl + uploadSubPath + "/" + fileName + fileExt
 	//文件目录
 	saveFile := uploadPath + uploadSubPath + "/" + fileName + fileExt
-	
+
 	//创建图片资源文件
 	dst, err := os.Create(saveFile)
 	if err != nil {
@@ -886,7 +886,7 @@ func (that *NodePage) doUpload(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 	//返回图片ID
 	return map[string]string{"url": fileSrc, "id": util.Int642String(insertId)}, nil
-	
+
 }
 
 // StructApiResult 前台接口标准结构

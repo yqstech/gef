@@ -14,9 +14,9 @@ import (
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/Models"
 	"github.com/yqstech/gef/Utils/db"
-	"github.com/yqstech/gef/Utils/util"
 	"github.com/yqstech/gef/builder"
 	"github.com/yqstech/gef/config"
+	"github.com/yqstech/gef/util"
 	"strings"
 )
 
