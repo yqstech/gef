@@ -11,8 +11,12 @@ package builder
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gohouse/gorose/v2"
 	"github.com/julienschmidt/httprouter"
+	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/Utils/db"
+	"github.com/yqstech/gef/util"
 	"html"
 	"net/http"
 	"strings"
@@ -426,7 +430,7 @@ func (builder *PageBuilder) ListRightBtnsIconClear() {
 	}
 }
 
-//SetButtonIcon 设置按钮图标
+// SetButtonIcon 设置按钮图标
 func (builder *PageBuilder) SetButtonIcon(btnName, icon string) {
 	if btn, ok := builder.buttons[btnName]; ok {
 		btn.Icon = icon
@@ -434,7 +438,7 @@ func (builder *PageBuilder) SetButtonIcon(btnName, icon string) {
 	}
 }
 
-//SetButtonActionUrl 设置按钮链接地址 是否是追加
+// SetButtonActionUrl 设置按钮链接地址 是否是追加
 func (builder *PageBuilder) SetButtonActionUrl(btnName, url string, isAddend bool) {
 	if btn, ok := builder.buttons[btnName]; ok {
 		if isAddend {
@@ -518,6 +522,12 @@ func (builder *PageBuilder) ListColumnAdd(FieldName, ColumnName, DataType string
 				opts := strings.Split(options[1], "&")
 				for _, opt := range opts {
 					optKv := strings.Split(opt, "=")
+					if len(optKv) == 1 {
+						optKv = strings.Split(opt, ":")
+					}
+					if len(optKv) == 1 {
+						continue
+					}
 					Options[optKv[0]] = optKv[1]
 				}
 			}
@@ -663,6 +673,41 @@ func (builder *PageBuilder) GetHttpParams() httprouter.Params {
 	return builder.HttpParams
 }
 
+// GetEasyModelsButtons 获取按钮列表
+func (builder *PageBuilder) GetEasyModelsButtons(allButton []interface{}) (map[string]Button, error) {
+	buttons := map[string]Button{}
+	if len(allButton) > 0 {
+		selfButtonList, err := db.New().Table("tb_easy_models_buttons").
+			Where("is_delete", 0).
+			Where("status", 1).
+			WhereIn("button_key", allButton).
+			Get()
+		if err != nil {
+			logger.Error(err.Error())
+			return buttons, errors.New("系统运行错误！")
+		}
+		for _, btnInfo := range selfButtonList {
+			buttons[btnInfo["button_key"].(string)] = Button{
+				ButtonName: btnInfo["button_name"].(string),
+				Action:     btnInfo["action"].(string),
+				ActionType: util.Int642Int(btnInfo["action_type"].(int64)),
+				ConfirmMsg: btnInfo["confirm_msg"].(string),
+				LayerTitle: btnInfo["layer_title"].(string),
+				ActionUrl:  btnInfo["action_url"].(string),
+				Class:      btnInfo["class_name"].(string),
+				Icon:       btnInfo["button_icon"].(string),
+				Display:    btnInfo["display"].(string),
+				Expand: map[string]string{
+					"w": btnInfo["layer_width"].(string),
+					"h": btnInfo["layer_height"].(string),
+				},
+				BatchAction: util.Is(btnInfo["batch_action"].(int64) == 1, true, false).(bool),
+			}
+		}
+	}
+	return buttons, nil
+}
+
 // TemplateData 设置模板数据
 func (builder *PageBuilder) TemplateData() map[string]interface{} {
 	data := map[string]interface{}{}
@@ -756,7 +801,7 @@ func (builder *PageBuilder) TemplateData() map[string]interface{} {
 	return data
 }
 
-//页面选项卡结构
+// 页面选项卡结构
 type pageTab struct {
 	Href  string
 	Title string

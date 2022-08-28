@@ -1,11 +1,12 @@
 package util
 
 import (
+	"regexp"
 	"strings"
 	"time"
 )
 
-//获取时间字符串
+// 获取时间字符串
 func Time() string {
 	return Int2String(Int642Int(time.Now().Unix()))
 }
@@ -64,4 +65,67 @@ func TimeLeft(t1, t2 string) int64 {
 	} else {
 		return time2 - time1
 	}
+}
+
+// Second2Dhms 秒格式化成 天 时 分 秒
+func Second2Dhms(second int64, d, h, m, s string) string {
+	if second < 0 {
+		second = 0
+	}
+	day := second / 86400
+	hour := (second - (day * 86400)) / 3600
+	minute := (second - day*86400 - hour*3600) / 60
+	sec := second - day*86400 - hour*3600 - minute*60
+	result := ""
+	//天数大于0时才显示天
+	if day > 0 {
+		result = result + Int642String(day) + d
+	}
+	//天或小时大于0时显示
+	if hour > 0 || day > 0 {
+		result = result + Int642String(hour) + h
+	}
+	//天时分大于0时显示分
+	if minute > 0 || hour > 0 || day > 0 {
+		result = result + Int642String(minute) + m
+	}
+	//一直显示秒
+	result = result + Int642String(sec) + s
+
+	return result
+}
+
+// Dhms2Second 时分秒转换成秒
+func Dhms2Second(str string) int64 {
+	second := int64(0)
+	//正则匹配所有数字
+	re := regexp.MustCompile("[0-9]+")
+	nums := re.FindAllString(str, -1)
+	//数字倒序
+	var timeArr []int64
+	l := int64(len(nums))
+	if l > 0 {
+		l--
+		for true {
+			if l < 0 {
+				break
+			}
+			timeArr = append(timeArr, int64(String2Int(nums[l])))
+		}
+	}
+	//倒序后的顺序为秒、分、时、天，累加秒数
+	for k, v := range timeArr {
+		if k == 0 {
+			second = second + v
+		} else if k == 1 {
+			second = second + v*60
+		} else if k == 2 {
+			second = second + v*3600
+		} else if k == 3 {
+			second = second + v*86400
+		} else {
+			break
+		}
+	}
+	return second
 }

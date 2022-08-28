@@ -69,7 +69,7 @@
             color: #ff5900 !important;
             font-size: 28px!important;
         }
-        .layui-input, .layui-textarea {
+        .layui-input, .layui-textarea,.layui-select {
             display: block;
             width: 97%;
             padding-left: 10px;
@@ -227,6 +227,15 @@
         {{else if eq $field.Type "select"}}
         "{{$field.Key}}":`{{if $field.Value}}{{$field.Value}}{{end}}`,
         "_{{$field.Key}}_options":{{toString $field.Data}},
+        {{else if eq $field.Type "select-sm"}}
+        "{{$field.Key}}":`{{if $field.Value}}{{$field.Value}}{{end}}`,
+        "_{{$field.Key}}_options":{{toString $field.Data}},
+        {{else if eq $field.Type "select-xs"}}
+        "{{$field.Key}}":`{{if $field.Value}}{{$field.Value}}{{end}}`,
+        "_{{$field.Key}}_options":{{toString $field.Data}},
+        {{else if eq $field.Type "select-xxs"}}
+        "{{$field.Key}}":`{{if $field.Value}}{{$field.Value}}{{end}}`,
+        "_{{$field.Key}}_options":{{toString $field.Data}},
         {{else if eq $field.Type "radio"}}
         "{{$field.Key}}":`{{if $field.Value}}{{$field.Value}}{{end}}`,
         "_{{$field.Key}}_options":{{toString $field.Data}},
@@ -325,12 +334,14 @@
                     success: function (data) {
                         var rst = eval('(' + data + ')');
                         if (rst.code == 200 || rst.code == "200") {
-                            that.formFields[optionsField] = rst.data;
                             //假如选项中没有一致的，设置为空
-                            var hadOptions = false;
-                            for (let i = 0; i < rst.data.length; i++) {
-                                if(rst.data[i].value == that.formFields[FieldKey]){
-                                    hadOptions = true;
+                            let hadOptions = false;
+                            if(!!rst.data){
+                                that.formFields[optionsField] = rst.data;
+                                for (let i = 0; i < rst.data.length; i++) {
+                                    if(rst.data[i].value == that.formFields[FieldKey]){
+                                        hadOptions = true;
+                                    }
                                 }
                             }
                             if(!hadOptions){

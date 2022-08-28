@@ -26,11 +26,8 @@ var OptionModelsList = map[string][]map[string]interface{}{}
 var OptionModelsListLock sync.Mutex
 
 // Select 新增选项集底层查询方法，支持where条件查询
-func (that OptionModels) Select(id int, where string, beautify bool) []map[string]interface{} {
-	cacheKey := util.Int2String(id) + "_" + util.Is(beautify, "1", "0").(string)
-	if where != "" {
-		cacheKey = cacheKey + "_" + util.MD5(where)
-	}
+func (that OptionModels) Select(id int, OmWhere, where string, beautify bool) []map[string]interface{} {
+	cacheKey := util.Int2String(id) + "_" + util.Is(beautify, "1", "0").(string) + "_" + util.MD5(OmWhere+"#"+where)
 	if selectData, ok := OptionModelsList[cacheKey]; ok {
 		return selectData
 	} else {
@@ -42,17 +39,15 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 			Where("is_delete", 0).
 			Where("status", 1).
 			Where(func() {
-				if id == 0 {
+				if id == 0 && OmWhere == "" {
 					conn.Where("1=1")
 				} else {
-					conn.Where("id", id)
-				}
-			}).
-			Where(func() {
-				if where == "" {
-					conn.Where("1=1")
-				} else {
-					conn.Where(where)
+					if id != 0 {
+						conn.Where("id", id)
+					}
+					if OmWhere != "" {
+						conn.Where(OmWhere)
+					}
 				}
 			}).First()
 		if err != nil {
@@ -62,7 +57,6 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 		if data == nil {
 			return nil
 		}
-
 		if data["data_type"].(int64) == 0 {
 			//解析json格式的静态数据
 			if data["static_data"].(string) != "" {
@@ -103,7 +97,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 
 			arrOptions, err, _ := Model{}.SelectOptionsData(data["table_name"].(string), keyTrans, "", "", where, data["select_order"].(string))
 			if err != nil {
-				logger.Error(err.Error())
+				logger.Error(data["table_name"].(string), err.Error())
 				return nil
 			}
 			//假如value就是ID，需要将value字段值 恢复 到id字段上
@@ -129,33 +123,8 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 			selectData = append(selectData, arrOptions...)
 		}
 		if beautify {
-			//静态数据渲染文本
-			for index, option := range selectData {
-				optionColor := ""
-				if bgColor, ok := option["bgColor"].(string); ok {
-					optionColor = ";background:" + bgColor + ";border-color:" + bgColor
-					if color, ok2 := option["color"].(string); ok2 {
-						optionColor = optionColor + ";color:" + color
-					} else {
-						//有背景色，默认字体就是白色
-						optionColor = optionColor + ";color:#FFFFFF"
-					}
-				} else {
-					//无背景色，有颜色，设置字体颜色
-					if color, ok := option["color"].(string); ok {
-						optionColor = ";color:" + color + ";border-color:" + color
-					}
-				}
-				optionIcon := ""
-				if icon, ok := option["icon"].(string); ok && icon != "" {
-					optionIcon = "<i class=\"" + icon + "\"></i>"
-				}
-				optionName := "<div class=\"option-tag\" style=\"" + optionColor + "\">" + optionIcon + util.Interface2String(
-					option["name"]) + "</div>"
-				selectData[index]["name"] = optionName
-			}
+			selectData = that.Beautify(selectData)
 		}
-		//logger.Alert("美化后的数据集", selectData)
 		//!设置了禁用
 		if data["options_disable"].(int64) == 1 {
 			for thisIndex, _ := range selectData {
@@ -206,9 +175,9 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 		go func() {
 			t := time.After(time.Second * 10) //十秒钟后删除
 			_, _ = <-t
-			OptionModelsListLock.Lock()
+			//OptionModelsListLock.Lock()
 			//defer OptionModelsListLock.Unlock()
-			//delete(OptionModelsList, cacheKey)
+			delete(OptionModelsList, cacheKey)
 		}()
 		OptionModelsList[cacheKey] = selectData
 		return selectData
@@ -217,7 +186,7 @@ func (that OptionModels) Select(id int, where string, beautify bool) []map[strin
 
 // ById 获取选项集数据（可选择美化数据）
 func (that OptionModels) ById(id int, beautify bool) []map[string]interface{} {
-	return that.Select(id, "", beautify)
+	return that.Select(id, "", "", beautify)
 }
 
 // ByKey 获取选项集数据（可选择美化数据）
@@ -229,11 +198,41 @@ func (that OptionModels) ByKey(uniqueKey interface{}, beautify bool) []map[strin
 	case int64:
 		data = that.ById(util.Int642Int(uniqueKey.(int64)), beautify)
 	case string:
-		data = that.Select(0, "unique_key = '"+uniqueKey.(string)+"'", beautify)
+		data = that.Select(0, "unique_key = '"+uniqueKey.(string)+"'", "", beautify)
 	default:
 		logger.Error("选项集key值类型异常！")
 	}
 	return data
+}
+func (that OptionModels) Beautify(data []map[string]interface{}) []map[string]interface{} {
+	var selectData []map[string]interface{}
+	util.JsonDecode(util.JsonEncode(data), &selectData)
+	//数据美化
+	for index, option := range selectData {
+		optionColor := ""
+		if bgColor, ok := option["bgColor"].(string); ok {
+			optionColor = ";background:" + bgColor + ";border-color:" + bgColor
+			if color, ok2 := option["color"].(string); ok2 {
+				optionColor = optionColor + ";color:" + color
+			} else {
+				//有背景色，默认字体就是白色
+				optionColor = optionColor + ";color:#FFFFFF"
+			}
+		} else {
+			//无背景色，有颜色，设置字体颜色
+			if color, ok := option["color"].(string); ok {
+				optionColor = ";color:" + color + ";border-color:" + color
+			}
+		}
+		optionIcon := ""
+		if icon, ok := option["icon"].(string); ok && icon != "" {
+			optionIcon = "<i class=\"" + icon + "\"></i>"
+		}
+		optionName := "<div class=\"option-tag\" style=\"" + optionColor + "\">" + optionIcon + util.Interface2String(
+			option["name"]) + "</div>"
+		selectData[index]["name"] = optionName
+	}
+	return selectData
 }
 
 // OptionDynamicParam 选项动态参数
@@ -278,16 +277,16 @@ func (that OptionModels) DynamicParams(uniqueKey string) []OptionDynamicParam {
 	return DynamicParams
 }
 
-//定时更新标记
+// 定时更新标记
 var matchRuleValidity = false
 
-//原子操作锁
+// 原子操作锁
 var fieldMatchSelectData sync.Mutex
 
-//字段完全匹配的id索引
+// 字段完全匹配的id索引
 var fieldKey2OptionModelKey = map[string]string{}
 
-//字段匹配规则列表
+// 字段匹配规则列表
 var fieldRules []fieldRule
 
 type fieldRule struct {
@@ -325,7 +324,7 @@ func FieldMatchOptionModelsKey(fieldKey string) string {
 			Where("is_delete", 0).
 			Where("status", 1).
 			OrderBy("id asc").
-			Fields("id,match_fields").
+			Fields("id,unique_key,match_fields").
 			Get()
 		if err != nil {
 			logger.Error(err.Error())
@@ -366,7 +365,7 @@ func FieldMatchOptionModelsKey(fieldKey string) string {
 }
 
 // TreeArrayExtendField 多维数据补充数组的附加信息
-//多维数组查询出子级的层级，遇到选项有_lastLevel值，就直接返回
+// 多维数组查询出子级的层级，遇到选项有_lastLevel值，就直接返回
 func TreeArrayExtendField(data []map[string]interface{}) ([]map[string]interface{}, []interface{}, int64) {
 	//迭代数组
 	//最多有几级子项

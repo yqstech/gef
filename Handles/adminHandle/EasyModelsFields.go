@@ -24,7 +24,7 @@ type EasyModelsFields struct {
 	Base
 }
 
-//列表数据类型
+// 列表数据类型
 var listDataType = []map[string]interface{}{
 	{"name": "普通文字(text)", "value": "text"},
 	{"name": "数组/匹配关联数据源(array)", "value": "array"},
@@ -41,22 +41,33 @@ var listDataType = []map[string]interface{}{
 	{"name": "图片30尺寸(image30)", "value": "image30"},
 }
 
-//表单数据类型
+// 表单数据类型
 var formDataType = []map[string]interface{}{
 	{"name": "文字输入框(text)", "value": "text"},
 	{"name": "文字输入框(短)(text-sm)", "value": "text-sm"},
 	{"name": "文字输入框(很短)(text-xs)", "value": "text-xs"},
 	{"name": "文字输入框(超短)(text-xxs)", "value": "text-xxs"},
 	{"name": "文字输入框(禁用状态)(text-disabled)", "value": "text-disabled"},
+	{"name": "文字输入框(禁用状态)(短)(text-disabled-sm)", "value": "text-disabled-sm"},
+	{"name": "文字输入框(禁用状态)(很短)(text-disabled-xs)", "value": "text-disabled-xs"},
+	{"name": "文字输入框(禁用状态)(超短)(text-disabled-xxs)", "value": "text-disabled-xxs"},
 	{"name": "数字输入框(number)", "value": "number"},
 	{"name": "数字输入框(短)(number-sm)", "value": "number-sm"},
 	{"name": "数字输入框(很短)(number-xs)", "value": "number-xs"},
 	{"name": "数字输入框(超短)(number-xxs)", "value": "number-xxs"},
+	{"name": "下拉选项(select)", "value": "select"},
+	{"name": "下拉选项(短)(select-sm)", "value": "select-sm"},
+	{"name": "下拉选项(很短)(select-xs)", "value": "select-xs"},
+	{"name": "下拉选项(超短)(select-xxs)", "value": "select-xxs"},
+	{"name": "下拉选项(禁用状态)(select-disabled)", "value": "select-disabled"},
+	{"name": "下拉选项(禁用状态)(短)(select-disabled-sm)", "value": "select-disabled-sm"},
+	{"name": "下拉选项(禁用状态)(很短)(select-disabled-xs)", "value": "select-disabled-xs"},
+	{"name": "下拉选项(禁用状态)(超短)(select-disabled-xxs)", "value": "select-disabled-xxs"},
+
 	{"name": "密码输入框(password)", "value": "password"},
 	{"name": "文本域(textarea)", "value": "textarea"},
 	{"name": "文本域(禁用状态)(textarea-disabled)", "value": "textarea-disabled"},
-	{"name": "下拉选项(select)", "value": "select"},
-	{"name": "下拉选项(禁用状态)(select-disabled)", "value": "select-disabled"},
+
 	{"name": "单选(radio)", "value": "radio"},
 	{"name": "多选(checkbox)", "value": "checkbox"},
 	{"name": "多级多选(checkbox_level)", "value": "checkbox_level"},
@@ -76,10 +87,13 @@ var formDataType = []map[string]interface{}{
 	{"name": "百度地图位置选择器(lnglat)", "value": "lnglat"},
 }
 
-//数据库数据变换规则
-//表单输入数据和数据库存储的数据，需要按照规则进行转换
+// 数据库数据变换规则
+// 表单输入数据和数据库存储的数据，需要按照规则进行转换
 var dataTransRulesForDB = []map[string]interface{}{
-	{"name": "两位小数(元)转整数(分)", "value": "yuan2fen"},
+	{"name": "展示两位小数(元)，存整数(分)", "value": "yuan2fen"},
+	{"name": "展示一位小数(小时)，存整数(秒)", "value": "hour2second"},
+	{"name": "展示一位小数(分钟)，存整数(秒)", "value": "minute2second"},
+	{"name": "展示时间(天/时/分/秒)，存整数(秒)", "value": "dhms2second"},
 }
 
 // NodeBegin 开始
@@ -171,6 +185,8 @@ func (that EasyModelsFields) NodeList(pageBuilder *builder.PageBuilder) (error, 
 		pageBuilder.ListColumnAdd("default_value", "默认值", "input::width=60px", nil)
 		pageBuilder.ListColumnAdd("index_num", "排序值", "input::type=number&width=50px", nil)
 	}
+
+	pageBuilder.SetListColumnStyle("field_name", "width:18%")
 	return nil, 0
 
 }
@@ -282,16 +298,16 @@ func (that EasyModelsFields) NodeSaveData(pageBuilder *builder.PageBuilder, oldD
 	return postData, nil, 0
 }
 
-//默认列表需要显示的字段
+// 默认列表需要显示的字段
 var defaultListShowFields = []interface{}{"id", "status"}
 
-//禁止新增的字段——新增页不显示
+// 禁止新增的字段——新增页不显示
 var defaultNotAllowCreateFields = []interface{}{"is_delete", "update_time", "create_time", "id", "status"}
 
-//默认禁止修改的字段——编辑页不显示
+// 默认禁止修改的字段——编辑页不显示
 var defaultNotAllowUpdateFields = []interface{}{"is_delete", "update_time", "create_time", "id", "status"}
 
-//同步模型字段
+// 同步模型字段
 func (that EasyModelsFields) syncModelFields(easyModelId int) {
 	//查询模型信息
 	easyModelInfo, err := db.New().Table("tb_easy_models").

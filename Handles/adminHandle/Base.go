@@ -21,35 +21,11 @@ type Base struct {
 }
 
 // NodeCheckAuth 重写校验权限节点
-func (b Base) NodeCheckAuth(pageBuilder *builder.PageBuilder, btnRule string, accountID int) (bool, error) {
+func (b Base) NodeCheckAuth(_ *builder.PageBuilder, btnRule string, accountID int) (bool, error) {
 	return Models.Admin{}.CheckAuth(btnRule, accountID), nil
 }
 
-func (b Base) SmsUpstreamList() []map[string]interface{} {
-	//获取列表
-	//获取列表
-	upstreamOptions, err, _ := Models.Model{}.SelectOptionsData("tb_sms_upstream", map[string]string{
-		"id":            "value",
-		"upstream_name": "name",
-	}, "", "", "", "")
-	if err != nil {
-		logger.Error(err.Error())
-		return nil
-	}
-	return upstreamOptions
-}
-func (b Base) EasyModels() []map[string]interface{} {
-	data, err, _ := Models.Model{}.SelectOptionsData("tb_easy_models", map[string]string{
-		"id":         "value",
-		"model_name": "name",
-	}, "", "", "", "")
-	if err != nil {
-		logger.Error(err.Error())
-		return nil
-	}
-	return data
-}
-
+// OptionModelsList 选项集列表
 func (b Base) OptionModelsList() []map[string]interface{} {
 	//获取列表
 	OptionModelsList, err, _ := Models.Model{}.SelectOptionsData("tb_option_models", map[string]string{
@@ -63,6 +39,7 @@ func (b Base) OptionModelsList() []map[string]interface{} {
 	return OptionModelsList
 }
 
+// DynamicOptionModelsList 动态选项集列表
 func (b Base) DynamicOptionModelsList() []map[string]interface{} {
 	//获取列表
 	OptionModelsList, err, _ := Models.Model{}.SelectOptionsData("tb_option_models", map[string]string{
@@ -76,7 +53,7 @@ func (b Base) DynamicOptionModelsList() []map[string]interface{} {
 	return OptionModelsList
 }
 
-//ChildrenOptionModelsList 下级选项集
+// ChildrenOptionModelsList 下级选项集列表
 func (b Base) ChildrenOptionModelsList(uniqueKey string) []map[string]interface{} {
 	//获取列表
 	ChildrenOptionModels, err, _ := Models.Model{}.SelectOptionsData("tb_option_models", map[string]string{

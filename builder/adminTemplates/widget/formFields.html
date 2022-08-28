@@ -66,6 +66,33 @@
         <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
                autocomplete="off" class="layui-input" disabled="disabled">
         {{- end -}}
+        {{- if eq $field.Type "text-disabled-sm"}}
+        <div class="layui-col-sm6">
+            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
+                   autocomplete="off" class="layui-input" disabled="disabled">
+        </div>
+        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+        {{- if eq $field.Type "text-disabled-xs"}}
+        <div class="layui-col-sm3">
+            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}"
+                   autocomplete="off" class="layui-input" disabled="disabled">
+        </div>
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+        {{- if eq $field.Type "text-disabled-xxs"}}
+        <div class="layui-col-sm2 layui-col-xs3">
+            <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}"
+                   autocomplete="off" class="layui-input" disabled="disabled">
+        </div>
+        <div class="layui-col-sm10 layui-col-xs9" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
 
         {{/* 数字 */}}
         {{- if eq $field.Type "number"}}
@@ -104,11 +131,11 @@
         {{- end -}}
         {{/* 密码 */}}
         {{- if eq $field.Type "password"}}
-        <div class="layui-col-sm6">
+        <div class="layui-col-sm3">
             <input @keyup.enter="formSubmit" type="password" v-model="formFields.{{$field.Key}}"
                 placeholder="请输入密码..." autocomplete="off" class="layui-input" >
         </div>
-        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -126,8 +153,7 @@
 
         {{/* 下拉选择 */}}
         {{- if eq $field.Type "select"}}
-        <select v-model="formFields.{{$field.Key}}" lay-verify="required" class="layui-select"
-            style="width:100%;color: #777777;{{$field.Style}}">
+        <select v-model="formFields.{{$field.Key}}" lay-verify="required" class="layui-select" style="color: #777777;{{$field.Style}}">
             <option value="">请选择</option>
             <option v-for="(opt,optIndex) in formFields._{{$field.Key}}_options" :value="opt.value" v-html="opt.name"></option>
         </select>
@@ -135,14 +161,85 @@
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
+        {{- if eq $field.Type "select-sm"}}
+        <div class="layui-col-sm6">
+            <select v-model="formFields.{{$field.Key}}" lay-verify="required" class="layui-select" style="color: #777777;{{$field.Style}}">
+                <option value="">请选择</option>
+                <option v-for="(opt,optIndex) in formFields._{{$field.Key}}_options" :value="opt.value" v-html="opt.name"></option>
+            </select>
+        </div>
+        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+        {{- if eq $field.Type "select-xs"}}
+        <div class="layui-col-sm3">
+            <select v-model="formFields.{{$field.Key}}" lay-verify="required" class="layui-select" style="color: #777777;{{$field.Style}}">
+                <option value="">请选择</option>
+                <option v-for="(opt,optIndex) in formFields._{{$field.Key}}_options" :value="opt.value" v-html="opt.name"></option>
+            </select>
+        </div>
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+        {{- if eq $field.Type "select-xxs"}}
+        <div class="layui-col-sm2">
+            <select v-model="formFields.{{$field.Key}}" lay-verify="required" class="layui-select" style="color: #777777;{{$field.Style}}">
+                <option value="">请选择</option>
+                <option v-for="(opt,optIndex) in formFields._{{$field.Key}}_options" :value="opt.value" v-html="opt.name"></option>
+            </select>
+        </div>
+        <div class="layui-col-sm10" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
         {{- if eq $field.Type "select-disabled"}}
-        <select v-model="formFields.{{$field.Key}}" lay-verify="required" class="layui-select"
-                style="width:100%;color: #777777;background-color:#e7e4ea;{{$field.Style}}" disabled="disabled">
+        <select v-model="formFields.{{$field.Key}}" lay-verify="required" class="layui-select" style="color: #777777;background-color:#e7e4ea;{{$field.Style}}" disabled="disabled">
             <option value="">请选择</option>
             {{range $k,$v := $field.Data}}
             <option value="{{$v.value}}">{{$v.name}}</option>
             {{- end -}}
         </select>
+        {{- end -}}
+        {{- if eq $field.Type "select-disabled-sm"}}
+        <div class="layui-col-sm6">
+            <select v-model="formFields.{{$field.Key}}" lay-verify="required" class="layui-select" style="color: #777777;background-color:#e7e4ea;{{$field.Style}}" disabled="disabled">
+                <option value="">请选择</option>
+                {{range $k,$v := $field.Data}}
+                <option value="{{$v.value}}">{{$v.name}}</option>
+                {{- end -}}
+            </select>
+        </div>
+        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+        {{- if eq $field.Type "select-disabled-xs"}}
+        <div class="layui-col-sm3">
+            <select v-model="formFields.{{$field.Key}}" lay-verify="required" class="layui-select" style="color: #777777;background-color:#e7e4ea;{{$field.Style}}" disabled="disabled">
+                <option value="">请选择</option>
+                {{range $k,$v := $field.Data}}
+                <option value="{{$v.value}}">{{$v.name}}</option>
+                {{- end -}}
+            </select>
+        </div>
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
+        {{- end -}}
+        {{- if eq $field.Type "select-disabled-xxs"}}
+        <div class="layui-col-sm2">
+            <select v-model="formFields.{{$field.Key}}" lay-verify="required" class="layui-select" style="color: #777777;background-color:#e7e4ea;{{$field.Style}}" disabled="disabled">
+                <option value="">请选择</option>
+                {{range $k,$v := $field.Data}}
+                <option value="{{$v.value}}">{{$v.name}}</option>
+                {{- end -}}
+            </select>
+        </div>
+        <div class="layui-col-sm10" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
         {{- end -}}
 
         {{/* 图标选择器 */}}
@@ -350,16 +447,28 @@
 
         {{/* 日期时间组件 */}}
         {{- if eq $field.Type "datetime"}}
-        <input type="text" class="layui-input" id="datetime_{{$field.Key}}" placeholder="{{$field.Notice}}"
-            style="{{$field.Style}}">
+        <div class="layui-col-sm3">
+            <input type="text" class="layui-input" id="datetime_{{$field.Key}}" style="{{$field.Style}}">
+        </div>
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
         {{- end -}}
         {{- if eq $field.Type "date"}}
-        <input type="text" class="layui-input" id="date_{{$field.Key}}" placeholder="{{$field.Notice}}"
-            style="{{$field.Style}}">
+        <div class="layui-col-sm3">
+            <input type="text" class="layui-input" id="date_{{$field.Key}}" style="{{$field.Style}}">
+        </div>
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
         {{- end -}}
         {{- if eq $field.Type "time"}}
-        <input type="text" class="layui-input" id="time_{{$field.Key}}" placeholder="{{$field.Notice}}"
-            style="{{$field.Style}}">
+        <div class="layui-col-sm3">
+            <input type="text" class="layui-input" id="time_{{$field.Key}}" style="{{$field.Style}}">
+        </div>
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+            <span>{{$field.Notice}}</span>
+        </div>
         {{- end -}}
 
         {{/* 商品规格spec */}}

@@ -27,8 +27,8 @@ type OptionModels struct {
 }
 
 var dataTypes = []map[string]interface{}{
-	{"name": "静态json数据", "value": "0"},
-	{"name": "查询数据表", "value": "1"},
+	{"name": "静态", "value": "0", "color": "#0066CC", "icon": "ri-braces-line"},
+	{"name": "查询", "value": "1", "color": "#FF6600", "icon": "ri-database-2-line"},
 }
 
 // NodeInit 初始化
@@ -64,32 +64,48 @@ func (that OptionModels) NodeList(pageBuilder *builder.PageBuilder) (error, int)
 	})
 	//!重置顶部按钮
 	pageBuilder.SetListTopBtns("add", "export_insert_data")
-
+	pageBuilder.SetListPageSize(50)
 	pageBuilder.SetListOrder("index_num,id asc")
-	pageBuilder.ListColumnAdd("unique_key", "标识符", "text", nil)
+	pageBuilder.ListColumnAdd("unique_key", "标识符", "html", nil)
 	pageBuilder.ListColumnAdd("name", "名称", "text", nil)
-	pageBuilder.ListColumnAdd("data_type", "数据类型", "array", dataTypes)
-	pageBuilder.ListColumnAdd("static_data", "静态数据", "html", nil)
-	pageBuilder.ListColumnAdd("table_name", "数据表", "text", nil)
-	pageBuilder.ListColumnAdd("value_field", "值字段", "text", nil)
-	pageBuilder.ListColumnAdd("name_field", "名称字段", "text", nil)
-	pageBuilder.ListColumnAdd("parent_field", "上级字段", "text", nil)
+	pageBuilder.ListColumnAdd("data_type", "数据类型", "array", Models.OptionModels{}.Beautify(dataTypes))
+	pageBuilder.ListColumnAdd("static_data", "静态数据/数据表字段", "html", nil)
+	//pageBuilder.ListColumnAdd("table_name", "数据表", "text", nil)
+	//pageBuilder.ListColumnAdd("value_field", "值字段", "text", nil)
+	//pageBuilder.ListColumnAdd("name_field", "名称字段", "text", nil)
+	//pageBuilder.ListColumnAdd("parent_field", "上级字段", "text", nil)
 	pageBuilder.ListColumnAdd("children_option_model_key", "下级选项集", "array", that.ChildrenOptionModelsList(""))
 	pageBuilder.ListColumnAdd("index_num", "排序", "input::type=number&width=50px", nil)
+	pageBuilder.SetListColumnStyle("unique_key", "width:10%")
+	pageBuilder.SetListColumnStyle("name", "width:10%")
 	return nil, 0
 }
 
 // NodeListData 重写列表数据
 func (that OptionModels) NodeListData(pageBuilder *builder.PageBuilder, data []gorose.Data) ([]gorose.Data, error, int) {
 	for k, v := range data {
-		staticData := []map[string]interface{}{}
-		if v["static_data"].(string) != "" {
-			util.JsonDecode(v["static_data"].(string), &staticData)
-			transData := []string{}
-			for _, opt := range staticData {
-				transData = append(transData, opt["name"].(string)+" : "+util.Interface2String(opt["value"]))
+
+		if v["data_type"].(int64) == 1 {
+
+			data[k]["unique_key"] = v["unique_key"].(string) + "<br><span style=\"color:#FF6600\">" + v["table_name"].(string) + "</span>"
+
+			data[k]["static_data"] = ""
+			if v["value_field"].(string) != "" || v["name_field"].(string) != "" {
+				data[k]["static_data"] = data[k]["static_data"].(string) + "<span style=\"color:#FF6600\">值字段：" + v["value_field"].(string) + "</span><br>" + "<span style=\"color:#FF6600\">名字段：" + v["name_field"].(string) + "</span><br>"
 			}
-			data[k]["static_data"] = strings.Join(transData, "<br>")
+			if v["parent_field"].(string) != "" {
+				data[k]["static_data"] = data[k]["static_data"].(string) + "<span style=\"color:#FF6600\">上级字段：" + v["parent_field"].(string) + "</span>"
+			}
+		} else {
+			if v["static_data"].(string) != "" {
+				var staticData []map[string]interface{}
+				util.JsonDecode(v["static_data"].(string), &staticData)
+				var transData []string
+				for _, opt := range staticData {
+					transData = append(transData, opt["name"].(string)+" : "+util.Interface2String(opt["value"]))
+				}
+				data[k]["static_data"] = strings.Join(transData, "<br>")
+			}
 		}
 	}
 	return data, nil, 0
@@ -233,9 +249,8 @@ func (that OptionModels) Dynamic(w http.ResponseWriter, r *http.Request, ps http
 			wheres = append(wheres, dp.FieldKey+" = '"+v+"'")
 		}
 	}
-	wheres = append(wheres, "unique_key = '"+optionModelKey+"'")
 
-	ops := Models.OptionModels{}.Select(0, strings.Join(wheres, " and "), false)
+	ops := Models.OptionModels{}.Select(0, "unique_key = '"+optionModelKey+"'", strings.Join(wheres, " and "), false)
 	that.ApiResult(w, 200, "success", ops)
 }
 

@@ -29,7 +29,7 @@ type EasyModelHandle struct {
 
 // NodeBegin 开始
 func (that EasyModelHandle) NodeBegin(pageBuilder *builder.PageBuilder) (error, int) {
-	easyModel, err := GetEasyModelInfo(that.ModelKey, "begin")
+	easyModel, err := GetEasyModelInfo(pageBuilder, that.ModelKey, "begin")
 	if err != nil {
 		return err, 500
 	} else {
@@ -42,7 +42,7 @@ func (that EasyModelHandle) NodeBegin(pageBuilder *builder.PageBuilder) (error, 
 
 // NodeList 初始化列表
 func (that EasyModelHandle) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
-	easyModel, err := GetEasyModelInfo(that.ModelKey, "list")
+	easyModel, err := GetEasyModelInfo(pageBuilder, that.ModelKey, "list")
 	if err != nil {
 		return err, 500
 	} else {
@@ -54,8 +54,13 @@ func (that EasyModelHandle) NodeList(pageBuilder *builder.PageBuilder) (error, i
 		if easyModel.PageNotice != "" {
 			pageBuilder.SetPageNotice(easyModel.PageNotice)
 		}
+		//!模型url参数透传到tabs
+		var validParams []string
+		for _, urlParam := range easyModel.UrlParams {
+			validParams = append(validParams, urlParam.ParamKey)
+		}
 		//!设置tabs列表和选中项
-		validUrl := util.UrlScreenParam(pageBuilder.GetHttpRequest(), []string{"id"}, false, true)
+		validUrl := util.UrlScreenParam(pageBuilder.GetHttpRequest(), validParams, false, true)
 		for index, tab := range easyModel.ListTabs {
 			pageBuilder.PageTabAdd(tab.TabName, validUrl+"tab="+util.Int2String(index))
 		}
@@ -138,7 +143,7 @@ func (that EasyModelHandle) NodeList(pageBuilder *builder.PageBuilder) (error, i
 
 // NodeListCondition 修改查询条件
 func (that EasyModelHandle) NodeListCondition(pageBuilder *builder.PageBuilder, condition [][]interface{}) ([][]interface{}, error, int) {
-	easyModel, err := GetEasyModelInfo(that.ModelKey, "list")
+	easyModel, err := GetEasyModelInfo(pageBuilder, that.ModelKey, "list")
 	if err != nil {
 		return condition, nil, 0
 	} else {
@@ -173,7 +178,7 @@ func (that EasyModelHandle) NodeListCondition(pageBuilder *builder.PageBuilder, 
 
 // NodeListData 重写列表数据
 func (that EasyModelHandle) NodeListData(pageBuilder *builder.PageBuilder, data []gorose.Data) ([]gorose.Data, error, int) {
-	easyModel, err := GetEasyModelInfo(that.ModelKey, "list")
+	easyModel, err := GetEasyModelInfo(pageBuilder, that.ModelKey, "list")
 	if err != nil {
 		return data, nil, 0
 	} else {
@@ -208,6 +213,30 @@ func (that EasyModelHandle) NodeListData(pageBuilder *builder.PageBuilder, data 
 					data[k][field.FieldKey] = util.Money(v[field.FieldKey].(int64))
 				}
 			}
+			//秒和小时互转
+			if field.SaveTransRule == "hour2second" {
+				//循环所有数据
+				for k, v := range data {
+					//转换同键的数据
+					data[k][field.FieldKey] = util.Float642String(float64(v[field.FieldKey].(int64)) / 3600.0)
+				}
+			}
+			//分钟和秒互转
+			if field.SaveTransRule == "minute2second" {
+				//循环所有数据
+				for k, v := range data {
+					//转换同键的数据
+					data[k][field.FieldKey] = util.Float642String(float64(v[field.FieldKey].(int64)) / 60.0)
+				}
+			}
+			//秒转天时分秒
+			if field.SaveTransRule == "dhms2second" {
+				//循环所有数据
+				for k, v := range data {
+					//转换同键的数据
+					data[k][field.FieldKey] = util.Second2Dhms(v[field.FieldKey].(int64), "天", "时", "分", "秒")
+				}
+			}
 		}
 		//数据增强
 		for _, field := range easyModel.Fields {
@@ -234,7 +263,7 @@ func (that EasyModelHandle) NodeListData(pageBuilder *builder.PageBuilder, data 
 
 // NodeForm 初始化表单
 func (that EasyModelHandle) NodeForm(pageBuilder *builder.PageBuilder, id int64) (error, int) {
-	easyModel, err := GetEasyModelInfo(that.ModelKey, util.Is(id == 0, "add", "edit").(string))
+	easyModel, err := GetEasyModelInfo(pageBuilder, that.ModelKey, util.Is(id == 0, "add", "edit").(string))
 	if err != nil {
 		return err, 500
 	} else {
@@ -361,7 +390,7 @@ func (that EasyModelHandle) NodeForm(pageBuilder *builder.PageBuilder, id int64)
 
 // NodeFormData 表单显示前修改数据
 func (that EasyModelHandle) NodeFormData(pageBuilder *builder.PageBuilder, data gorose.Data, id int64) (gorose.Data, error, int) {
-	easyModel, err := GetEasyModelInfo(that.ModelKey, util.Is(id == 0, "add", "edit").(string))
+	easyModel, err := GetEasyModelInfo(pageBuilder, that.ModelKey, util.Is(id == 0, "add", "edit").(string))
 	if err != nil {
 		return data, nil, 0
 	} else {
@@ -372,6 +401,16 @@ func (that EasyModelHandle) NodeFormData(pageBuilder *builder.PageBuilder, data 
 				if field.SaveTransRule == "yuan2fen" {
 					data[field.FieldKey] = util.Money(data[field.FieldKey].(int64))
 				}
+				if field.SaveTransRule == "hour2second" {
+					data[field.FieldKey] = util.Float642String(float64(data[field.FieldKey].(int64)) / 3600.0)
+				}
+				if field.SaveTransRule == "minute2second" {
+					data[field.FieldKey] = util.Float642String(float64(data[field.FieldKey].(int64)) / 60.0)
+				}
+				if field.SaveTransRule == "dhms2second" {
+					data[field.FieldKey] = util.Second2Dhms(data[field.FieldKey].(int64), "天", "时", "分", "秒")
+				}
+
 			}
 		} else {
 			//新增页链接参数透传
@@ -387,7 +426,7 @@ func (that EasyModelHandle) NodeFormData(pageBuilder *builder.PageBuilder, data 
 
 // NodeSaveData 表单保存数据前使用
 func (that EasyModelHandle) NodeSaveData(pageBuilder *builder.PageBuilder, oldData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
-	easyModel, err := GetEasyModelInfo(that.ModelKey, util.Is(oldData["id"].(int64) == 0, "add", "edit").(string))
+	easyModel, err := GetEasyModelInfo(pageBuilder, that.ModelKey, util.Is(oldData["id"].(int64) == 0, "add", "edit").(string))
 	if err != nil {
 		return postData, nil, 0
 	} else {
@@ -399,6 +438,23 @@ func (that EasyModelHandle) NodeSaveData(pageBuilder *builder.PageBuilder, oldDa
 					return nil, errors.New("金额格式错误"), 500
 				}
 				postData[field.FieldKey] = v
+			}
+			if field.SaveTransRule == "hour2second" {
+				v, err := util.FloatString2Int64(postData[field.FieldKey].(string), 3600.0)
+				if err != nil {
+					return nil, errors.New("金额格式错误"), 500
+				}
+				postData[field.FieldKey] = v
+			}
+			if field.SaveTransRule == "minute2second" {
+				v, err := util.FloatString2Int64(postData[field.FieldKey].(string), 60.0)
+				if err != nil {
+					return nil, errors.New("金额格式错误"), 500
+				}
+				postData[field.FieldKey] = v
+			}
+			if field.SaveTransRule == "dhms2second" {
+				postData[field.FieldKey] = util.Dhms2Second(postData[field.FieldKey].(string))
 			}
 		}
 	}
@@ -468,7 +524,7 @@ var easyModelList = map[string]EasyModel{}
 var easyModelListLock sync.Mutex
 
 // GetEasyModelInfo 获取模型信息
-func GetEasyModelInfo(modelKey string, actionName string) (EasyModel, error) {
+func GetEasyModelInfo(pageBuilder *builder.PageBuilder, modelKey string, actionName string) (EasyModel, error) {
 	saveKey := modelKey + "_" + actionName
 	if easyModel, ok := easyModelList[saveKey]; ok {
 		return easyModel, nil
@@ -547,36 +603,10 @@ func GetEasyModelInfo(modelKey string, actionName string) (EasyModel, error) {
 			allButton = append(allButton, btn["text"])
 		}
 		//!获取自定义按钮列表
-		if len(allButton) > 0 {
-			selfButtonList, err := db.New().Table("tb_easy_models_buttons").
-				Where("is_delete", 0).
-				Where("status", 1).
-				WhereIn("button_key", allButton).
-				Get()
-			if err != nil {
-				logger.Error(err.Error())
-				return EasyModel{}, errors.New("系统运行错误！")
-			}
-			for _, btnInfo := range selfButtonList {
-				easyModel.Buttons[btnInfo["button_key"].(string)] = builder.Button{
-					ButtonName: btnInfo["button_name"].(string),
-					Action:     btnInfo["action"].(string),
-					ActionType: util.Int642Int(btnInfo["action_type"].(int64)),
-					ConfirmMsg: btnInfo["confirm_msg"].(string),
-					LayerTitle: btnInfo["layer_title"].(string),
-					ActionUrl:  btnInfo["action_url"].(string),
-					Class:      btnInfo["class_name"].(string),
-					Icon:       btnInfo["button_icon"].(string),
-					Display:    btnInfo["display"].(string),
-					Expand: map[string]string{
-						"w": btnInfo["layer_width"].(string),
-						"h": btnInfo["layer_height"].(string),
-					},
-					BatchAction: util.Is(btnInfo["batch_action"].(int64) == 1, true, false).(bool),
-				}
-			}
+		easyModel.Buttons, err = pageBuilder.GetEasyModelsButtons(allButton)
+		if err != nil {
+			return EasyModel{}, err
 		}
-
 		//!格式化url参数
 		urlParams := strings.Split(modelInfo["url_params"].(string), "\n")
 		for _, urlParam := range urlParams {

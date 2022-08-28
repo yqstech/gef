@@ -76,6 +76,7 @@ func (that EasyModelsButtons) NodeList(pageBuilder *builder.PageBuilder) (error,
 	})
 	//!重置顶部按钮
 	pageBuilder.SetListTopBtns("add", "export_insert_data")
+	pageBuilder.SetListOrder("id asc")
 
 	pageBuilder.ListColumnAdd("button_key", "按钮关键字", "text", nil)
 	pageBuilder.ListColumnAdd("button_name", "按钮名称", "text", nil)

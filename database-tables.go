@@ -15,14 +15,18 @@ type ID struct {
 	ID int64 `gorm:"column:id;type:int(10);comment:ID;AUTO_INCREMENT;primaryKey" json:"id"`
 }
 type CUSD struct {
-	CreateTime time.Time `gorm:"column:create_time;type:DATETIME;default:CURRENT_TIMESTAMP;NOT NULL;comment:创建时间" json:"create_time"`
-	UpdateTime time.Time `gorm:"column:update_time;type:DATETIME;default:CURRENT_TIMESTAMP;NOT NULL;comment:更新时间" json:"update_time"`
+	CreateTime time.Time `gorm:"column:create_time;type:TIMESTAMP;default:CURRENT_TIMESTAMP;NOT NULL;comment:创建时间" json:"create_time"`
+	UpdateTime time.Time `gorm:"column:update_time;type:TIMESTAMP;default:CURRENT_TIMESTAMP;NOT NULL;comment:更新时间" json:"update_time"`
 	Status     int       `gorm:"column:status;type:tinyint(1);default:1;NOT NULL;comment:状态" json:"status"`
 	IsDelete   int       `gorm:"column:is_delete;type:tinyint(1);default:0;NOT NULL;comment:是否删除" json:"is_delete"`
 }
 type CD struct {
-	CreateTime time.Time `gorm:"column:create_time;type:DATETIME;default:CURRENT_TIMESTAMP;NOT NULL;comment:创建时间" json:"create_time"`
+	CreateTime time.Time `gorm:"column:create_time;type:TIMESTAMP;default:CURRENT_TIMESTAMP;NOT NULL;comment:创建时间" json:"create_time"`
 	IsDelete   int       `gorm:"column:is_delete;type:tinyint(1);default:0;NOT NULL;comment:是否删除" json:"is_delete"`
+}
+
+type IndexNum struct {
+	IndexNum int `gorm:"column:index_num;type:int(11);default:1;NOT NULL;comment:排列顺序|数值越小越靠前" json:"index_num"`
 }
 
 // Tables 需要维护的所有的表结构体
@@ -107,8 +111,8 @@ type TbAdminRules struct {
 	IsInside int    `gorm:"column:is_inside;type:tinyint(1);default:1;NOT NULL;comment:是否是内置数据" json:"is_inside"` // 是否是内置数据|后台手动修改后即锁定，不再让程序自动更新
 	Icon     string `gorm:"column:icon;type:varchar(30);default:'';NOT NULL;comment:图标字体" json:"icon"`            // 图标字体
 	Route    string `gorm:"column:route;type:varchar(100);default:'';NOT NULL;comment:路由" json:"route"`           // 路由
-	IndexNum int    `gorm:"column:index_num;type:int(11);default:200;NOT NULL;comment:排序" json:"index_num"`       // 排序
-	OpenLog  int    `gorm:"column:open_log;type:tinyint(1);default:0" json:"open_log"`                            // 是否开启日志
+	IndexNum
+	OpenLog int `gorm:"column:open_log;type:tinyint(1);default:0" json:"open_log"` // 是否开启日志
 	CUSD
 }
 
@@ -171,8 +175,8 @@ type TbConfigs struct {
 	Notice    string `gorm:"column:notice;type:varchar(200);default:'';NOT NULL;comment:配置补充说明" json:"notice"`                            // 配置补充说明
 	FieldType string `gorm:"column:field_type;type:char(20);default:'';NOT NULL;comment:调用form表单项类型text html textarea" json:"field_type"` // 调用form表单项类型text html textarea
 	Options   string `gorm:"column:options;type:varchar(1024);default:[];NOT NULL" json:"options"`
-	IndexNum  int    `gorm:"column:index_num;type:int(11);default:200;NOT NULL" json:"index_num"`
-	If        string `gorm:"column:if;type:varchar(100);default:'';NOT NULL;comment:展示条件" json:"if"` // 展示条件
+	IndexNum
+	If string `gorm:"column:if;type:varchar(100);default:'';NOT NULL;comment:展示条件" json:"if"` // 展示条件
 	CUSD
 }
 
@@ -229,7 +233,7 @@ type TbEasyCurdModelsFields struct {
 	OptionModelsKey string `gorm:"column:option_models_key;type:varchar(50);default:'';NOT NULL;comment:选项集key" json:"option_models_key"` // 选项集key
 	IsPrivate       int    `gorm:"column:is_private;type:int(11);default:0;NOT NULL;comment:是否私密" json:"is_private"`                      // 是否私密
 	IsLock          int    `gorm:"column:is_lock;type:int(11);default:0;NOT NULL;comment:是否锁定|禁止修改" json:"is_lock"`                       // 是否锁定|禁止修改
-	IndexNum        int    `gorm:"column:index_num;type:int(11);default:1;NOT NULL;comment:排序" json:"index_num"`                          // 排序
+	IndexNum
 	CUSD
 }
 
@@ -292,12 +296,12 @@ func (m *TbEasyModelsButtons) TableName() string {
 // TbEasyModelsFields 模型字段
 type TbEasyModelsFields struct {
 	ID
-	ModelID                int    `gorm:"column:model_id;type:int(11);default:0;NOT NULL;comment:模型ID" json:"model_id"`                                                // 模型ID
-	FieldKey               string `gorm:"column:field_key;type:varchar(50);default:'';NOT NULL;comment:模型字段关键字" json:"field_key"`                                      // 模型字段关键字
-	FieldName              string `gorm:"column:field_name;type:varchar(50);default:'';NOT NULL;comment:模型字段名称" json:"field_name"`                                     // 模型字段名称
-	FieldNameReset         string `gorm:"column:field_name_reset;type:varchar(50);default:'';NOT NULL;comment:重置字段名称（列表顶部）" json:"field_name_reset"`                   // 重置字段名称（列表顶部）
-	FieldNotice            string `gorm:"column:field_notice;type:varchar(50);default:'';NOT NULL;comment:字段提示" json:"field_notice"`                                   // 字段提示
-	IndexNum               int    `gorm:"column:index_num;type:int(11);default:1;NOT NULL;comment:排序" json:"index_num"`                                                // 排序
+	ModelID        int    `gorm:"column:model_id;type:int(11);default:0;NOT NULL;comment:模型ID" json:"model_id"`                              // 模型ID
+	FieldKey       string `gorm:"column:field_key;type:varchar(50);default:'';NOT NULL;comment:模型字段关键字" json:"field_key"`                    // 模型字段关键字
+	FieldName      string `gorm:"column:field_name;type:varchar(50);default:'';NOT NULL;comment:模型字段名称" json:"field_name"`                   // 模型字段名称
+	FieldNameReset string `gorm:"column:field_name_reset;type:varchar(50);default:'';NOT NULL;comment:重置字段名称（列表顶部）" json:"field_name_reset"` // 重置字段名称（列表顶部）
+	FieldNotice    string `gorm:"column:field_notice;type:varchar(50);default:'';NOT NULL;comment:字段提示" json:"field_notice"`                 // 字段提示
+	IndexNum
 	OptionModelsKey        string `gorm:"column:option_models_key;type:varchar(50);default:'';NOT NULL;comment:选项集key" json:"option_models_key"`                       // 选项集key
 	OptionBeautify         int    `gorm:"column:option_beautify;type:tinyint(1);default:1;NOT NULL;comment:选项美化" json:"option_beautify"`                               // 选项美化
 	OptionIndent           int    `gorm:"column:option_indent;type:tinyint(1);default:0;NOT NULL;comment:选项按照上下级缩进" json:"option_indent"`                              // 选项按照上下级缩进
@@ -347,9 +351,9 @@ type TbOptionModels struct {
 	SelectWhere            string `gorm:"column:select_where;type:varchar(100);default:'';NOT NULL;comment:查询条件" json:"select_where"`                           // 查询条件
 	DynamicParams          string `gorm:"column:dynamic_params;type:varchar(1024);default:'';NOT NULL;comment:动态参数" json:"dynamic_params"`                      // 动态参数
 	SelectOrder            string `gorm:"column:select_order;type:varchar(100);default:'';NOT NULL;comment:查询排序条件" json:"select_order"`                         // 查询排序条件
-	IndexNum               int    `gorm:"column:index_num;type:int(11);default:200;NOT NULL;comment:显示排序" json:"index_num"`                                     // 显示排序
-	MatchFields            string `gorm:"column:match_fields;type:varchar(1024);default:'';NOT NULL;comment:匹配字段" json:"match_fields"`                          // 匹配字段
-	DefaultData            string `gorm:"column:default_data;type:varchar(1024);default:'';NOT NULL;comment:默认数据" json:"default_data"`                          // 默认数据
+	IndexNum
+	MatchFields string `gorm:"column:match_fields;type:varchar(1024);default:'';NOT NULL;comment:匹配字段" json:"match_fields"` // 匹配字段
+	DefaultData string `gorm:"column:default_data;type:varchar(1024);default:'';NOT NULL;comment:默认数据" json:"default_data"` // 默认数据
 	CUSD
 }
 

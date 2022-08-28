@@ -9,7 +9,7 @@
 
 package Event
 
-//Listener 事件监听者,必须有Do方法
+// Listener 事件监听者,必须有Do方法
 type Listener interface {
 	Do(eventName string, data ...interface{}) (error, int)
 }
@@ -42,6 +42,7 @@ func Trigger(eventName string, data ...interface{}) (error, int) {
 	lastCode := 0
 	if ListenerList, ok := Listeners[eventName]; ok {
 		for _, listener := range ListenerList {
+			//todo:拷贝一个事件处理对象？
 			err, code := listener.Do(eventName, data...)
 			if err != nil {
 				return err, code

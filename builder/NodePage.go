@@ -96,7 +96,7 @@ func (that *NodePage) ActDisplay(display Displayer, pageBuilder *PageBuilder) (s
 	data := pageBuilder.TemplateData()
 	for k, v := range data {
 		//渲染器设置参数
-		if value, ok := display.DisplayData["k"]; !ok || value == "" {
+		if value, ok := display.DisplayData[k]; !ok || value == "" {
 			display.SetDate(k, v)
 		}
 	}
