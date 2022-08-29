@@ -41,8 +41,8 @@ func (that EasyCurdModelsFields) NodeBegin(pageBuilder *builder.PageBuilder) (er
 func (that EasyCurdModelsFields) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 	pageBuilder.SetListOrder("index_num asc,id asc")
 	pageBuilder.SetListTopBtns()
-	pageBuilder.ListColumnAdd("field_key", "字段Key", "text", nil)
-	pageBuilder.ListColumnAdd("field_name", "字段名称", "text", nil)
+	pageBuilder.ListColumnAdd("field_key", "字段和名称", "html", nil)
+	//pageBuilder.ListColumnAdd("field_name", "字段名称", "text", nil)
 	pageBuilder.ListColumnAdd("field_note", "字段备注", "text", nil)
 	pageBuilder.ListColumnAdd("option_models_key", "关联选项集", "array", that.OptionModelsList())
 	pageBuilder.ListColumnAdd("is_private", "私密数据", "switch::text=私密|公开", nil)
@@ -50,7 +50,16 @@ func (that EasyCurdModelsFields) NodeList(pageBuilder *builder.PageBuilder) (err
 	pageBuilder.ListColumnAdd("index_num", "排序", "input::type=number&width=50px", nil)
 	pageBuilder.ListColumnAdd("update_time", "最后同步", "text", nil)
 	pageBuilder.SetListRightBtns("edit")
+	pageBuilder.SetListColumnStyle("field_note", "width:160px")
 	return nil, 0
+}
+
+// NodeListData 重写列表数据
+func (that EasyCurdModelsFields) NodeListData(pageBuilder *builder.PageBuilder, data []gorose.Data) ([]gorose.Data, error, int) {
+	for k, v := range data {
+		data[k]["field_key"] = "<strong style='color:#FF9900; font-size:13px'>" + v["field_key"].(string) + "</strong><br>" + v["field_name"].(string)
+	}
+	return data, nil, 0
 }
 
 // NodeListCondition 修改查询条件
@@ -74,13 +83,13 @@ func (that EasyCurdModelsFields) NodeForm(pageBuilder *builder.PageBuilder, id i
 	return nil, 0
 }
 
-//默认设置成私密的字段名
+// 默认设置成私密的字段名
 var defaultPrivateFields = []interface{}{"is_delete", "status", "create_time", "pid"}
 
-//默认锁定(禁止直接修改)的字段
+// 默认锁定(禁止直接修改)的字段
 var defaultLockFields = []interface{}{"is_delete", "update_time", "create_time", "pid", "id"}
 
-//同步模型字段
+// 同步模型字段
 func (that EasyCurdModelsFields) syncModelFields(easyModelId int) {
 	//查询模型信息
 	easyModelInfo, err := db.New().Table("tb_easy_curd_models").

@@ -425,14 +425,14 @@
 
         {{/* 颜色选择器 */}}
         {{- if eq $field.Type "color"}}
-        <div class="layui-col-sm6" style="max-width:200px;padding-right: 10px">
+        <div class="layui-col-sm3" style="max-width:200px;padding-right: 10px">
             <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="请选择颜色..."
                    autocomplete="off" class="layui-input">
         </div>
-        <div class="layui-col-sm6" style="line-height:28px">
+        <div class="layui-col-sm1" style="line-height:28px">
             <div class="color_picker_{{$field.Key}}"></div>
         </div>
-        <div class="layui-col-sm12" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm8" style="line-height: 36px;text-align: left;color:#999">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}

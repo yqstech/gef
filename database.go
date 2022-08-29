@@ -144,6 +144,10 @@ func (that DbManager) AutoInsideData(data []InsideData) {
 			DataId := int64(0)
 			//不存在则添加
 			if first == nil {
+				//防止is_inside参数直接被添加进去
+				if _, ok := d.Data["is_inside"]; ok {
+					d.Data["is_inside"] = 1
+				}
 				insertId, err := db.New().Table(d.TableName).InsertGetId(d.Data)
 				if err != nil {
 					panic(err.Error())
@@ -152,6 +156,7 @@ func (that DbManager) AutoInsideData(data []InsideData) {
 				DataId = insertId
 			} else {
 				//如果存在is_inside 且 is_inside=1时，更新数据
+				//编辑页要设置is_inside=0，防止被再次修改
 				if _, ok := first["is_inside"]; ok {
 					if first["is_inside"].(int64) == 1 {
 						db.New().Table(d.TableName).Where("id", first["id"]).Update(d.Data)

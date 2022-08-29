@@ -156,6 +156,7 @@ gef.InsideData{
 		delete(Item, "create_time")
 		delete(Item, "update_time")
 		delete(Item, "is_delete")
+		delete(Item, "is_inside")
 		//标记上级ID
 		Item["group_id"] = "__PID__"
 		content = `
