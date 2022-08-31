@@ -15,8 +15,7 @@
         .batchActionButtons{
             position: fixed;
             top: 0px;
-            left: 50%;
-            margin-left: -200px;
+            left: 5px;
             background: #fcead2;
             padding: 10px 20px;
             border-radius: 0 0 8px 8px;
@@ -31,12 +30,12 @@
 <div class="p20" id="app" v-cloak>
     {{if .pageNotice}}<blockquote class="layui-elem-quote">{{.pageNotice}}</blockquote>{{end}}
     <div class="layui-row" style="border-bottom: 1px dashed #e1e1e1">
-        <div class="layui-col-lg4 layui-col-md6">
+        <div class="layui-col-md4 layui-col-xs4">
             <fieldset class="layui-elem-field layui-field-title">
                 <legend>{{.title}}</legend>
             </fieldset>
         </div>
-        <div class="layui-col-lg8 layui-col-md6" style="text-align: right;padding-top: 5px">
+        <div class="layui-col-md8 layui-col-xs8" style="text-align: right;padding: 5px 0 10px;">
 
             {{range $index,$button := .topBtns}}
             {{ if $button}}
@@ -54,20 +53,25 @@
                onclick="{{$button.ActionUrl}}"
                {{end}}
 
-               class="layui-btn {{$button.Class}}"
+               class="layui-btn list_top_btn {{$button.Class}}"
             >{{template "icon" $button.Icon}}
-                {{$button.ButtonName}}</a>
+                <span class="">{{$button.ButtonName}}</span></a>
             {{end}}
             {{end}}
-            <a href="javascript:location.reload();" class="layui-btn">{{template "icon" "layui-icon-refresh"}}
-                刷新</a>
+            {{if .listSearchFields}}
+            <a onclick="searchFormShow()" class="layui-btn rose list_top_btn top_btn_search">{{template "icon" "ri-search-line"}}
+                <span class="">搜索</span></a>
+            {{- end -}}
+            <a href="javascript:location.reload();" class="layui-btn list_top_btn">{{template "icon" "layui-icon-refresh"}}
+                <span class="">刷新</span></a>
+
         </div>
     </div>
     {{if .listSearchFields}}
-    <div class="layui-row" style="padding:15px 0 10px">
+    <div class="layui-row list_search" style="padding:15px 0 10px;">
         <div class="layui-col-lg12">
             {{range $fieldIndex,$field:=.listSearchFields}}
-            <div class="layui-input-inline">
+            <div class="layui-input-inline" style="margin-bottom: 5px">
                 {{if eq $field.Type "text"}}
                 <input type="text" v-model="searchForm.{{$field.Key}}" placeholder="{{$field.Title}}" class="layui-input key"
                        style="{{$field.Style}}">
@@ -86,7 +90,7 @@
                 {{end}}
             </div>
             {{end}}
-            <button type="button" class="layui-btn sou" @click="search(1)">查询</button>
+            <button type="button" class="layui-btn rose sou" @click="search(1)" style="margin-bottom: 5px">查询</button>
         </div>
     </div>
     {{end}}
@@ -150,6 +154,55 @@
             </tbody>
         </table>
     </div>
+    <div class="list_table_mobile" style="width:100%;overflow-x: auto;">
+        <table class="layui-table layui-form">
+            <thead>
+            <tr>
+                <td v-if="batchAction" class="column column_check"><i v-if="isAllChecked" class="ri-checkbox-line" @click="checkAll(false)"></i><i v-else class="ri-checkbox-blank-line" @click="checkAll(true)"></i></td>
+                <td class="column" style="white-space: normal">
+                    {{range .listColumns}}<span style="margin-right: 5px">{{.ColumnName}}</span>{{end}}
+                </td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="(item,index) in data_list" :key="item.id">
+                <td v-if="batchAction" class="column column_check"><i v-if="item._checked" class="ri-checkbox-line" @click="item._checked = false;"></i><i v-else class="ri-checkbox-blank-line" @click="item._checked = true;"></i></td>
+                <td class="column">
+                    {{range $columnIndex,$column :=.listColumns}}
+                    <div class="mobile_list_item">
+                        {{ template "listColumn" $column}}
+                    </div>
+                    {{end}}
+                    <div class="mobile_list_button">
+                        {{range $index,$button := .rightBtns}}
+                        {{ if $button}}
+                        <a {{if $button.Display}}v-if="{{$button.Display}}"{{end}}
+                           {{if eq $button.ActionType 1}}
+                           {{if $button.ConfirmMsg}}
+                           @click="confirm(item.id,'{{$button.ActionUrl}}','{{$button.ConfirmMsg}}')"
+                           {{else}}
+                           @click="ajax(item.id,'{{$button.ActionUrl}}')"
+                           {{end}}
+                           {{end}}
+                           {{if eq $button.ActionType 2}}
+                           @click="layer(item.id,'{{$button.ActionUrl}}','{{$button.ButtonName}}','{{$button.LayerTitle}}','{{$button.Expand.w}}','{{$button.Expand.h}}')"
+                           {{end}}
+                           {{if eq $button.ActionType 3}}
+                           onclick="{{$button.ActionUrl}}"
+                           {{end}}
+                           class="layui-btn layui-btn-sm {{$button.Class}}"
+                        >{{template "icon" $button.Icon}}
+                            {{$button.ButtonName}}</a>
+                        {{end}}
+                        {{end}}
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+
     <div v-if="checkedTotal>0" class="batchActionButtons">
         {{range $index,$button := .rightBtns}}
         {{if eq $button.ActionType 1}}
@@ -413,6 +466,9 @@
 
             });
         })
+    }
+    function searchFormShow(){
+        $(".list_search").toggle();
     }
 </script>
 </body>

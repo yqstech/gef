@@ -277,7 +277,7 @@ type TbEasyModelsButtons struct {
 	ButtonNote  string `gorm:"column:button_note;type:varchar(50);default:'';NOT NULL;comment:按钮备注" json:"button_note"`                             // 按钮备注
 	ButtonIcon  string `gorm:"column:button_icon;type:varchar(50);default:'';NOT NULL;comment:按钮图标" json:"button_icon"`                             // 按钮图标
 	ClassName   string `gorm:"column:class_name;type:varchar(50);default:'';NOT NULL;comment:按钮class样式类" json:"class_name"`                         // 按钮class样式类
-	Display     string `gorm:"column:display;type:varchar(50);default:'';NOT NULL;comment:按钮显示条件" json:"display"`                                   // 按钮显示条件
+	Display     string `gorm:"column:display;type:varchar(500);default:'';NOT NULL;comment:按钮显示条件" json:"display"`                                  // 按钮显示条件
 	ActionType  int    `gorm:"column:action_type;type:int(11);default:200;NOT NULL;comment:按钮类型:1、ajax操作 2、弹出页面 3、执行javascript" json:"action_type"` // 按钮类型:1、ajax操作 2、弹出页面 3、执行javascript
 	Action      string `gorm:"column:action;type:varchar(50);default:'';NOT NULL;comment:动作值，校验权限使用，格式例如: add 或 /user/add" json:"action"`           // 动作值，校验权限使用，格式例如: add 或 /user/add
 	ActionUrl   string `gorm:"column:action_url;type:varchar(50);default:'';NOT NULL;comment:动作url地址，相对路径或绝对路径,使用/开头自动添加后台url地址" json:"action_url"` // 动作url地址，相对路径或绝对路径,使用/开头自动添加后台url地址

@@ -18,15 +18,17 @@
 <div id="app" v-cloak>
     <!--顶栏-->
     <header>
-        <h1><img style="width: 100%" src="{{.logo}}"/></h1>
+        <h1 class="logo"><img style="width: 100%" src="{{.logo}}"/></h1>
         <div class="topMenus">
-            <a v-for="vo in toplMenus" style="float: left;" :class="vo.active?'on':''" @click="getMenus(vo.id)">
-                <i class="layui-icon" :class="vo.icon"></i>
+            <a class="left_menu" v-for="vo in toplMenus" style="float: left;" :class="vo.active?'on':''"
+               @click="getMenus(vo.id)">
+                <i class="layui-icon" :class="vo.icon" :title="vo.name"></i>
                 <span v-text="vo.name"></span>
             </a>
-            <a v-for="vo in toprMenus" style="float: right;font-weight: 300!important;" :href="vo.url"
+            <a class="right_menu" v-for="vo in toprMenus" style="float: right;font-weight: 300!important;"
+               :href="vo.url"
                :target="vo.target">
-                <i class="layui-icon" :class="vo.icon"></i>
+                <i class="layui-icon" :class="vo.icon" :title="vo.name"></i>
                 <span v-text="vo.name"></span>
             </a>
         </div>
@@ -55,6 +57,7 @@
                 </li>
             </ul>
         </div>
+        <div class="left_shade" @click="LeftMenuHide()"></div>
     </div>
 </div>
 <!--右侧,移出app范围，vue和Safari浏览器不兼容-->
@@ -83,9 +86,13 @@
             this.getMenus(0);
             this.thisActive();
             this.thisAttr();
+            setTimeout(function () {
+                LeftMenuHide()
+            }, 100)
         },
         methods: {
             getMenus: function (group_id) {
+                LeftMenuShow();
                 //设置cookie menuGroupID
                 setCookie("menuGroupID", group_id, 864000)
                 var that = this;
@@ -97,11 +104,42 @@
                     success: function (data) {
                         var data = api_data(data)
                         if (data) {
-                            that.menu = data.menus;
                             that.toplMenus = data.topMenus;
                             that.toprMenus = data.userMenus;
-                            if (that.menu.length > 0) {
-                                that.menu[0].active = true;
+                            if (!!data.menus) {
+                                //左侧左侧选中项
+                                let activeMenu = [];
+                                let oldMenu = JSON.parse(JSON.stringify(that.menu))
+                                for (let i = 0; i < oldMenu.length; i++) {
+                                    if (oldMenu[i].active == true) {
+                                        activeMenu.push(oldMenu[i].id);
+                                    }
+                                    for (let j = 0; j < oldMenu[i].list.length; j++) {
+                                        if (oldMenu[i].list[j].active == true) {
+                                            activeMenu.push(oldMenu[i].list[j].id);
+                                        }
+                                    }
+                                }
+                                console.log(activeMenu)
+                                if(activeMenu.length>0){
+                                    for (let i = 0; i < data.menus.length; i++) {
+                                        if (activeMenu.indexOf(data.menus[i].id) > -1) {
+                                            data.menus[i].active = true
+                                        }
+                                        for (let j = 0; j < data.menus[i].list.length; j++) {
+                                            if (activeMenu.indexOf(data.menus[i].list[j].id) > -1) {
+                                                data.menus[i].list[j].active = true
+                                            }
+                                        }
+                                    }
+                                }else{
+                                    if (data.menus.length > 0) {
+                                        data.menus[0].active = true;
+                                    }
+                                }
+                                that.menu = data.menus;
+                            }else{
+                                that.menu = [];
                             }
                         }
                     }
@@ -155,6 +193,7 @@
                     })
                 })
                 this.menu[pid].list[id].active = true;
+                LeftMenuHide();
             },
             //更新菜单缓存
             updateStorage() {
@@ -269,6 +308,16 @@
                 window.location.href = url;
             }, s * 1000);
         }
+    }
+
+    function LeftMenuShow() {
+        $(".main .left").addClass("mobile_show")
+        $(".main .left_shade").addClass("mobile_show")
+    }
+
+    function LeftMenuHide() {
+        $(".main .left").removeClass("mobile_show")
+        $(".main .left_shade").removeClass("mobile_show")
     }
 </script>
 </body>

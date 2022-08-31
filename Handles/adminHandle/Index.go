@@ -214,6 +214,7 @@ func (that Index) GetMenus(w http.ResponseWriter, r *http.Request, ps httprouter
 				rule["route"] = config.AdminPath + rule["route"].(string)
 			}
 			ruleMap[rule["id"].(int64)] = map[string]interface{}{
+				"id":     util.Int642String(rule["id"].(int64)),
 				"name":   rule["name"],
 				"icon":   rule["icon"],
 				"url":    rule["route"],
@@ -234,6 +235,7 @@ func (that Index) GetMenus(w http.ResponseWriter, r *http.Request, ps httprouter
 					rule["route"] = config.AdminPath + rule["route"].(string)
 				}
 				ruleMap[rule["pid"].(int64)]["list"] = append(ruleMap[rule["pid"].(int64)]["list"].([]map[string]string), map[string]string{
+					"id":     util.Int642String(rule["id"].(int64)),
 					"name":   rule["name"].(string),
 					"url":    rule["route"].(string),
 					"active": "",
