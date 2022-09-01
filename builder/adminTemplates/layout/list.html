@@ -62,7 +62,7 @@
             <a onclick="searchFormShow()" class="layui-btn rose list_top_btn top_btn_search">{{template "icon" "ri-search-line"}}
                 <span class="">搜索</span></a>
             {{- end -}}
-            <a href="javascript:location.reload();" class="layui-btn list_top_btn">{{template "icon" "layui-icon-refresh"}}
+            <a href="javascript:location.reload();" class="layui-btn list_top_btn">{{template "icon" "ri-refresh-line"}}
                 <span class="">刷新</span></a>
 
         </div>
@@ -70,27 +70,57 @@
     {{if .listSearchFields}}
     <div class="layui-row list_search" style="padding:15px 0 10px;">
         <div class="layui-col-lg12">
-            {{range $fieldIndex,$field:=.listSearchFields}}
-            <div class="layui-input-inline" style="margin-bottom: 5px">
+            <div class="layui-inline">
+                {{range $fieldIndex,$field:=.listSearchFields}}
+                <label class="search_inline_label">{{$field.Title}}</label>
+
                 {{if eq $field.Type "text"}}
-                <input type="text" v-model="searchForm.{{$field.Key}}" placeholder="{{$field.Title}}" class="layui-input key"
-                       style="{{$field.Style}}">
+                <div class="layui-input-inline" style="margin-bottom: 5px;">
+                    <input type="text" v-model="searchForm.{{$field.Key}}" placeholder="{{$field.Expand.placeholder}}"
+                           class="layui-input key" style="width: 180px;{{$field.Style}}">
+                </div>
+                {{end}}
+                {{if eq $field.Type "text-sm"}}
+                <div class="layui-input-inline" style="margin-bottom: 5px;">
+                    <input type="text" v-model="searchForm.{{$field.Key}}" placeholder="{{$field.Expand.placeholder}}"
+                           class="layui-input key" style="width: 80px;{{$field.Style}}">
+                </div>
+                {{end}}
+                {{if eq $field.Type "number"}}
+                <div class="layui-input-inline" style="margin-bottom: 5px;">
+                    <input type="number" v-model="searchForm.{{$field.Key}}" placeholder="{{$field.Expand.placeholder}}"
+                           class="layui-input key" style="width: 180px;{{$field.Style}}">
+                </div>
+                {{end}}
+                {{if eq $field.Type "number-sm"}}
+                <div class="layui-input-inline" style="margin-bottom: 5px;">
+                    <input type="number" v-model="searchForm.{{$field.Key}}" placeholder="{{$field.Expand.placeholder}}"
+                           class="layui-input key" style="width: 80px;{{$field.Style}}">
+                </div>
                 {{end}}
                 {{if eq $field.Type "select"}}
-                <select v-model="searchForm.{{$field.Key}}" class="layui-select" style="color: #777777;min-width: 120px;{{$field.Style}}">
-                    <option value="{{$field.DefValue}}">{{$field.Title}}</option>
-                    {{range $k,$v := $field.Data}}
-                    <option value="{{$k}}">{{$v}}</option>
-                    {{end}}
-                </select>
+                <div class="layui-input-inline" style="margin-bottom: 5px;">
+                    <select v-model="searchForm.{{$field.Key}}" class="layui-select" placeholder="{{$field.Expand.placeholder}}"
+                            style="color: #777777;min-width: 120px;{{$field.Style}}">
+                        <option value="{{$field.DefValue}}">{{$field.Title}}</option>
+                        {{range $k,$v := $field.Data}}
+                        <option value="{{$k}}">{{$v}}</option>
+                        {{end}}
+                    </select>
+                </div>
                 {{end}}
                 {{if eq $field.Type "datetime"}}
-                <span>{{$field.Title}}</span>
-                <input type="text" class="layui-input" v-model="searchForm.{{$field.Key}}" id="time_{{$field.Key}}" placeholder="{{$field.Title}}" style="display:inline-block;width: 150px;{{$field.Style}}">
+                <div class="layui-input-inline" style="margin-bottom: 5px;">
+                    <input type="text" class="layui-input" v-model="searchForm.{{$field.Key}}" id="time_{{$field.Key}}"
+                           placeholder="{{$field.Expand.placeholder}}" style="display:inline-block;width: 150px;{{$field.Style}}">
+                </div>
                 {{end}}
+
+                {{end}}
+                <button type="button" class="layui-btn rose sou" @click="search(1)" style="margin-bottom: 5px">查询</button>
             </div>
-            {{end}}
-            <button type="button" class="layui-btn rose sou" @click="search(1)" style="margin-bottom: 5px">查询</button>
+
+
         </div>
     </div>
     {{end}}
@@ -160,7 +190,7 @@
             <tr>
                 <td v-if="batchAction" class="column column_check"><i v-if="isAllChecked" class="ri-checkbox-line" @click="checkAll(false)"></i><i v-else class="ri-checkbox-blank-line" @click="checkAll(true)"></i></td>
                 <td class="column" style="white-space: normal">
-                    {{range .listColumns}}<span style="margin-right: 5px">{{.ColumnName}}</span>{{end}}
+                    {{range .listColumns}}<span class="mobile_title_item">{{.ColumnName}}</span>{{end}}
                 </td>
             </tr>
             </thead>

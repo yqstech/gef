@@ -160,7 +160,7 @@ func (builder *PageBuilder) DataReset() {
 			ActionType: 2,
 			ActionUrl:  "add",
 			Class:      "def",
-			Icon:       "layui-icon-add-circle",
+			Icon:       "ri-add-circle-line",
 			Display:    "",
 			Expand: map[string]string{
 				"w": "98%",
@@ -431,10 +431,18 @@ func (builder *PageBuilder) ListRightBtnsIconClear() {
 }
 
 // SetButtonIcon 设置按钮图标
-func (builder *PageBuilder) SetButtonIcon(btnName, icon string) {
-	if btn, ok := builder.buttons[btnName]; ok {
+func (builder *PageBuilder) SetButtonIcon(btnKey, icon string) {
+	if btn, ok := builder.buttons[btnKey]; ok {
 		btn.Icon = icon
-		builder.buttons[btnName] = btn
+		builder.buttons[btnKey] = btn
+	}
+}
+
+// SetButtonName 设置按钮名称
+func (builder *PageBuilder) SetButtonName(btnKey, ButtonName string) {
+	if btn, ok := builder.buttons[btnKey]; ok {
+		btn.ButtonName = ButtonName
+		builder.buttons[btnKey] = btn
 	}
 }
 

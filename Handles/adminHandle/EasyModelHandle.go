@@ -137,12 +137,30 @@ func (that EasyModelHandle) NodeList(pageBuilder *builder.PageBuilder) (error, i
 				}
 			}
 		}
+		//!搜索表单
+		for _, searchItem := range easyModel.SearchForm {
+			pageBuilder.ListSearchFieldAdd(
+				searchItem.SearchKey,
+				searchItem.DataType,
+				searchItem.SearchName,
+				searchItem.DefaultValue,
+				searchItem.DefaultValue,
+				util.Is(searchItem.OptionModelsKey == "", []map[string]interface{}{}, Models.OptionModels{}.ByKey(searchItem.OptionModelsKey, false)).([]map[string]interface{}),
+				searchItem.Style,
+				map[string]interface{}{
+					"placeholder": searchItem.Placeholder,
+				})
+		}
 		return nil, 0
 	}
 }
 
 // NodeListCondition 修改查询条件
 func (that EasyModelHandle) NodeListCondition(pageBuilder *builder.PageBuilder, condition [][]interface{}) ([][]interface{}, error, int) {
+	//!删除自动添加的搜索项，由EasyModel搜索表单配置信息统一处理
+	pageBuilder.SetListCondition([][]interface{}{})
+	condition = [][]interface{}{}
+
 	easyModel, err := GetEasyModelInfo(pageBuilder, that.ModelKey, "list")
 	if err != nil {
 		return condition, nil, 0
@@ -171,9 +189,78 @@ func (that EasyModelHandle) NodeListCondition(pageBuilder *builder.PageBuilder, 
 				})
 			}
 		}
+		//全部查询条件
+		PostSearch := map[string]interface{}{}
+		postSearch := pageBuilder.HttpRequest.PostFormValue("search")
+		if postSearch != "" {
+			util.JsonDecode(postSearch, &PostSearch)
+		}
+
+		//? 设置表单查询条件
+		for _, searchFormItem := range easyModel.SearchForm {
+			//!仅支持查询单个字段
+			if len(searchFormItem.SearchFields) == 1 {
+				if postValue, ok := PostSearch[searchFormItem.SearchKey]; ok {
+					if postValue == "" && searchFormItem.DefaultValue != "" {
+						postValue = searchFormItem.DefaultValue
+					}
+					if postValue != "" {
+						if searchFormItem.MatchType == "like" {
+							//追加查询条件
+							condition = append(condition, []interface{}{
+								searchFormItem.SearchFields[0], "like", "%" + util.Interface2String(postValue) + "%",
+							})
+						} else {
+							//追加查询条件
+							condition = append(condition, []interface{}{
+								searchFormItem.SearchFields[0], searchFormItem.MatchType, postValue,
+							})
+						}
+
+					}
+				}
+			}
+		}
 	}
 	//追加查询条件
 	return condition, nil, 0
+}
+
+// NodeListOrm 追加高级查询条件
+func (that EasyModelHandle) NodeListOrm(pageBuilder *builder.PageBuilder, conn *gorose.IOrm) (error, int) {
+	easyModel, err := GetEasyModelInfo(pageBuilder, that.ModelKey, "list")
+	if err != nil {
+		return err, 0
+	} else {
+		//全部查询条件
+		PostSearch := map[string]interface{}{}
+		postSearch := pageBuilder.HttpRequest.PostFormValue("search")
+		if postSearch != "" {
+			util.JsonDecode(postSearch, &PostSearch)
+		}
+		//!多个字段同时查询
+		for _, searchFormItem := range easyModel.SearchForm {
+			if len(searchFormItem.SearchFields) > 1 {
+				if postValue, ok := PostSearch[searchFormItem.SearchKey]; ok {
+					if postValue == "" && searchFormItem.DefaultValue != "" {
+						postValue = searchFormItem.DefaultValue
+					}
+					if postValue != "" {
+						(*conn).Where(func() {
+							for index, field := range searchFormItem.SearchFields {
+								if index == 0 {
+									(*conn).Where(field, searchFormItem.MatchType, postValue)
+								} else {
+									(*conn).OrWhere(field, searchFormItem.MatchType, postValue)
+								}
+							}
+						})
+					}
+				}
+			}
+		}
+	}
+	return nil, 200
 }
 
 // NodeListData 重写列表数据
@@ -472,6 +559,7 @@ type EasyModel struct {
 	AllowStatus  bool                      //允许改状态
 	Fields       []EasyModelField          //字段列表
 	ListTabs     []EasyModelListTab        //列表多Tab页
+	SearchForm   []SearchFromItem          //搜索表单项
 	OrderType    string                    //排序方式
 	PageSize     int                       //分页大小
 	PageNotice   string                    //页面备注
@@ -517,6 +605,18 @@ type EasyModelField struct {
 	FieldAugment                 string                   //数据增强转换规则
 	Attach2Field                 string                   //附加到其他字段
 	SaveTransRule                string                   //保存时数据变换规则
+}
+
+type SearchFromItem struct {
+	DataType        string   //组件类型名称
+	SearchKey       string   //组件关键字
+	SearchName      string   //组件名，提示信息
+	Placeholder     string   //提示信息
+	Style           string   //附加样式
+	OptionModelsKey string   //关联选项集
+	SearchFields    []string //搜索字段集合
+	MatchType       string   //匹配规则
+	DefaultValue    string   //默认值
 }
 
 // easyModelList 存储的模型信息列表
@@ -625,6 +725,35 @@ func GetEasyModelInfo(pageBuilder *builder.PageBuilder, modelKey string, actionN
 				})
 			}
 		}
+		//!模型搜索表单信息
+		searchForm, err := db.New().Table("tb_easy_models_search_form").
+			Where("is_delete", 0).
+			Where("status", 1).
+			Where("model_id", modelInfo["id"].(int64)).
+			Order("index_num asc,id asc").
+			Get()
+		if err != nil {
+			logger.Error(err.Error())
+			return EasyModel{}, errors.New("系统运行错误！")
+		}
+		for _, item := range searchForm {
+			var searchFields []string
+			if item["search_fields"].(string) != "" {
+				util.JsonDecode(item["search_fields"].(string), &searchFields)
+			}
+			searchFormItem := SearchFromItem{
+				DataType:        item["data_type"].(string),
+				SearchKey:       item["search_key"].(string),
+				SearchName:      item["search_name"].(string),
+				Placeholder:     item["placeholder"].(string),
+				OptionModelsKey: item["option_models_key"].(string),
+				SearchFields:    searchFields,
+				MatchType:       item["match_type"].(string),
+				DefaultValue:    item["default_value"].(string),
+			}
+			easyModel.SearchForm = append(easyModel.SearchForm, searchFormItem)
+		}
+
 		//!模型字段信息
 		modelFields, err := db.New().Table("tb_easy_models_fields").
 			Where("is_delete", 0).

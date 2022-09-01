@@ -31,10 +31,9 @@ import (
 
 // ====================  默认内置的操作方法 ============================
 
-//
 // Index
-//  @Description: 默认Index方法,即列表页
 //
+//	@Description: 默认Index方法,即列表页
 func (that *NodePage) Index(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	that.PageBuilder.SetActionName("列表")
 	//! that.NodePage
@@ -67,7 +66,7 @@ func (that *NodePage) Index(w http.ResponseWriter, r *http.Request, ps httproute
 			//得到按钮rule
 			btnRule := ""
 			//统一去掉开头的斜杠
-			if btnInfo.Action[0:1] == "/" {
+			if btnInfo.Action != "" && btnInfo.Action[0:1] == "/" {
 				btnInfo.Action = btnInfo.Action[1:]
 			}
 			ruleArr := strings.Split(btnInfo.Action, "/")
@@ -187,6 +186,7 @@ func (that *NodePage) Index(w http.ResponseWriter, r *http.Request, ps httproute
 			logger.Alert(conn.LastSql())
 			return
 		}
+		logger.Alert(conn.LastSql())
 		page := util.PostValue(r, "page")
 		if page != "" {
 			that.PageBuilder.SetListPage(util.String2Int(page))
@@ -236,10 +236,9 @@ func (that *NodePage) Index(w http.ResponseWriter, r *http.Request, ps httproute
 	that.ActShow(w, tpl, that.PageBuilder)
 }
 
-//
 // Add
-//  @Description: 默认新增方法
 //
+//	@Description: 默认新增方法
 func (that *NodePage) Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//开始
 	that.PageBuilder.SetActionName("新增")
@@ -345,7 +344,7 @@ func (that *NodePage) Add(w http.ResponseWriter, r *http.Request, ps httprouter.
 	}, that.PageBuilder)
 }
 
-//检查是否有多余项（提交的字段在formFields内不存在）
+// 检查是否有多余项（提交的字段在formFields内不存在）
 func (that *NodePage) postDataCheckSpare(PostData map[string]interface{}) (map[string]interface{}, error) {
 	//查询所有表单项的KEY
 	for _, formField := range that.PageBuilder.formFields {
@@ -364,7 +363,7 @@ func (that *NodePage) postDataCheckSpare(PostData map[string]interface{}) (map[s
 	return PostData, nil
 }
 
-//检查必传项目必须上传
+// 检查必传项目必须上传
 func (that *NodePage) postDataCheckMust(PostData map[string]interface{}) (map[string]interface{}, error) {
 	mustFieldVlues := map[string][]interface{}{}
 	mustFieldName := map[string]string{}
@@ -412,10 +411,9 @@ func (that *NodePage) postDataCheckMust(PostData map[string]interface{}) (map[st
 	return PostData, nil
 }
 
-//
 // Edit
-//  @Description: 默认编辑数据方法
 //
+//	@Description: 默认编辑数据方法
 func (that *NodePage) Edit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//开始
 	that.PageBuilder.SetActionName("修改")
@@ -544,10 +542,9 @@ func (that *NodePage) Edit(w http.ResponseWriter, r *http.Request, ps httprouter
 
 }
 
-//
 // Status
-//  @Description: 默认设置状态方法
 //
+//	@Description: 默认设置状态方法
 func (that *NodePage) Status(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//开始
 	//logger.Alert("默认Status方法")
@@ -624,10 +621,9 @@ func (that *NodePage) Status(w http.ResponseWriter, r *http.Request, ps httprout
 
 }
 
-//
 // Delete
-//  @Description: 默认删除方法
 //
+//	@Description: 默认删除方法
 func (that *NodePage) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//开始
 	if that.NodePage == nil {
@@ -768,10 +764,9 @@ func (that *NodePage) WangEditorUpload(w http.ResponseWriter, r *http.Request, p
 	fmt.Fprint(w, util.JsonEncode(data))
 }
 
-//
 // doUpload
-//  @Description: 默认处理图片上传
 //
+//	@Description: 默认处理图片上传
 func (that *NodePage) doUpload(w http.ResponseWriter, r *http.Request, ps httprouter.Params) (map[string]string, error) {
 	//!接受文件
 	file, fileHeader, err := r.FormFile("file")

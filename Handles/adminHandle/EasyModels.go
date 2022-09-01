@@ -61,7 +61,7 @@ func (that EasyModels) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 	//!重置右侧按钮
 	//重新设置编辑按钮
 	pageBuilder.SetButton("edit", builder.Button{
-		ButtonName: "编辑模型",
+		ButtonName: "",
 		Action:     "edit",
 		ActionType: 2,
 		ActionUrl:  "edit",
@@ -75,14 +75,29 @@ func (that EasyModels) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 	})
 	//新增右侧字段管理按钮
 	pageBuilder.SetButton("fields", builder.Button{
-		ButtonName: "模型字段",
+		ButtonName: "字段",
 		Action:     "/easy_models_fields/index",
 		ActionType: 2,
 		LayerTitle: "模型字段管理",
 		ActionUrl:  config.AdminPath + "/easy_models_fields/index",
 		Class:      "rose",
 		Icon:       "ri-table-line",
-		Display:    "!item.btn_field || item.btn_field!='hide'",
+		Display:    "",
+		Expand: map[string]string{
+			"w": "98%",
+			"h": "98%",
+		},
+	})
+	//新增右侧字段管理按钮
+	pageBuilder.SetButton("search_form", builder.Button{
+		ButtonName: "搜索",
+		Action:     "/easy_models_search_form/index",
+		ActionType: 2,
+		LayerTitle: "模型搜索表单管理",
+		ActionUrl:  config.AdminPath + "/easy_models_search_form/index",
+		Class:      "cyan",
+		Icon:       "ri-search-2-line",
+		Display:    "",
 		Expand: map[string]string{
 			"w": "98%",
 			"h": "98%",
@@ -103,8 +118,11 @@ func (that EasyModels) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 			"h": "98%",
 		},
 	})
+	pageBuilder.SetButtonName("disable", "")
+	pageBuilder.SetButtonName("enable", "")
+	pageBuilder.SetButtonName("delete", "")
 	//!重置右侧按钮
-	pageBuilder.SetListRightBtns("edit", "fields", "export_insert_data", "disable", "enable", "delete")
+	pageBuilder.SetListRightBtns("edit", "fields", "search_form", "export_insert_data", "disable", "enable", "delete")
 
 	pageBuilder.SetListOrder("id asc")
 	pageBuilder.ListColumnAdd("model_key", "模型Key", "text", nil)

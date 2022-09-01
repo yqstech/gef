@@ -66,3 +66,20 @@ func (b Base) ChildrenOptionModelsList(uniqueKey string) []map[string]interface{
 	}
 	return ChildrenOptionModels
 }
+
+// GetEasyModelsFields 下级选项集列表
+func (b Base) GetEasyModelsFields(modelId string) []map[string]interface{} {
+	if modelId == "" {
+		return nil
+	}
+	//获取列表
+	data, err, _ := Models.Model{}.SelectOptionsData("tb_easy_models_fields", map[string]string{
+		"field_key":  "value",
+		"field_name": "name",
+	}, "", "", "model_id="+modelId, "")
+	if err != nil {
+		logger.Error(err.Error())
+		return nil
+	}
+	return data
+}

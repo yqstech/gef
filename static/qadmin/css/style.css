@@ -834,11 +834,50 @@ header .topMenus a.on {
     display: inline-block;
     padding: 5px 10px;
     margin: 0 5px 5px 0;
+    border-radius: 6px;
+    line-height: 32px;
+    vertical-align: top;
+    min-height: 32px;
+}
+.mobile_list_item:nth-child(4n){
+    background: #e6fce5;
+}
+.mobile_list_item:nth-child(4n-1){
+    background: #e0f4fc;
+}
+.mobile_list_item:nth-child(4n-2){
+    background: #fcf2e7;
+}
+.mobile_list_item:nth-child(4n-3){
+    background: #fceaea;
+}
+.mobile_title_item{
+    display: inline-block;
+    padding: 2px 5px;
+    margin: 0 3px 3px 0;
+    border-radius: 4px;
+}
+.mobile_title_item:nth-child(4n){
+    background: #e6fce5;
+}
+.mobile_title_item:nth-child(4n-1){
+    background: #e0f4fc;
+}
+.mobile_title_item:nth-child(4n-2){
+    background: #fcf2e7;
+}
+.mobile_title_item:nth-child(4n-3){
+    background: #fceaea;
 }
 .mobile_list_button{
     display: block;
     margin: 10px 0;
     text-align: right;
+}
+.search_inline_label{
+    display: inline-block;
+    color: #666666;
+    font-size: 0.9em;
 }
 @media (max-width: 1000px) {
     .p20 {

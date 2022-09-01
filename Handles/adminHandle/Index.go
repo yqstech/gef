@@ -71,19 +71,19 @@ func (that Index) GetMenus(w http.ResponseWriter, r *http.Request, ps httprouter
 	userMenus := []map[string]interface{}{
 		{
 			"name":   "退出",
-			"icon":   "layui-icon-release",
+			"icon":   "ri-logout-circle-r-line",
 			"url":    config.AdminPath + "/account/logout",
 			"target": "",
 		},
 		{
 			"name":   "修改密码",
-			"icon":   "layui-icon-password",
+			"icon":   "ri-shield-user-line",
 			"url":    config.AdminPath + "/account/resetpwd",
 			"target": "main_area",
 		},
 		{
 			"name":   accountName,
-			"icon":   "layui-icon-username",
+			"icon":   "ri-user-3-line",
 			"url":    config.AdminPath + "/account/userinfo",
 			"target": "main_area",
 		},
