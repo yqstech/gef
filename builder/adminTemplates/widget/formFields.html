@@ -31,7 +31,7 @@
         {{- if eq $field.Type "text"}}
         <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
             autocomplete="off" class="layui-input">
-        <div style="line-height: 36px;text-align: left;color:#999">
+        <div style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -40,7 +40,7 @@
             <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
                    autocomplete="off" class="layui-input">
         </div>
-        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -49,7 +49,7 @@
             <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}"
                    autocomplete="off" class="layui-input">
         </div>
-        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -58,7 +58,7 @@
             <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}"
                    autocomplete="off" class="layui-input">
         </div>
-        <div class="layui-col-sm10 layui-col-xs9" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm10 layui-col-xs9" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -71,7 +71,7 @@
             <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
                    autocomplete="off" class="layui-input" disabled="disabled">
         </div>
-        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -80,7 +80,7 @@
             <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}"
                    autocomplete="off" class="layui-input" disabled="disabled">
         </div>
-        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -89,7 +89,7 @@
             <input @keyup.enter="formSubmit" type="text" v-model="formFields.{{$field.Key}}"
                    autocomplete="off" class="layui-input" disabled="disabled">
         </div>
-        <div class="layui-col-sm10 layui-col-xs9" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm10 layui-col-xs9" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -98,7 +98,7 @@
         {{- if eq $field.Type "number"}}
         <input @keyup.enter="formSubmit" type="number" v-model="formFields.{{$field.Key}}"
             placeholder="{{$field.Notice}}" autocomplete="off" class="layui-input">
-        <div style="line-height: 36px;text-align: left;color:#999">
+        <div style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -107,7 +107,7 @@
             <input @keyup.enter="formSubmit" type="number" v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}"
                    autocomplete="off" class="layui-input">
         </div>
-        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -116,7 +116,7 @@
             <input @keyup.enter="formSubmit" type="number" v-model="formFields.{{$field.Key}}"
                    autocomplete="off" class="layui-input">
         </div>
-        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -125,7 +125,7 @@
             <input @keyup.enter="formSubmit" type="number" v-model="formFields.{{$field.Key}}"
                    autocomplete="off" class="layui-input">
         </div>
-        <div class="layui-col-sm10 layui-col-xs9" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm10 layui-col-xs9" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -135,7 +135,7 @@
             <input @keyup.enter="formSubmit" type="password" v-model="formFields.{{$field.Key}}"
                 placeholder="请输入密码..." autocomplete="off" class="layui-input" >
         </div>
-        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -143,7 +143,7 @@
         {{/* 文本域 */}}
         {{- if eq $field.Type "textarea"}}
         <textarea v-model="formFields.{{$field.Key}}" placeholder="{{$field.Notice}}" class="layui-textarea"></textarea>
-        <div style="line-height: 36px;text-align: left;color:#999">
+        <div style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -157,7 +157,7 @@
             <option value="">请选择</option>
             <option v-for="(opt,optIndex) in formFields._{{$field.Key}}_options" :value="opt.value" v-html="opt.name"></option>
         </select>
-        <div style="line-height: 36px;text-align: left;color:#999">
+        <div style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -168,7 +168,7 @@
                 <option v-for="(opt,optIndex) in formFields._{{$field.Key}}_options" :value="opt.value" v-html="opt.name"></option>
             </select>
         </div>
-        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -179,7 +179,7 @@
                 <option v-for="(opt,optIndex) in formFields._{{$field.Key}}_options" :value="opt.value" v-html="opt.name"></option>
             </select>
         </div>
-        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -190,7 +190,7 @@
                 <option v-for="(opt,optIndex) in formFields._{{$field.Key}}_options" :value="opt.value" v-html="opt.name"></option>
             </select>
         </div>
-        <div class="layui-col-sm10" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm10" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -211,7 +211,7 @@
                 {{- end -}}
             </select>
         </div>
-        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm6" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -224,7 +224,7 @@
                 {{- end -}}
             </select>
         </div>
-        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -237,7 +237,7 @@
                 {{- end -}}
             </select>
         </div>
-        <div class="layui-col-sm10" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm10" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -255,7 +255,7 @@
             <button type="button" class="layui-btn layui-btn-normal" @click="iconSelect('{{$field.Key}}')">选择图标</button>
             <button type="button" class="layui-btn layui-btn-warm" @click="formFields.{{$field.Key}}=''">清除</button>
         </div>
-        <div class="layui-col-xs12" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-xs12" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -267,7 +267,7 @@
             @click="formFields.{{$field.Key}}=opt.value"
            v-html="(formFields.{{$field.Key}}==opt.value?'<i class=\'radio-item ri-checkbox-circle-line\'></i>':'<i class=\'radio-item ri-checkbox-blank-circle-line\'></i>')+opt.name">
         </a>
-        <div style="line-height: 36px;text-align: left;color:#999">
+        <div style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -282,7 +282,7 @@
                 <img :src="formFields.{{$field.Key}}" />
             </div>
         </div>
-        <div style="line-height: 36px;text-align: left;color:#999">
+        <div style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -302,7 +302,7 @@
         <div class="layui-col-sm2">
             <a v-if="formFields.{{$field.Key}}!=''" title="清除图片" style="cursor: pointer;background:#ffffff;border: 1px solid #222222;color:#222222;padding:1px;border-radius: 50px" class="ri-close-line" @click="formFields.{{$field.Key}}=''"></a>
         </div>
-        <div class="layui-col-sm8" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm8" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -320,7 +320,7 @@
                               @change="uploadImages($event,'{{$field.Key}}')" /></label>
             </div>
         </div>
-        <div style="line-height: 36px;text-align: left;color:#999">
+        <div style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -339,7 +339,7 @@
         <div class="layui-col-sm2">
             <a v-if="formFields.{{$field.Key}}!=''" title="删除" style="cursor: pointer;background:#ffffff;border: 1px solid #222222;color:#222222;padding:1px;border-radius: 50px" class="ri-close-line" @click="formFields.{{$field.Key}}=''"></a>
         </div>
-        <div class="layui-col-sm8" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm8" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -361,7 +361,7 @@
         <div class="layui-col-sm2">
             <a v-if="formFields.{{$field.Key}}!=''" title="删除" style="cursor: pointer;background:#ffffff;border: 1px solid #222222;color:#222222;padding:1px;border-radius: 50px" class="ri-close-line" @click="formFields.{{$field.Key}}=''"></a>
         </div>
-        <div style="line-height: 36px;text-align: left;color:#999">
+        <div style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -385,7 +385,7 @@
         <div class="layui-col-sm2">
             <a v-if="formFields.{{$field.Key}}!=''" title="删除" style="cursor: pointer;background:#ffffff;border: 1px solid #222222;color:#222222;padding:1px;border-radius: 50px" class="ri-close-line" @click="formFields.{{$field.Key}}=''"></a>
         </div>
-        <div style="line-height: 36px;text-align: left;color:#999">
+        <div style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -406,16 +406,24 @@
                 :autocomplete-items="formFields._{{$field.Key}}_options"
                 @tags-changed="newTags => formFields.{{$field.Key}} = newTags"
         />
+        <div style="line-height: 36px;text-align: left;color:#d5b176">
+            <span>{{$field.Notice}}</span>
+        </div>
         {{- end -}}
 
         {{/* 多选框 */}}
         {{- if eq $field.Type "checkbox"}}
-        {{range $k,$v := $field.Data}}
-        <label class="checkbox-label">
-            <input class="layui-form-checkbox" type="checkbox" name="{{$field.Key}}" v-model="formFields.{{$field.Key}}"
-                value="{{$v.value}}" /> {{$v.name}}
-        </label>
-        {{- end -}}
+        <div>
+            {{range $k,$v := $field.Data}}
+            <label class="checkbox-label">
+                <input class="layui-form-checkbox" type="checkbox" name="{{$field.Key}}" v-model="formFields.{{$field.Key}}"
+                       value="{{$v.value}}" /> {{$v.name}}
+            </label>
+            {{- end -}}
+        </div>
+        <div style="line-height: 36px;text-align: left;color:#d5b176">
+            <span>{{$field.Notice}}</span>
+        </div>
         {{- end -}}
 
         {{/* 多级多选框 */}}
@@ -432,7 +440,7 @@
         <div class="layui-col-sm1" style="line-height:28px">
             <div class="color_picker_{{$field.Key}}"></div>
         </div>
-        <div class="layui-col-sm8" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm8" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -450,7 +458,7 @@
         <div class="layui-col-sm3">
             <input type="text" class="layui-input" id="datetime_{{$field.Key}}" style="{{$field.Style}}">
         </div>
-        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -458,7 +466,7 @@
         <div class="layui-col-sm3">
             <input type="text" class="layui-input" id="date_{{$field.Key}}" style="{{$field.Style}}">
         </div>
-        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}
@@ -466,7 +474,7 @@
         <div class="layui-col-sm3">
             <input type="text" class="layui-input" id="time_{{$field.Key}}" style="{{$field.Style}}">
         </div>
-        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#999">
+        <div class="layui-col-sm9" style="line-height: 36px;text-align: left;color:#d5b176">
             <span>{{$field.Notice}}</span>
         </div>
         {{- end -}}

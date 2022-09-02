@@ -334,16 +334,18 @@ func (m *TbEasyModelsFields) TableName() string {
 // TbEasyModelsSearchForm easy模型-搜索表单
 type TbEasyModelsSearchForm struct {
 	ID
-	ModelID         int    `gorm:"column:model_id;type:int(11);default:0;NOT NULL;comment:模型ID" json:"model_id"`                                  // 模型ID
-	SearchKey       string `gorm:"column:search_key;type:varchar(50);default:'';NOT NULL;comment:表单项标识|模型搜索表单项关键字" json:"search_key"`             // 模型搜索表单项关键字
-	SearchName      string `gorm:"column:search_name;type:varchar(50);default:'';NOT NULL;comment:表单项名称|模型搜索表单项名称" json:"search_name"`            // 模型搜索表单项名称
-	Placeholder     string `gorm:"column:placeholder;type:varchar(50);default:'';NOT NULL;comment:提示信息|输入框内显示的提示信息" json:"placeholder"`           // 提示信息|输入框内显示的提示信息
-	DataType        string `gorm:"column:data_type;type:varchar(50);default:'';NOT NULL;comment:组件类型|表单组件类型" json:"data_type"`                    // 组件类型|表单组件类型
-	OptionModelsKey string `gorm:"column:option_models_key;type:varchar(50);default:'';NOT NULL;comment:关联选项集|选择关联的选项集" json:"option_models_key"` // 选项集key
-	SearchFields    string `gorm:"column:search_fields;type:varchar(200);default:'';NOT NULL;comment:搜索字段|多个字段用逗号分割" json:"search_fields"`        // 搜索字段|多个字段用逗号分割
-	MatchType       string `gorm:"column:match_type;type:varchar(50);default:'';NOT NULL;comment:匹配类型|搜索匹配类型" json:"match_type"`                  // 匹配类型|搜索匹配类型
-	DefaultValue    string `gorm:"column:default_value;type:varchar(50);default:'';NOT NULL;comment:默认值" json:"default_value"`                    // 默认值
-	Style           string `gorm:"column:style;type:varchar(150);default:'';NOT NULL;comment:附加样式" json:"style"`                                  // 附加样式
+	ModelID         int    `gorm:"column:model_id;type:int(11);default:0;NOT NULL;comment:模型ID" json:"model_id"`                                                                   // 模型ID
+	SearchKey       string `gorm:"column:search_key;type:varchar(50);default:'';NOT NULL;comment:表单项标识|模型搜索表单项关键字" json:"search_key"`                                              // 模型搜索表单项关键字
+	SearchName      string `gorm:"column:search_name;type:varchar(50);default:'';NOT NULL;comment:表单项名称|模型搜索表单项名称" json:"search_name"`                                             // 模型搜索表单项名称
+	Placeholder     string `gorm:"column:placeholder;type:varchar(50);default:'';NOT NULL;comment:提示信息|输入框内显示的提示信息" json:"placeholder"`                                            // 提示信息|输入框内显示的提示信息
+	DataType        string `gorm:"column:data_type;type:varchar(50);default:'';NOT NULL;comment:组件类型|表单组件类型" json:"data_type"`                                                     // 组件类型|表单组件类型
+	OptionModelsKey string `gorm:"column:option_models_key;type:varchar(50);default:'';NOT NULL;comment:关联选项集|选择关联的选项集" json:"option_models_key"`                                  // 选项集key
+	OptionModelsAdd string `gorm:"column:option_models_add;type:varchar(1000);default:'';NOT NULL;comment:追加选项|扩充选项集选项,格式为：value|name|sql；sql为空执行默认查询条件" json:"option_models_add"` // 追加选项
+	SubQuery        string `gorm:"column:sub_query;type:varchar(1000);default:'';NOT NULL;comment:子查询|提交的数据嵌入子查询语句中" json:"sub_query"`                                             // 子查询
+	SearchFields    string `gorm:"column:search_fields;type:varchar(200);default:'';NOT NULL;comment:搜索字段|多个字段是 或 的关系" json:"search_fields"`                                       // 搜索字段|多个字段用逗号分割
+	MatchType       string `gorm:"column:match_type;type:varchar(50);default:'';NOT NULL;comment:匹配类型|搜索匹配类型" json:"match_type"`                                                   // 匹配类型|搜索匹配类型
+	DefaultValue    string `gorm:"column:default_value;type:varchar(50);default:'';NOT NULL;comment:默认值" json:"default_value"`                                                     // 默认值
+	Style           string `gorm:"column:style;type:varchar(150);default:'';NOT NULL;comment:附加样式" json:"style"`                                                                   // 附加样式
 	IndexNum
 	CUSD
 }

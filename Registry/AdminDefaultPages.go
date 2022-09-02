@@ -39,6 +39,7 @@ var AdminPages = map[string]builder.NodePager{
 	//!------------ EasyModelHandle 简单模型 -------------------------
 	"easy_models":             &adminHandle.EasyModels{},           //模型管理
 	"easy_models_fields":      &adminHandle.EasyModelsFields{},     //模型字段管理
+	"easy_models_search_form": &adminHandle.EasyModelsSearchForm{}, //模型搜索表单管理
 	"easy_models_buttons":     &adminHandle.EasyModelsButtons{},    //模型按钮管理
 	"easy_curd_models":        &adminHandle.EasyCurdModels{},       //接口模型 easyCurd模型管理
 	"easy_curd_models_fields": &adminHandle.EasyCurdModelsFields{}, //接口模型字段管理 easyCurd模型字段管理

@@ -139,13 +139,22 @@ func (that EasyModelHandle) NodeList(pageBuilder *builder.PageBuilder) (error, i
 		}
 		//!搜索表单
 		for _, searchItem := range easyModel.SearchForm {
+			//选项集
+			var ItemOptionModels []map[string]interface{}
+			if searchItem.OptionModelsKey != "" {
+				ItemOptionModels = Models.OptionModels{}.ByKey(searchItem.OptionModelsKey, false)
+			}
+			//自定义追加选项集
+			for _, oma := range searchItem.OptionModelsAdd {
+				ItemOptionModels = append(ItemOptionModels, oma)
+			}
 			pageBuilder.ListSearchFieldAdd(
 				searchItem.SearchKey,
 				searchItem.DataType,
 				searchItem.SearchName,
+				"",
 				searchItem.DefaultValue,
-				searchItem.DefaultValue,
-				util.Is(searchItem.OptionModelsKey == "", []map[string]interface{}{}, Models.OptionModels{}.ByKey(searchItem.OptionModelsKey, false)).([]map[string]interface{}),
+				ItemOptionModels,
 				searchItem.Style,
 				map[string]interface{}{
 					"placeholder": searchItem.Placeholder,
@@ -201,19 +210,43 @@ func (that EasyModelHandle) NodeListCondition(pageBuilder *builder.PageBuilder, 
 			//!仅支持查询单个字段
 			if len(searchFormItem.SearchFields) == 1 {
 				if postValue, ok := PostSearch[searchFormItem.SearchKey]; ok {
-					if postValue == "" && searchFormItem.DefaultValue != "" {
-						postValue = searchFormItem.DefaultValue
-					}
 					if postValue != "" {
-						if searchFormItem.MatchType == "like" {
-							//追加查询条件
+						//是否使用自定义sql
+						useSelfSql := false
+						for _, v := range searchFormItem.OptionModelsAdd {
+							if postValue == util.Interface2String(v["value"]) {
+								if sql, ok := v["sql"]; ok {
+									useSelfSql = true
+									//设置自定义查询条件
+									condition = append(condition, []interface{}{sql})
+									break
+								}
+							}
+						}
+						if useSelfSql {
+							continue
+						}
+
+						postValueTs := util.Interface2String(postValue)
+						if searchFormItem.SubQuery != "" && searchFormItem.MatchType == "like" {
+							//子查询+like
+							postValueTs = "CONCAT('%', (" + strings.Replace(searchFormItem.SubQuery, "$1", util.Interface2String(postValue), -1) + "), '%')"
+						} else if searchFormItem.SubQuery != "" {
+							//子查询+普通运算符
+							postValueTs = "(" + strings.Replace(searchFormItem.SubQuery, "$1", util.Interface2String(postValue), -1) + ")"
+						} else if searchFormItem.MatchType == "like" {
+							//like模糊查询
+							postValueTs = "%" + util.Interface2String(postValue) + "%"
+						} else {
+							//其他不变
+						}
+						if searchFormItem.SubQuery != "" {
 							condition = append(condition, []interface{}{
-								searchFormItem.SearchFields[0], "like", "%" + util.Interface2String(postValue) + "%",
+								searchFormItem.SearchFields[0] + " " + searchFormItem.MatchType + " " + postValueTs,
 							})
 						} else {
-							//追加查询条件
 							condition = append(condition, []interface{}{
-								searchFormItem.SearchFields[0], searchFormItem.MatchType, postValue,
+								searchFormItem.SearchFields[0], searchFormItem.MatchType, postValueTs,
 							})
 						}
 
@@ -240,18 +273,59 @@ func (that EasyModelHandle) NodeListOrm(pageBuilder *builder.PageBuilder, conn *
 		}
 		//!多个字段同时查询
 		for _, searchFormItem := range easyModel.SearchForm {
+			//当前查询关联了多个字段 使用or拼接
 			if len(searchFormItem.SearchFields) > 1 {
 				if postValue, ok := PostSearch[searchFormItem.SearchKey]; ok {
-					if postValue == "" && searchFormItem.DefaultValue != "" {
-						postValue = searchFormItem.DefaultValue
-					}
 					if postValue != "" {
+						//判断值是否是自定义的追加选项，且设置了追加选项自定义的sql查询语句
+						SelfSql := ""
+						for _, v := range searchFormItem.OptionModelsAdd {
+							if postValue == util.Interface2String(v["value"]) {
+								if sql, ok := v["sql"]; ok {
+									SelfSql = sql.(string)
+								}
+							}
+						}
+
+						//提交的值转为sql语句
+						postValueTs := ""
+						if searchFormItem.SubQuery != "" && searchFormItem.MatchType == "like" {
+							//子查询+like模糊查询的方式
+							postValueTs = "CONCAT('%', (" + strings.Replace(searchFormItem.SubQuery, "$1", util.Interface2String(postValue), -1) + "), '%')"
+						} else if searchFormItem.SubQuery != "" {
+							//子查询+普通运算符
+							postValueTs = "(" + strings.Replace(searchFormItem.SubQuery, "$1", util.Interface2String(postValue), -1) + ")"
+						} else if searchFormItem.MatchType == "like" {
+							//like模糊查询
+							postValueTs = "%" + util.Interface2String(postValue) + "%"
+						} else {
+							//其他不变
+							postValueTs = util.Interface2String(postValue)
+						}
+						logger.Error(postValueTs + "|||")
+
+						//! 不可直接引用，gorose可能是异步处理，searchFormItem会改变
+						SearchFields := searchFormItem.SearchFields
+						SubQuery := searchFormItem.SubQuery
+						MatchType := searchFormItem.MatchType
 						(*conn).Where(func() {
-							for index, field := range searchFormItem.SearchFields {
+							for index, field := range SearchFields {
 								if index == 0 {
-									(*conn).Where(field, searchFormItem.MatchType, postValue)
+									if SelfSql != "" {
+										(*conn).Where(SelfSql)
+									} else if SubQuery != "" {
+										(*conn).Where(field + " " + MatchType + " " + postValueTs)
+									} else {
+										(*conn).Where(field, MatchType, postValueTs)
+									}
 								} else {
-									(*conn).OrWhere(field, searchFormItem.MatchType, postValue)
+									if SelfSql != "" {
+										(*conn).OrWhere(SelfSql)
+									} else if SubQuery != "" {
+										(*conn).OrWhere(field + " " + MatchType + " " + postValueTs)
+									} else {
+										(*conn).OrWhere(field, MatchType, postValueTs)
+									}
 								}
 							}
 						})
@@ -608,15 +682,19 @@ type EasyModelField struct {
 }
 
 type SearchFromItem struct {
-	DataType        string   //组件类型名称
-	SearchKey       string   //组件关键字
-	SearchName      string   //组件名，提示信息
-	Placeholder     string   //提示信息
-	Style           string   //附加样式
-	OptionModelsKey string   //关联选项集
-	SearchFields    []string //搜索字段集合
-	MatchType       string   //匹配规则
-	DefaultValue    string   //默认值
+	DataType        string                   //组件类型名称
+	SearchKey       string                   //组件关键字
+	SearchName      string                   //组件名，提示信息
+	Placeholder     string                   //提示信息
+	Style           string                   //附加样式
+	OptionModelsKey string                   //关联选项集
+	OptionModelsAdd []map[string]interface{} //选项集追加
+	SearchFields    []string                 //搜索字段集合
+	MatchType       string                   //匹配规则
+	DefaultValue    string                   //默认值
+	SubQuery        string                   //子查询语句
+	//DefaultOptionValue string                   //默认项的值
+	//EmptySetValue      string                   //空值设置值
 }
 
 // easyModelList 存储的模型信息列表
@@ -741,15 +819,37 @@ func GetEasyModelInfo(pageBuilder *builder.PageBuilder, modelKey string, actionN
 			if item["search_fields"].(string) != "" {
 				util.JsonDecode(item["search_fields"].(string), &searchFields)
 			}
+
+			//# 格式化追加选项集
+			var OptionModelsAdds []map[string]interface{}
+			optionModelsAdd := strings.Split(item["option_models_add"].(string), "\n")
+			for _, omAdd := range optionModelsAdd {
+				omPs := strings.Split(omAdd, "|")
+				if len(omPs) == 2 {
+					OptionModelsAdds = append(OptionModelsAdds, map[string]interface{}{
+						"value": omPs[0],
+						"name":  omPs[1],
+						"sql":   "",
+					})
+				} else if len(omPs) == 3 {
+					OptionModelsAdds = append(OptionModelsAdds, map[string]interface{}{
+						"value": omPs[0],
+						"name":  omPs[1],
+						"sql":   omPs[2],
+					})
+				}
+			}
 			searchFormItem := SearchFromItem{
 				DataType:        item["data_type"].(string),
 				SearchKey:       item["search_key"].(string),
 				SearchName:      item["search_name"].(string),
 				Placeholder:     item["placeholder"].(string),
 				OptionModelsKey: item["option_models_key"].(string),
+				OptionModelsAdd: OptionModelsAdds,
 				SearchFields:    searchFields,
 				MatchType:       item["match_type"].(string),
 				DefaultValue:    item["default_value"].(string),
+				SubQuery:        item["sub_query"].(string),
 			}
 			easyModel.SearchForm = append(easyModel.SearchForm, searchFormItem)
 		}

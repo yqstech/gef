@@ -29,6 +29,7 @@ var searchMatchType = []map[string]interface{}{
 	{"name": ">=", "value": ">="},
 	{"name": "<=", "value": "<="},
 	{"name": "模糊查询(like)", "value": "like"},
+	{"name": "多选(in)", "value": "in"},
 	//{"name": "自定义", "value": "-"}, //checkbox勾选后自定义sql查询语句
 }
 
@@ -46,7 +47,7 @@ func (that EasyModelsSearchForm) NodeList(pageBuilder *builder.PageBuilder) (err
 	pageBuilder.SetButtonActionUrl("add", "model_id="+modelId, true)
 	pageBuilder.SetButtonActionUrl("edit", "model_id="+modelId, true)
 	//!设置tab列表
-	pageBuilder.SetListOrder("id asc")
+	pageBuilder.SetListOrder("index_num asc,id asc")
 	pageBuilder.ListColumnClear()
 	pageBuilder.ListColumnAdd("search_key", "搜索项标识", "text", nil)
 	pageBuilder.ListColumnAdd("search_name", "搜索项名称", "text", nil)
@@ -80,13 +81,17 @@ func (that EasyModelsSearchForm) NodeForm(pageBuilder *builder.PageBuilder, id i
 		pageBuilder.FormFieldsAdd("model_id", "hidden", "", "", modelId, true, nil, "", nil)
 		pageBuilder.FormFieldsAdd("search_key", "text-sm", "搜索项标识", "模型内唯一搜索项", "", true, nil, "", nil)
 		pageBuilder.FormFieldsAdd("search_name", "text-sm", "搜索项名称", "输入框前面的显示的文字", "", true, nil, "", nil)
-		pageBuilder.FormFieldsAdd("placeholder", "text-sm", "提示信息", "输入框内显示的提示信息", "", false, nil, "", nil)
+		pageBuilder.FormFieldsAdd("placeholder", "text-sm", "提示信息", "输入框内提示信息，或下拉框空白选项", "", false, nil, "", nil)
 		pageBuilder.FormFieldsAdd("data_type", "select-sm", "表单组件", "设置数据类型和使用的组件", "text", true, searchDataType, "", nil)
 		pageBuilder.FormFieldsAdd("option_models_key", "select-xs", "关联选项集", "下拉选项关联选项集", "", false, that.OptionModelsList(), "", map[string]interface{}{
 			"if": "formFields.data_type=='select' || formFields.data_type=='select-sm'",
 		})
-		pageBuilder.FormFieldsAdd("search_fields", "checkbox", "搜索字段", "搜索关联的字段", "", true, that.GetEasyModelsFields(modelId), "", nil)
-		pageBuilder.FormFieldsAdd("match_type", "radio", "匹配类型", "查询数据匹配类型", "=", true, searchMatchType, "", nil)
+		pageBuilder.FormFieldsAdd("option_models_add", "textarea", "追加选项", "扩充选项集选项,格式为：value|name|sql；sql为空执行默认查询条件", "", false, that.OptionModelsList(), "", map[string]interface{}{
+			"if": "formFields.data_type=='select' || formFields.data_type=='select-sm'",
+		})
+		pageBuilder.FormFieldsAdd("search_fields", "checkbox", "匹配字段", "搜索值关联的字段，多字段为'或'的关系", "", true, that.GetEasyModelsFields(modelId), "", nil)
+		pageBuilder.FormFieldsAdd("sub_query", "textarea", "子查询", "$1代表表单提交的值,例如 select id from tb_user where tel = '$1'", "", false, nil, "", nil)
+		pageBuilder.FormFieldsAdd("match_type", "radio", "匹配类型", "数据查询时的匹配类型", "=", true, searchMatchType, "", nil)
 		pageBuilder.FormFieldsAdd("default_value", "text-xxs", "默认值", "搜索填充默认值", "", false, nil, "", nil)
 		pageBuilder.FormFieldsAdd("style", "text", "附加样式", "输入框、下拉框等组件调整样式", "", false, nil, "", nil)
 	}

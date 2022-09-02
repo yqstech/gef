@@ -67,6 +67,16 @@
 
         </div>
     </div>
+    {{if gt .pageTabsLength 0}}
+    <div class="layui-tab">
+        <div class="layui-tab-title">
+            {{$select := .pageTabSelect}}
+            {{range $tabIndex,$tabInfo := .pageTabs}}
+            <li {{if eq $tabIndex $select}}class="layui-this"{{end}}><a href="{{$tabInfo.Href}}">{{$tabInfo.Title}}</a></li>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
     {{if .listSearchFields}}
     <div class="layui-row list_search" style="padding:15px 0 10px;">
         <div class="layui-col-lg12">
@@ -77,32 +87,36 @@
                 {{if eq $field.Type "text"}}
                 <div class="layui-input-inline" style="margin-bottom: 5px;">
                     <input type="text" v-model="searchForm.{{$field.Key}}" placeholder="{{$field.Expand.placeholder}}"
+                           @keyup.enter="search(1)"
                            class="layui-input key" style="width: 180px;{{$field.Style}}">
                 </div>
                 {{end}}
                 {{if eq $field.Type "text-sm"}}
                 <div class="layui-input-inline" style="margin-bottom: 5px;">
                     <input type="text" v-model="searchForm.{{$field.Key}}" placeholder="{{$field.Expand.placeholder}}"
+                           @keyup.enter="search(1)"
                            class="layui-input key" style="width: 80px;{{$field.Style}}">
                 </div>
                 {{end}}
                 {{if eq $field.Type "number"}}
                 <div class="layui-input-inline" style="margin-bottom: 5px;">
                     <input type="number" v-model="searchForm.{{$field.Key}}" placeholder="{{$field.Expand.placeholder}}"
+                           @keyup.enter="search(1)"
                            class="layui-input key" style="width: 180px;{{$field.Style}}">
                 </div>
                 {{end}}
                 {{if eq $field.Type "number-sm"}}
                 <div class="layui-input-inline" style="margin-bottom: 5px;">
                     <input type="number" v-model="searchForm.{{$field.Key}}" placeholder="{{$field.Expand.placeholder}}"
+                           @keyup.enter="search(1)"
                            class="layui-input key" style="width: 80px;{{$field.Style}}">
                 </div>
                 {{end}}
                 {{if eq $field.Type "select"}}
                 <div class="layui-input-inline" style="margin-bottom: 5px;">
-                    <select v-model="searchForm.{{$field.Key}}" class="layui-select" placeholder="{{$field.Expand.placeholder}}"
+                    <select v-model="searchForm.{{$field.Key}}" class="layui-select"
                             style="color: #777777;min-width: 120px;{{$field.Style}}">
-                        <option value="{{$field.DefValue}}">{{$field.Title}}</option>
+                        <option value="{{$field.DefValue}}">{{$field.Expand.placeholder}}</option>
                         {{range $k,$v := $field.Data}}
                         <option value="{{$k}}">{{$v}}</option>
                         {{end}}
@@ -119,18 +133,6 @@
                 {{end}}
                 <button type="button" class="layui-btn rose sou" @click="search(1)" style="margin-bottom: 5px">查询</button>
             </div>
-
-
-        </div>
-    </div>
-    {{end}}
-    {{if gt .pageTabsLength 0}}
-    <div class="layui-tab">
-        <div class="layui-tab-title">
-            {{$select := .pageTabSelect}}
-            {{range $tabIndex,$tabInfo := .pageTabs}}
-            <li {{if eq $tabIndex $select}}class="layui-this"{{end}}><a href="{{$tabInfo.Href}}">{{$tabInfo.Title}}</a></li>
-            {{end}}
         </div>
     </div>
     {{end}}
