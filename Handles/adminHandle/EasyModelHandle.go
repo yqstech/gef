@@ -137,12 +137,30 @@ func (that EasyModelHandle) NodeList(pageBuilder *builder.PageBuilder) (error, i
 				}
 			}
 		}
+
+		//当前选中的tab页面
+		TabSelectParams := map[string]interface{}{}
+		if tabIndex >= 0 && tabIndex+1 <= len(easyModel.ListTabs) {
+			TabSelectParams = easyModel.ListTabs[tabIndex].SearchFormParams
+		}
+
 		//!搜索表单
 		for _, searchItem := range easyModel.SearchForm {
 			//选项集
 			var ItemOptionModels []map[string]interface{}
 			if searchItem.OptionModelsKey != "" {
-				ItemOptionModels = Models.OptionModels{}.ByKey(searchItem.OptionModelsKey, false)
+				//查询当前选项集是否支持联动
+				//# 配置了联动的监听参数
+				//# 如果参数1和tab参数一致
+				//# 则查询条件为 参数2=tab参数值
+				var Sqls []string
+				DynamicParams := Models.OptionModels{}.DynamicParams(searchItem.OptionModelsKey)
+				for _, DynamicParam := range DynamicParams {
+					if SelectParamValue, ok := TabSelectParams[DynamicParam.ParamKey]; ok {
+						Sqls = append(Sqls, DynamicParam.FieldKey+"="+SelectParamValue.(string))
+					}
+				}
+				ItemOptionModels = Models.OptionModels{}.ByKeySelect(searchItem.OptionModelsKey, strings.Join(Sqls, " and "), false)
 			}
 			//自定义追加选项集
 			for _, oma := range searchItem.OptionModelsAdd {
@@ -645,8 +663,9 @@ type EasyModel struct {
 	BatchAction  bool                      //是否支持批量操作
 }
 type EasyModelListTab struct {
-	TabName         string //tab页名称
-	SelectCondition string //查询条件
+	TabName          string                 //tab页名称
+	SelectCondition  string                 //tab页查询条件，根据tab值，解析查询条件
+	SearchFormParams map[string]interface{} //参数:值
 }
 type EasyModelUrlParam struct {
 	ParamKey     string //参数key
@@ -750,14 +769,27 @@ func GetEasyModelInfo(pageBuilder *builder.PageBuilder, modelKey string, actionN
 				Opts := strings.Split(tab, "|")
 				OptsLength := len(Opts)
 				newTab := EasyModelListTab{
-					TabName:         "标签页",
-					SelectCondition: "",
+					TabName:          "标签页",
+					SelectCondition:  "",
+					SearchFormParams: map[string]interface{}{},
 				}
 				if OptsLength > 0 && Opts[0] != "" {
 					newTab.TabName = Opts[0]
 				}
 				if OptsLength > 1 && Opts[1] != "" {
 					newTab.SelectCondition = Opts[1]
+				}
+				//! tab和搜索表单的联动参数设置
+				if OptsLength > 2 && Opts[2] != "" {
+					searchFormPs := strings.Split(Opts[2], "&")
+					for _, ps := range searchFormPs {
+						if ps != "" {
+							params := strings.Split(ps, "=")
+							if len(params) == 2 {
+								newTab.SearchFormParams[params[0]] = params[1]
+							}
+						}
+					}
 				}
 				easyModel.ListTabs = append(easyModel.ListTabs, newTab)
 			}
@@ -802,56 +834,6 @@ func GetEasyModelInfo(pageBuilder *builder.PageBuilder, modelKey string, actionN
 					DefaultValue: "",
 				})
 			}
-		}
-		//!模型搜索表单信息
-		searchForm, err := db.New().Table("tb_easy_models_search_form").
-			Where("is_delete", 0).
-			Where("status", 1).
-			Where("model_id", modelInfo["id"].(int64)).
-			Order("index_num asc,id asc").
-			Get()
-		if err != nil {
-			logger.Error(err.Error())
-			return EasyModel{}, errors.New("系统运行错误！")
-		}
-		for _, item := range searchForm {
-			var searchFields []string
-			if item["search_fields"].(string) != "" {
-				util.JsonDecode(item["search_fields"].(string), &searchFields)
-			}
-
-			//# 格式化追加选项集
-			var OptionModelsAdds []map[string]interface{}
-			optionModelsAdd := strings.Split(item["option_models_add"].(string), "\n")
-			for _, omAdd := range optionModelsAdd {
-				omPs := strings.Split(omAdd, "|")
-				if len(omPs) == 2 {
-					OptionModelsAdds = append(OptionModelsAdds, map[string]interface{}{
-						"value": omPs[0],
-						"name":  omPs[1],
-						"sql":   "",
-					})
-				} else if len(omPs) == 3 {
-					OptionModelsAdds = append(OptionModelsAdds, map[string]interface{}{
-						"value": omPs[0],
-						"name":  omPs[1],
-						"sql":   omPs[2],
-					})
-				}
-			}
-			searchFormItem := SearchFromItem{
-				DataType:        item["data_type"].(string),
-				SearchKey:       item["search_key"].(string),
-				SearchName:      item["search_name"].(string),
-				Placeholder:     item["placeholder"].(string),
-				OptionModelsKey: item["option_models_key"].(string),
-				OptionModelsAdd: OptionModelsAdds,
-				SearchFields:    searchFields,
-				MatchType:       item["match_type"].(string),
-				DefaultValue:    item["default_value"].(string),
-				SubQuery:        item["sub_query"].(string),
-			}
-			easyModel.SearchForm = append(easyModel.SearchForm, searchFormItem)
 		}
 
 		//!模型字段信息
@@ -903,12 +885,65 @@ func GetEasyModelInfo(pageBuilder *builder.PageBuilder, modelKey string, actionN
 						newTab := EasyModelListTab{
 							TabName:         options["name"].(string),
 							SelectCondition: field["field_key"].(string) + "='" + util.Interface2String(options["value"]) + "'",
+							SearchFormParams: map[string]interface{}{
+								field["field_key"].(string): util.Interface2String(options["value"]),
+							},
 						}
 						easyModel.ListTabs = append(easyModel.ListTabs, newTab)
 					}
 				}
 			}
 			easyModel.Fields = append(easyModel.Fields, modelField)
+		}
+
+		//!模型搜索表单信息
+		searchForm, err := db.New().Table("tb_easy_models_search_form").
+			Where("is_delete", 0).
+			Where("status", 1).
+			Where("model_id", modelInfo["id"].(int64)).
+			Order("index_num asc,id asc").
+			Get()
+		if err != nil {
+			logger.Error(err.Error())
+			return EasyModel{}, errors.New("系统运行错误！")
+		}
+		for _, item := range searchForm {
+			var searchFields []string
+			if item["search_fields"].(string) != "" {
+				util.JsonDecode(item["search_fields"].(string), &searchFields)
+			}
+			//# 格式化追加选项集
+			var OptionModelsAdds []map[string]interface{}
+			optionModelsAdd := strings.Split(item["option_models_add"].(string), "\n")
+			for _, omAdd := range optionModelsAdd {
+				omPs := strings.Split(omAdd, "|")
+				if len(omPs) == 2 {
+					OptionModelsAdds = append(OptionModelsAdds, map[string]interface{}{
+						"value": omPs[0],
+						"name":  omPs[1],
+						"sql":   "",
+					})
+				} else if len(omPs) == 3 {
+					OptionModelsAdds = append(OptionModelsAdds, map[string]interface{}{
+						"value": omPs[0],
+						"name":  omPs[1],
+						"sql":   omPs[2],
+					})
+				}
+			}
+			searchFormItem := SearchFromItem{
+				DataType:        item["data_type"].(string),
+				SearchKey:       item["search_key"].(string),
+				SearchName:      item["search_name"].(string),
+				Placeholder:     item["placeholder"].(string),
+				OptionModelsKey: item["option_models_key"].(string),
+				OptionModelsAdd: OptionModelsAdds,
+				SearchFields:    searchFields,
+				MatchType:       item["match_type"].(string),
+				DefaultValue:    item["default_value"].(string),
+				SubQuery:        item["sub_query"].(string),
+			}
+			easyModel.SearchForm = append(easyModel.SearchForm, searchFormItem)
 		}
 
 		//!保存并返回

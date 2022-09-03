@@ -185,24 +185,29 @@ func (that OptionModels) Select(id int, OmWhere, where string, beautify bool) []
 }
 
 // ById 获取选项集数据（可选择美化数据）
-func (that OptionModels) ById(id int, beautify bool) []map[string]interface{} {
-	return that.Select(id, "", "", beautify)
-}
+//func (that OptionModels) ById(id int, beautify bool) []map[string]interface{} {
+//	return that.Select(id, "", "", beautify)
+//}
 
 // ByKey 获取选项集数据（可选择美化数据）
 func (that OptionModels) ByKey(uniqueKey interface{}, beautify bool) []map[string]interface{} {
 	var data []map[string]interface{}
 	switch uniqueKey.(type) {
-	case int:
-		data = that.ById(uniqueKey.(int), beautify)
-	case int64:
-		data = that.ById(util.Int642Int(uniqueKey.(int64)), beautify)
+	//case int:
+	//	data = that.ById(uniqueKey.(int), beautify)
+	//case int64:
+	//	data = that.ById(util.Int642Int(uniqueKey.(int64)), beautify)
 	case string:
 		data = that.Select(0, "unique_key = '"+uniqueKey.(string)+"'", "", beautify)
 	default:
 		logger.Error("选项集key值类型异常！")
 	}
 	return data
+}
+
+// ByKeySelect 选项集key+sql查询条件
+func (that OptionModels) ByKeySelect(uniqueKey string, where string, beautify bool) []map[string]interface{} {
+	return that.Select(0, "unique_key = '"+uniqueKey+"'", where, beautify)
 }
 func (that OptionModels) Beautify(data []map[string]interface{}) []map[string]interface{} {
 	var selectData []map[string]interface{}

@@ -173,7 +173,7 @@ func (that EasyModels) NodeForm(pageBuilder *builder.PageBuilder, id int64) (err
 	rightBtn := "[{'classes':'tag-1','text':'edit'},{'classes':'tag-1','text':'disable'},{'classes':'tag-1','text':'enable'},{'classes':'tag-1','text':'delete'}]"
 	pageBuilder.FormFieldsAdd("right_buttons", "tags", "操作按钮", "", rightBtn, false, buttonList, "", nil)
 	pageBuilder.FormFieldsAdd("page_notice", "textarea", "页面公告", "列表页面顶部的提示信息", "", false, nil, "", nil)
-	pageBuilder.FormFieldsAdd("tabs_for_list", "textarea", "列表选项卡", "格式:tab名称|查询条件，每行一个", "", false, nil, "", nil)
+	pageBuilder.FormFieldsAdd("tabs_for_list", "textarea", "列表选项卡", "格式:tab名称|查询条件|搜索表单联动参数对(例如:a=1&b=2)，每行一个", "", false, nil, "", nil)
 	pageBuilder.FormFieldsAdd("", "block", "高级用法", "", "", false, nil, "", nil)
 	pageBuilder.FormFieldsAdd("level_indent", "text", "字段按级缩进", "列表页支持按字段1的上下级关系缩进字段2，格式为:级别字段key:缩进字段key，例如pid:name", "", false, nil, "", nil)
 	pageBuilder.FormFieldsAdd("url_params", "textarea", "Url传参", "Url参数转为列表查询条件 并 透传顶部按钮链接 \n格式为 参数:数据库字段:默认值，例如：id:model_id:0\n默认值为空自动忽略，每行一个转换规则", "", false, nil, "", nil)
