@@ -49,9 +49,15 @@ func (ar AdminRules) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 	//pageBuilder.ListSearchFieldAdd("time_type", "select", "按订单时间", "1", nil, "width:auto;min-width:0px", nil)
 	//pageBuilder.ListSearchFieldAdd("start_time", "datetime", "", util.TimeNowFormat("2006-01-02 00:00:00", 0, 0, -2), nil, "", nil)
 	//pageBuilder.ListSearchFieldAdd("end_time", "datetime", "-", util.TimeNowFormat("2006-01-02 00:00:00", 0, 0, +1), nil, "", nil)
-	pageBuilder.ListSearchFieldAdd("id", "text", "ID", "", "", nil, "", nil)
-	pageBuilder.ListSearchFieldAdd("status", "select", "状态", "-1", "-1", Models.OptionModels{}.ByKey("status", false), "", nil)
-	pageBuilder.ListSearchFieldAdd("type", "select", "类型", "0", "0", Models.OptionModels{}.ByKey("rule_type", false), "", nil)
+	pageBuilder.ListSearchFieldAdd("id", "text-sm", "ID", "", "", nil, "", map[string]interface{}{
+		"placeholder": "ID",
+	})
+	pageBuilder.ListSearchFieldAdd("status", "select", "状态", "-1", "-1", Models.OptionModels{}.ByKey("status", false), "", map[string]interface{}{
+		"placeholder": "选择状态",
+	})
+	pageBuilder.ListSearchFieldAdd("type", "select", "类型", "0", "0", Models.OptionModels{}.ByKey("rule_type", false), "", map[string]interface{}{
+		"placeholder": "选择类型",
+	})
 	return nil, 0
 }
 

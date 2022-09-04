@@ -108,8 +108,12 @@ func (that Configs) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 	pageBuilder.SetListColumnStyle("action", "width:20%")
 
 	//搜索表单
-	pageBuilder.ListSearchFieldAdd("group_id", "select", "选择分组", "", "", ConfigsGroups, "", nil)
-	pageBuilder.ListSearchFieldAdd("status", "select", "选择状态", "", "", Models.OptionModels{}.ByKey("status", false), "", nil)
+	pageBuilder.ListSearchFieldAdd("group_id", "select", "分组", "", "", ConfigsGroups, "", map[string]interface{}{
+		"placeholder": "请选择分组",
+	})
+	pageBuilder.ListSearchFieldAdd("status", "select", "状态", "", "", Models.OptionModels{}.ByKey("status", false), "", map[string]interface{}{
+		"placeholder": "请选择状态",
+	})
 	return nil, 0
 }
 

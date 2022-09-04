@@ -37,7 +37,9 @@ func (a AdminLog) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 	if err != nil {
 		return err, code
 	}
-	pageBuilder.ListSearchFieldAdd("account_id", "select", "操作人", "", "", adminList, "", nil)
+	pageBuilder.ListSearchFieldAdd("account_id", "select", "人员", "", "", adminList, "", map[string]interface{}{
+		"placeholder": "选择管理员",
+	})
 
 	pageBuilder.ListColumnAdd("account_id", "操作人ID", "text", nil)
 	pageBuilder.ListColumnAdd("account_name", "操作人名称", "text", nil)
