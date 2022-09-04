@@ -86,28 +86,28 @@
 
                 {{if eq $field.Type "text"}}
                 <div class="layui-input-inline" style="margin-bottom: 5px;">
-                    <input type="text" v-model="searchForm.{{$field.Key}}" placeholder="{{$field.Expand.placeholder}}"
+                    <input type="text" v-model="searchForm.{{$field.Key}}" placeholder="{{if $field.Expand.placeholder}}{{$field.Expand.placeholder}}{{end}}"
                            @keyup.enter="search(1)"
                            class="layui-input key" style="width: 180px;{{$field.Style}}">
                 </div>
                 {{end}}
                 {{if eq $field.Type "text-sm"}}
                 <div class="layui-input-inline" style="margin-bottom: 5px;">
-                    <input type="text" v-model="searchForm.{{$field.Key}}" placeholder="{{$field.Expand.placeholder}}"
+                    <input type="text" v-model="searchForm.{{$field.Key}}" placeholder="{{if $field.Expand.placeholder}}{{$field.Expand.placeholder}}{{end}}"
                            @keyup.enter="search(1)"
                            class="layui-input key" style="width: 80px;{{$field.Style}}">
                 </div>
                 {{end}}
                 {{if eq $field.Type "number"}}
                 <div class="layui-input-inline" style="margin-bottom: 5px;">
-                    <input type="number" v-model="searchForm.{{$field.Key}}" placeholder="{{$field.Expand.placeholder}}"
+                    <input type="number" v-model="searchForm.{{$field.Key}}" placeholder="{{if $field.Expand.placeholder}}{{$field.Expand.placeholder}}{{end}}"
                            @keyup.enter="search(1)"
                            class="layui-input key" style="width: 180px;{{$field.Style}}">
                 </div>
                 {{end}}
                 {{if eq $field.Type "number-sm"}}
                 <div class="layui-input-inline" style="margin-bottom: 5px;">
-                    <input type="number" v-model="searchForm.{{$field.Key}}" placeholder="{{$field.Expand.placeholder}}"
+                    <input type="number" v-model="searchForm.{{$field.Key}}" placeholder="{{if $field.Expand.placeholder}}{{$field.Expand.placeholder}}{{end}}"
                            @keyup.enter="search(1)"
                            class="layui-input key" style="width: 80px;{{$field.Style}}">
                 </div>
@@ -116,7 +116,7 @@
                 <div class="layui-input-inline" style="margin-bottom: 5px;">
                     <select v-model="searchForm.{{$field.Key}}" class="layui-select"
                             style="color: #777777;min-width: 120px;{{$field.Style}}">
-                        <option value="{{$field.DefValue}}">{{$field.Expand.placeholder}}</option>
+                        <option value="{{$field.DefValue}}">{{if $field.Expand.placeholder}}{{$field.Expand.placeholder}}{{end}}</option>
                         {{range $k,$v := $field.Data}}
                         <option value="{{$k}}">{{$v}}</option>
                         {{end}}
@@ -126,7 +126,13 @@
                 {{if eq $field.Type "datetime"}}
                 <div class="layui-input-inline" style="margin-bottom: 5px;">
                     <input type="text" class="layui-input" v-model="searchForm.{{$field.Key}}" id="time_{{$field.Key}}"
-                           placeholder="{{$field.Expand.placeholder}}" style="display:inline-block;width: 150px;{{$field.Style}}">
+                           placeholder="{{if $field.Expand.placeholder}}{{$field.Expand.placeholder}}{{end}}" style="display:inline-block;width: 150px;{{$field.Style}}">
+                </div>
+                {{end}}
+                {{if eq $field.Type "date"}}
+                <div class="layui-input-inline" style="margin-bottom: 5px;">
+                    <input type="text" class="layui-input" v-model="searchForm.{{$field.Key}}" id="date_{{$field.Key}}"
+                           placeholder="{{if $field.Expand.placeholder}}{{$field.Expand.placeholder}}{{end}}" style="display:inline-block;width: 150px;{{$field.Style}}">
                 </div>
                 {{end}}
 
@@ -472,6 +478,16 @@
         laydate.render({
             elem: '#time_{{$field.Key}}',
             type: 'datetime',
+            value: "{{$field.DefValue}}",
+            done: function (value, date, endDate) {
+                vue.searchForm.{{$field.Key}} = value;
+            }
+        });
+        {{end}}
+        {{if eq $field.Type "date"}}
+        laydate.render({
+            elem: '#date_{{$field.Key}}',
+            type: 'date',
             value: "{{$field.DefValue}}",
             done: function (value, date, endDate) {
                 vue.searchForm.{{$field.Key}} = value;

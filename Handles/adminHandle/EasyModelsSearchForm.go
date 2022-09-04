@@ -89,10 +89,10 @@ func (that EasyModelsSearchForm) NodeForm(pageBuilder *builder.PageBuilder, id i
 		pageBuilder.FormFieldsAdd("option_models_add", "textarea", "追加选项", "扩充选项集选项,格式为：value|name|sql；sql为空执行默认查询条件", "", false, that.OptionModelsList(), "", map[string]interface{}{
 			"if": "formFields.data_type=='select' || formFields.data_type=='select-sm'",
 		})
-		pageBuilder.FormFieldsAdd("search_fields", "checkbox", "匹配字段", "搜索值关联的字段，多字段为'或'的关系", "", true, that.GetEasyModelsFields(modelId), "", nil)
-		pageBuilder.FormFieldsAdd("sub_query", "textarea", "子查询", "$1代表表单提交的值,例如 select id from tb_user where tel = '$1'", "", false, nil, "", nil)
-		pageBuilder.FormFieldsAdd("match_type", "radio", "匹配类型", "数据查询时的匹配类型", "=", true, searchMatchType, "", nil)
 		pageBuilder.FormFieldsAdd("default_value", "text-xxs", "默认值", "搜索填充默认值", "", false, nil, "", nil)
+		pageBuilder.FormFieldsAdd("search_fields", "checkbox", "匹配字段", "搜索值关联的字段，多字段为'或'的关系", "", true, that.GetEasyModelsFields(modelId), "", nil)
+		pageBuilder.FormFieldsAdd("match_type", "radio", "匹配类型", "数据查询时的匹配类型", "=", true, searchMatchType, "", nil)
+		pageBuilder.FormFieldsAdd("sub_query", "textarea", "子查询", "$1代表表单提交的值,例如 select id from tb_user where tel = '$1'", "", false, nil, "", nil)
 		pageBuilder.FormFieldsAdd("style", "text", "附加样式", "输入框、下拉框等组件调整样式", "", false, nil, "", nil)
 	}
 

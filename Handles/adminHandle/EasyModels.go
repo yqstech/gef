@@ -244,5 +244,40 @@ gef.InsideData{
 `
 		fmt.Fprint(w, content)
 	}
+	fmt.Fprint(w, "\n\n//=============================================>\n")
+	fmt.Fprint(w, "//=============================================>\n")
+	fmt.Fprint(w, "//=============================================>\n")
+	fmt.Fprint(w, "//=============================================>\n\n\n")
+	fmt.Fprint(w, "//!下边是搜索表单\n\n")
+
+	SearchForm, err := db.New().
+		Table("tb_easy_models_search_form").
+		Where("is_delete", 0).
+		Where("model_id", id).
+		Order("index_num,id asc").Get()
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+	for index, Item := range SearchForm {
+		//删除部分字段
+		delete(Item, "id")
+		delete(Item, "create_time")
+		delete(Item, "update_time")
+		delete(Item, "is_delete")
+		//按顺序添加排序字段
+		Item["index_num"] = index + 1
+		//标记上级ID
+		Item["model_id"] = "__PID__"
+		content = `
+gef.InsideData{
+	TableName: "tb_easy_models_search_form",
+	Condition: [][]interface{}{{"model_id", "__PID__"},{"search_key", "` + Item["search_key"].(string) + `"}},
+	Data: map[string]interface{}` + util.JsonEncode(Item) + `,
+},
+`
+		fmt.Fprint(w, content)
+	}
+
 	fmt.Fprint(w, "\n\n\n\n\n")
 }
