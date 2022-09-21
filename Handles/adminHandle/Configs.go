@@ -100,7 +100,7 @@ func (that Configs) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 	pageBuilder.ListColumnAdd("title", "配置项名称", "text", nil)
 	pageBuilder.ListColumnAdd("value", "当前值/默认值", "html", nil)
 	pageBuilder.ListColumnAdd("notice", "说明", "text", nil)
-	pageBuilder.ListColumnAdd("index_num", "排序", "text", nil)
+	pageBuilder.ListColumnAdd("index_num", "排序", "input::type=number&width:50px", nil)
 	//pageBuilder.ListColumnAdd("status", "状态", "array", models.DefaultStatus)
 
 	pageBuilder.SetListColumnStyle("notice", "width:20%")
