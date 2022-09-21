@@ -289,22 +289,23 @@
 
         {{/* 图片上传 */}}
         {{- if eq $field.Type "image"}}
-        <div class="layui-col-sm2">
-            <div v-if="formFields.{{$field.Key}}==''" class="upload_image_btn" style="color: #00a0e9">
-                <i class="ri-image-add-fill" style="font-size:32px!important"></i>
-                <label><input type="file" accept="image/x-png,image/gif,image/jpeg,image/bmp"
-                        @change="uploadImageFile($event,'{{$field.Key}}')" /></label>
+        <div class="layui-col-md12">
+            <div style="position: relative;display: inline-block">
+                <div v-if="formFields.{{$field.Key}}==''" class="upload_image_btn" style="color: #00a0e9">
+                    <i class="ri-image-add-fill" style="font-size:32px!important"></i>
+                    <label><input type="file" accept="image/x-png,image/gif,image/jpeg,image/bmp"
+                                  @change="uploadImageFile($event,'{{$field.Key}}')" /></label>
+                </div>
+                <div v-else class="upload_image_view">
+                    <img :src="formFields.{{$field.Key}}" />
+                </div>
+                <a v-if="formFields.{{$field.Key}}!=''" title="清除图片" class="image_remove_btn ri-close-line" @click="formFields.{{$field.Key}}=''"></a>
             </div>
-            <div v-else class="upload_image_view">
-                <img :src="formFields.{{$field.Key}}" />
+            <div style="line-height: 36px;text-align: left;color:#d5b176;display: inline-block;margin-left: 10px">
+                <span>{{$field.Notice}}</span>
             </div>
         </div>
-        <div class="layui-col-sm2">
-            <a v-if="formFields.{{$field.Key}}!=''" title="清除图片" style="cursor: pointer;background:#ffffff;border: 1px solid #222222;color:#222222;padding:1px;border-radius: 50px" class="ri-close-line" @click="formFields.{{$field.Key}}=''"></a>
-        </div>
-        <div class="layui-col-sm8" style="line-height: 36px;text-align: left;color:#d5b176">
-            <span>{{$field.Notice}}</span>
-        </div>
+
         {{- end -}}
 
         {{/* 多图片上传 */}}
