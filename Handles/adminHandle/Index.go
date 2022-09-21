@@ -218,7 +218,7 @@ func (that Index) GetMenus(w http.ResponseWriter, r *http.Request, ps httprouter
 				"name":   rule["name"],
 				"icon":   rule["icon"],
 				"url":    rule["route"],
-				"hidden": false,
+				"hidden": len(ruleIndex) > 4,
 				"active": false,
 				"list":   []map[string]string{},
 			}
