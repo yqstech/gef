@@ -879,6 +879,24 @@ header .topMenus a.on {
     color: #666666;
     font-size: 0.9em;
 }
+
+.layui-form-label {
+    width: 120px;
+}
+.layui-input-block{
+    margin-left: 155px;
+}
+.image_remove_btn{
+    position: absolute;
+    top :0;
+    right: 5px;
+    cursor: pointer;
+    background:#ffffff;
+    border: 1px solid #222222;
+    color:#222222;
+    padding:1px;
+    border-radius: 50px
+}
 @media (max-width: 1000px) {
     .p20 {
         padding: 10px;
@@ -955,4 +973,11 @@ header .topMenus a.on {
     .list_table{
         display: none;
     }
+}
+
+.upload_image_view img,.layui-table .column  img{
+    background-color: #e7e7e7;
+    background-image: linear-gradient(45deg, #b9b9b9 25%, transparent 0, transparent 75%, #b9b9b9 0),
+    linear-gradient(45deg, #b9b9b9 25%, transparent 0, transparent 75%, #b9b9b9 0);
+    background-position: 0 0, 2px 2px; background-size: 4px 4px;
 }
