@@ -249,9 +249,44 @@ func (that OptionModels) Dynamic(w http.ResponseWriter, r *http.Request, ps http
 			wheres = append(wheres, dp.FieldKey+" = '"+v+"'")
 		}
 	}
-
 	ops := Models.OptionModels{}.Select(0, "unique_key = '"+optionModelKey+"'", strings.Join(wheres, " and "), false)
-	that.ApiResult(w, 200, "success", ops)
+	//选项缩进
+	var FieldOptions []map[string]interface{}
+	//深度拷贝，直接复制的话，多次刷新会造成多次缩进
+	for _, v := range ops {
+		x := map[string]interface{}{}
+		for k1, v1 := range v {
+			x[k1] = v1
+		}
+		FieldOptions = append(FieldOptions, x)
+	}
+	//转一下类型
+	var FieldOptionsCopy []gorose.Data
+	for _, v := range FieldOptions {
+		v["id"] = int64(util.String2Int(util.Interface2String(v["id"])))
+		v["pid"] = int64(util.String2Int(util.Interface2String(v["pid"])))
+		FieldOptionsCopy = append(FieldOptionsCopy, v)
+	}
+	//执行缩进
+	FieldOptionsCopy = Models.Model{}.GoroseDataLevelOrder(FieldOptionsCopy, "id", "pid", 0, 0)
+	for k, v := range FieldOptionsCopy {
+		if v["level"] == int64(0) {
+		} else if v["level"] == int64(1) {
+			FieldOptionsCopy[k]["name"] = "&nbsp;&nbsp;&nbsp;&nbsp;├─&nbsp;" + v["name"].(string)
+		} else if v["level"] == int64(2) {
+			FieldOptionsCopy[k]["name"] = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─&nbsp;" + v["name"].(string)
+		} else if v["level"] == int64(3) {
+			FieldOptionsCopy[k]["name"] = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─&nbsp;" + v["name"].(string)
+		} else if v["level"] == int64(4) {
+			FieldOptionsCopy[k]["name"] = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├&nbsp;&nbsp;&nbsp;&nbsp;├─&nbsp;" + v["name"].(string)
+		}
+	}
+	//类型再回来
+	FieldOptions = []map[string]interface{}{}
+	for _, v := range FieldOptionsCopy {
+		FieldOptions = append(FieldOptions, v)
+	}
+	that.ApiResult(w, 200, "success", FieldOptions)
 }
 
 func (that OptionModels) ExportInsertData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
