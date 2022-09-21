@@ -49,7 +49,13 @@ func (that *Index) Main(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 	tpl := builder.Displayer{
 		TplName: "main.html",
 	}
-	tpl.SetDate("title", "首页")
+	tpl.SetDate("app", Models.AppConfigs{}.Values(2))
+	//当前账户信息
+	tpl.SetDate("account", map[string]interface{}{
+		"account_id":   ps.ByName("account_id"),
+		"account_name": ps.ByName("account_name"),
+		"account":      ps.ByName("account"),
+	})
 	that.ActShow(w, tpl, that.PageBuilder)
 }
 

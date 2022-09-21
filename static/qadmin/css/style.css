@@ -981,3 +981,5 @@ header .topMenus a.on {
     linear-gradient(45deg, #b9b9b9 25%, transparent 0, transparent 75%, #b9b9b9 0);
     background-position: 0 0, 2px 2px; background-size: 4px 4px;
 }
+
+.wangEditor li{list-style: unset!important;}
