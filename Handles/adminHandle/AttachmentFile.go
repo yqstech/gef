@@ -10,10 +10,14 @@
 package adminHandle
 
 import (
+	"fmt"
 	"github.com/gohouse/gorose/v2"
+	"github.com/julienschmidt/httprouter"
+	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/builder"
 	"github.com/yqstech/gef/util"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -53,8 +57,14 @@ var FileExtImage = map[string]string{
 	"other": "/static/images/exts/other.png",
 }
 
+// NodeInit 初始化
+func (that *AttachmentFile) NodeInit(pageBuilder *builder.PageBuilder) {
+	//注册handle
+	that.NodePageActions["export_insert_data"] = that.ExportInsertData
+}
+
 // NodeBegin 开始
-func (that AttachmentFile) NodeBegin(pageBuilder *builder.PageBuilder) (error, int) {
+func (that *AttachmentFile) NodeBegin(pageBuilder *builder.PageBuilder) (error, int) {
 	pageBuilder.SetTitle("文件附件管理")
 	pageBuilder.SetPageName("附件")
 	pageBuilder.SetTbName("tb_attachment")
@@ -62,10 +72,9 @@ func (that AttachmentFile) NodeBegin(pageBuilder *builder.PageBuilder) (error, i
 }
 
 // NodeList 初始化列表
-func (that AttachmentFile) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
+func (that *AttachmentFile) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 	pageBuilder.ListColumnClear()
 	pageBuilder.SetListRightBtns("delete")
-	pageBuilder.ListTopBtnsClear()
 	pageBuilder.ListColumnAdd("ext_image", "文件类型", "image60", nil)
 	pageBuilder.ListColumnAdd("file_name", "文件名称", "text", nil)
 	pageBuilder.ListColumnAdd("ext", "文件后缀", "text", nil)
@@ -75,7 +84,7 @@ func (that AttachmentFile) NodeList(pageBuilder *builder.PageBuilder) (error, in
 }
 
 // NodeListCondition 修改查询条件
-func (that AttachmentFile) NodeListCondition(pageBuilder *builder.PageBuilder, condition [][]interface{}) ([][]interface{}, error, int) {
+func (that *AttachmentFile) NodeListCondition(pageBuilder *builder.PageBuilder, condition [][]interface{}) ([][]interface{}, error, int) {
 	//追加查询条件
 	condition = append(condition, []interface{}{
 		"ext", "not in", ImageExts,
@@ -84,7 +93,7 @@ func (that AttachmentFile) NodeListCondition(pageBuilder *builder.PageBuilder, c
 }
 
 // NodeListData 重写列表数据
-func (that AttachmentFile) NodeListData(pageBuilder *builder.PageBuilder, data []gorose.Data) ([]gorose.Data, error, int) {
+func (that *AttachmentFile) NodeListData(pageBuilder *builder.PageBuilder, data []gorose.Data) ([]gorose.Data, error, int) {
 	for k, v := range data {
 		data[k]["id"] = util.Int642String(v["id"].(int64))
 		if src, ok := FileExtImage[strings.ToLower(v["ext"].(string))]; ok {
@@ -96,8 +105,8 @@ func (that AttachmentFile) NodeListData(pageBuilder *builder.PageBuilder, data [
 	return data, nil, 0
 }
 
-//NodeDeleteBefore 删除前操作
-func (that AttachmentFile) NodeDeleteBefore(pageBuilder *builder.PageBuilder, id int64) (error, int) {
+// NodeDeleteBefore 删除前操作
+func (that *AttachmentFile) NodeDeleteBefore(pageBuilder *builder.PageBuilder, id int64) (error, int) {
 	first, err := db.New().Table("tb_attachment").Where("id", id).First()
 	if err != nil {
 		return err, 0
@@ -113,4 +122,36 @@ func (that AttachmentFile) NodeDeleteBefore(pageBuilder *builder.PageBuilder, id
 		}
 	}
 	return nil, 0
+}
+
+// ExportInsertData 导出内置数据
+func (that *AttachmentFile) ExportInsertData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	//查找模型列表
+	mainList, err := db.New().Table("tb_attachment").
+		Where("is_delete", 0).
+		Order("id asc").
+		Get()
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+	fmt.Fprint(w, "//! 附件数据（文件和图片）")
+	//遍历列表
+	for _, Item := range mainList {
+		//删除部分字段
+		delete(Item, "create_time")
+		delete(Item, "update_time")
+		delete(Item, "is_delete")
+		//按顺序添加排序字段
+		//Item["index_num"] = index + 1
+		content := `
+{
+	TableName: "tb_attachment",
+	Condition: [][]interface{}{{"id", "` + util.Int642String(Item["id"].(int64)) + `"}},
+	Data: map[string]interface{}` + util.JsonEncode(Item) + `,
+	AllowDelete: true,
+},
+`
+		fmt.Fprint(w, content)
+	}
 }
