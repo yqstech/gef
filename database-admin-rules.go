@@ -273,6 +273,24 @@ var adminRules = []map[string]interface{}{
 					},
 				},
 			},
+			{
+				"name":      "导出数据",
+				"type":      1,
+				"is_compel": 0,
+				"icon":      "ri-download-2-fill",
+				"route":     "#export_data",
+				"index_num": 99,
+				"children": []map[string]interface{}{
+					{
+						"name":      "附件记录",
+						"type":      1,
+						"is_compel": 0,
+						"icon":      "",
+						"route":     "/attachment_file/export_insert_data",
+						"children":  []map[string]interface{}{},
+					},
+				},
+			},
 		},
 	},
 }

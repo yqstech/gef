@@ -206,9 +206,10 @@ func (that *AppConfigs) Edit2(w http.ResponseWriter, r *http.Request, ps httprou
 			}
 			if cfg == nil {
 				_, err = db.New().Table("tb_app_configs").Insert(map[string]interface{}{
-					"group_id": that.GroupId,
-					"name":     keyName,
-					"value":    value,
+					"group_id":  that.GroupId,
+					"name":      keyName,
+					"value":     value,
+					"is_inside": 0,
 				})
 				if err != nil {
 					logger.Error(err.Error())
@@ -221,6 +222,7 @@ func (that *AppConfigs) Edit2(w http.ResponseWriter, r *http.Request, ps httprou
 					Update(map[string]interface{}{
 						"value":       value,
 						"update_time": util.TimeNow(),
+						"is_inside":   0,
 					})
 				if err != nil {
 					logger.Error(err.Error())

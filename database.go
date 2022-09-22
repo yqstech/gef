@@ -134,12 +134,19 @@ func (that DbManager) AutoInsideData(data []InsideData) {
 			for _, c := range d.Condition {
 				conn = conn.Where(c...)
 			}
-			conn = conn.Where("is_delete", 0)
+			//默认不允许删除，删除后的自动恢复
+			//当设置AllowDelete为true时，这里不排除已删除的数据，即，删除后不会再添加
+			if d.AllowDelete == false {
+				conn = conn.Where("is_delete", 0)
+			}
 			first, err := conn.First()
 			if err != nil {
 				panic(err.Error())
 				return
 			}
+			//logger.Debug(d.TableName)
+			//logger.Debug(d.Condition)
+			//logger.Debug(d.AllowDelete)
 			//logger.Debug(conn.LastSql())
 			DataId := int64(0)
 			//不存在则添加
@@ -159,7 +166,9 @@ func (that DbManager) AutoInsideData(data []InsideData) {
 				//编辑页要设置is_inside=0，防止被再次修改
 				if _, ok := first["is_inside"]; ok {
 					if first["is_inside"].(int64) == 1 {
-						db.New().Table(d.TableName).Where("id", first["id"]).Update(d.Data)
+						if first["is_delete"].(int64) == 0 {
+							db.New().Table(d.TableName).Where("id", first["id"]).Update(d.Data)
+						}
 					}
 				}
 				DataId = first["id"].(int64)
@@ -174,16 +183,19 @@ func (that DbManager) AutoInsideData(data []InsideData) {
 					ccJson = strings.Replace(ccJson, "__PID__", util.Int642String(DataId), -1)
 					var ccArr [][]interface{}
 					util.JsonDecode(ccJson, &ccArr)
+					//处理插入数据继承上级ID
 					for ck, cv := range childData.(InsideData).Data {
 						if util.Interface2String(cv) == "__PID__" {
 							childData.(InsideData).Data[ck] = DataId
 						}
 					}
+					//创建新的下级
 					newInsideData := InsideData{
-						TableName: childData.(InsideData).TableName,
-						Condition: ccArr,
-						Data:      childData.(InsideData).Data,
-						Children:  childData.(InsideData).Children,
+						TableName:   childData.(InsideData).TableName,
+						Condition:   ccArr,
+						AllowDelete: childData.(InsideData).AllowDelete,
+						Data:        childData.(InsideData).Data,
+						Children:    childData.(InsideData).Children,
 					}
 					newInsideDataList = append(newInsideDataList, newInsideData)
 					d.Children[childIndex] = newInsideData
@@ -195,8 +207,9 @@ func (that DbManager) AutoInsideData(data []InsideData) {
 }
 
 type InsideData struct {
-	TableName string                 //数据表
-	Condition [][]interface{}        //查询条件
-	Data      map[string]interface{} //存储的数据
-	Children  []interface{}          //下级数据集合
+	TableName   string                 //数据表
+	Condition   [][]interface{}        //查询条件
+	AllowDelete bool                   //允许删除（默认不允许删除，即，删除后自动恢复）
+	Data        map[string]interface{} //存储的数据
+	Children    []interface{}          //下级数据集合
 }

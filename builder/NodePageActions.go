@@ -186,7 +186,7 @@ func (that *NodePage) Index(w http.ResponseWriter, r *http.Request, ps httproute
 			logger.Alert(conn.LastSql())
 			return
 		}
-		logger.Alert(conn.LastSql())
+		//logger.Alert(conn.LastSql())
 		page := util.PostValue(r, "page")
 		if page != "" {
 			that.PageBuilder.SetListPage(util.String2Int(page))

@@ -29,6 +29,14 @@ type IndexNum struct {
 	IndexNum int `gorm:"column:index_num;type:int(11);default:1;NOT NULL;comment:排列顺序|数值越小越靠前" json:"index_num"`
 }
 
+// IsInside 是否是内置数据
+// 无此字段的表，程序重启不更新数据，程序升级不更新新的内置数据，
+// 有此字段且为1，重启和升级会自动刷新数据
+// 有此字段且为0（标识后台修改后就锁定了），不再自动更新
+type IsInside struct {
+	IsInside int `gorm:"column:is_inside;type:tinyint(1);default:1;NOT NULL;comment:是否是内置数据" json:"is_inside"` // 是否是内置数据|后台手动修改后即锁定，不再让程序自动更新
+}
+
 // Tables 需要维护的所有的表结构体
 var tables = []interface{}{
 	&TbAdmin{},
@@ -105,15 +113,15 @@ func (m *TbAdminLog) TableName() string {
 // TbAdminRules 后台权限菜单表
 type TbAdminRules struct {
 	ID
-	Pid      int    `gorm:"column:pid;type:int(11);default:0;NOT NULL;comment:上级权限" json:"pid"`                   // 上级权限
-	Name     string `gorm:"column:name;type:varchar(50);default:'';NOT NULL;comment:权限名称" json:"name"`            // 权限名称
-	Type     int    `gorm:"column:type;type:tinyint(4);default:1;NOT NULL;comment:权限类型1菜单2按钮" json:"type"`        // 权限类型1菜单2按钮
-	IsCompel int    `gorm:"column:is_compel;type:tinyint(1);default:0;NOT NULL;comment:是否必选" json:"is_compel"`    // 是否必选
-	IsInside int    `gorm:"column:is_inside;type:tinyint(1);default:1;NOT NULL;comment:是否是内置数据" json:"is_inside"` // 是否是内置数据|后台手动修改后即锁定，不再让程序自动更新
-	Icon     string `gorm:"column:icon;type:varchar(30);default:'';NOT NULL;comment:图标字体" json:"icon"`            // 图标字体
-	Route    string `gorm:"column:route;type:varchar(100);default:'';NOT NULL;comment:路由" json:"route"`           // 路由
+	Pid      int    `gorm:"column:pid;type:int(11);default:0;NOT NULL;comment:上级权限" json:"pid"`                // 上级权限
+	Name     string `gorm:"column:name;type:varchar(50);default:'';NOT NULL;comment:权限名称" json:"name"`         // 权限名称
+	Type     int    `gorm:"column:type;type:tinyint(4);default:1;NOT NULL;comment:权限类型1菜单2按钮" json:"type"`     // 权限类型1菜单2按钮
+	IsCompel int    `gorm:"column:is_compel;type:tinyint(1);default:0;NOT NULL;comment:是否必选" json:"is_compel"` // 是否必选
+	Icon     string `gorm:"column:icon;type:varchar(30);default:'';NOT NULL;comment:图标字体" json:"icon"`         // 图标字体
+	Route    string `gorm:"column:route;type:varchar(100);default:'';NOT NULL;comment:路由" json:"route"`        // 路由
+	OpenLog  int    `gorm:"column:open_log;type:tinyint(1);default:0" json:"open_log"`                         // 是否开启日志
+	IsInside
 	IndexNum
-	OpenLog int `gorm:"column:open_log;type:tinyint(1);default:0" json:"open_log"` // 是否开启日志
 	CUSD
 }
 
@@ -136,10 +144,10 @@ func (m *TbAdminToken) TableName() string {
 // TbAppConfigs 应用配置表（除了应用内的配置以外的配置项）
 type TbAppConfigs struct {
 	ID
-	GroupID  int    `gorm:"column:group_id;type:int(11);default:0;NOT NULL" json:"group_id"`
-	Name     string `gorm:"column:name;type:varchar(100);default:'';NOT NULL;comment:关键字" json:"name"`            // 关键字
-	Value    string `gorm:"column:value;type:text;NOT NULL;comment:配置内容" json:"value"`                            // 配置内容
-	IsInside int    `gorm:"column:is_inside;type:tinyint(1);default:1;NOT NULL;comment:是否是内置数据" json:"is_inside"` // 是否是内置数据|后台手动修改后即锁定，不再让程序自动更新
+	GroupID int    `gorm:"column:group_id;type:int(11);default:0;NOT NULL" json:"group_id"`
+	Name    string `gorm:"column:name;type:varchar(100);default:'';NOT NULL;comment:关键字" json:"name"` // 关键字
+	Value   string `gorm:"column:value;type:text;NOT NULL;comment:配置内容" json:"value"`                 // 配置内容
+	IsInside
 	CUSD
 }
 
@@ -287,6 +295,7 @@ type TbEasyModelsButtons struct {
 	LayerWidth  string `gorm:"column:layer_width;type:varchar(50);default:'';NOT NULL;comment:弹窗宽度，支持px或%" json:"layer_width"`                      // 弹窗宽度，支持px或%
 	LayerHeight string `gorm:"column:layer_height;type:varchar(50);default:'';NOT NULL;comment:弹窗高度，支持px或%" json:"layer_height"`                    // 弹窗高度，支持px或%
 	BatchAction int    `gorm:"column:batch_action;type:tinyint(1);default:0;NOT NULL;comment:是否支持批量操作" json:"batch_action"`                         // 是否支持批量操作
+	IndexNum
 	CUSD
 }
 
