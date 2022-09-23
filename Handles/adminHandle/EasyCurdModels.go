@@ -11,6 +11,7 @@ package adminHandle
 
 import (
 	"fmt"
+	"github.com/gohouse/gorose/v2"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/Models"
@@ -29,6 +30,8 @@ type EasyCurdModels struct {
 func (that *EasyCurdModels) NodeInit(pageBuilder *builder.PageBuilder) {
 	//注册handle
 	that.NodePageActions["export_insert_data"] = that.ExportInsertData
+	that.NodePageActions["update_all_models_fields"] = that.UpdateAllFields
+	that.NodePageActions["export_all_data"] = that.ExportAllData
 }
 
 // NodeBegin 开始
@@ -41,8 +44,37 @@ func (that EasyCurdModels) NodeBegin(pageBuilder *builder.PageBuilder) (error, i
 
 // NodeList 初始化列表
 func (that EasyCurdModels) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
+	//新增顶部按钮
+	pageBuilder.SetButton("update_all_models_fields", builder.Button{
+		ButtonName: "刷新字段",
+		Action:     "/easy_curd_models/update_all_models_fields",
+		ActionType: 2,
+		LayerTitle: "刷新全部模型字段",
+		ActionUrl:  config.AdminPath + "/easy_curd_models/update_all_models_fields",
+		Class:      "rose",
+		Icon:       "ri-refresh-fill",
+		Display:    "",
+		Expand: map[string]string{
+			"w": "98%",
+			"h": "98%",
+		},
+	})
+	pageBuilder.SetButton("export_all_data", builder.Button{
+		ButtonName: "导出未禁用",
+		Action:     "/easy_curd_models/export_all_data",
+		ActionType: 2,
+		LayerTitle: "导出全部接口模型",
+		ActionUrl:  config.AdminPath + "/easy_curd_models/export_all_data",
+		Class:      "black",
+		Icon:       "ri-braces-fill",
+		Display:    "",
+		Expand: map[string]string{
+			"w": "98%",
+			"h": "98%",
+		},
+	})
 	//!重置顶部按钮
-	//pageBuilder.SetListTopBtns("add", "select_data")
+	pageBuilder.SetListTopBtns("add", "update_all_models_fields", "export_all_data")
 
 	//新增右侧字段管理按钮
 	pageBuilder.SetButton("fields", builder.Button{
@@ -108,6 +140,37 @@ func (that EasyCurdModels) NodeForm(pageBuilder *builder.PageBuilder, id int64) 
 	return nil, 0
 }
 
+// UpdateAllFields 更新所有字段
+func (that EasyCurdModels) UpdateAllFields(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	models, err := db.New().Table("tb_easy_curd_models").Where("is_delete", 0).Get()
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+	ModelsFields := EasyCurdModelsFields{}
+	for _, m := range models {
+		ModelsFields.syncModelFields(util.Int642Int(m["id"].(int64)))
+		fmt.Fprint(w, "刷新模型【"+m["model_name"].(string)+"】成功！\n")
+	}
+	fmt.Fprint(w, "操作成功！")
+}
+
+// ExportAllData 导出所有数据
+func (that EasyCurdModels) ExportAllData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	models, err := db.New().
+		Table("tb_easy_curd_models").
+		Where("is_delete", 0).
+		Where("status", 1).
+		Get()
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+	for _, m := range models {
+		that.ExportModelsAndFileds(w, m)
+	}
+}
+
 // ExportInsertData 导出内置数据
 func (that EasyCurdModels) ExportInsertData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := util.GetValue(r, "id")
@@ -120,11 +183,17 @@ func (that EasyCurdModels) ExportInsertData(w http.ResponseWriter, r *http.Reque
 	if easyModel == nil {
 		return
 	}
+	that.ExportModelsAndFileds(w, easyModel)
+}
+
+func (that EasyCurdModels) ExportModelsAndFileds(w http.ResponseWriter, easyModel gorose.Data) {
 	fmt.Fprint(w, "//! 接口模型【"+easyModel["model_name"].(string)+"】")
+	fieldsContent := that.ExportModelFileds(easyModel["id"].(int64))
 	delete(easyModel, "id")
 	delete(easyModel, "create_time")
 	delete(easyModel, "update_time")
 	delete(easyModel, "is_delete")
+
 	content := `
 {
 	TableName: "tb_easy_curd_models",
@@ -132,18 +201,16 @@ func (that EasyCurdModels) ExportInsertData(w http.ResponseWriter, r *http.Reque
 	Data: map[string]interface{}` + util.JsonEncode(easyModel) + `,
 	Children:[]interface{}{
 		//!接口模型的字段
-		
+		` + fieldsContent + `
 	},
 },
 `
 	fmt.Fprint(w, content)
 
-	fmt.Fprint(w, "\n\n//=============================================>\n")
-	fmt.Fprint(w, "//=============================================>\n")
-	fmt.Fprint(w, "//=============================================>\n")
-	fmt.Fprint(w, "//=============================================>\n\n\n")
-	fmt.Fprint(w, "//!下边是接口模型字段\n\n")
+}
 
+// ExportModelFileds 导出字段
+func (that EasyCurdModels) ExportModelFileds(id int64) string {
 	Fields, err := db.New().
 		Table("tb_easy_curd_models_fields").
 		Where("is_delete", 0).
@@ -151,8 +218,9 @@ func (that EasyCurdModels) ExportInsertData(w http.ResponseWriter, r *http.Reque
 		Order("index_num,id asc").Get()
 	if err != nil {
 		logger.Error(err.Error())
-		return
+		return ""
 	}
+	content := ""
 	for index, Item := range Fields {
 		//删除部分字段
 		delete(Item, "id")
@@ -163,14 +231,13 @@ func (that EasyCurdModels) ExportInsertData(w http.ResponseWriter, r *http.Reque
 		Item["index_num"] = index + 1
 		//标记上级ID
 		Item["model_id"] = "__PID__"
-		content = `
-gef.InsideData{
-	TableName: "tb_easy_curd_models_fields",
-	Condition: [][]interface{}{{"model_id", "__PID__"},{"field_key", "` + Item["field_key"].(string) + `"}},
-	Data: map[string]interface{}` + util.JsonEncode(Item) + `,
-},
+		content += `
+		gef.InsideData{
+			TableName: "tb_easy_curd_models_fields",
+			Condition: [][]interface{}{{"model_id", "__PID__"},{"field_key", "` + Item["field_key"].(string) + `"}},
+			Data: map[string]interface{}` + util.JsonEncode(Item) + `,
+		},
 `
-		fmt.Fprint(w, content)
 	}
-	fmt.Fprint(w, "\n\n\n\n\n")
+	return content
 }

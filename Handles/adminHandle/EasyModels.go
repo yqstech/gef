@@ -11,6 +11,7 @@ package adminHandle
 
 import (
 	"fmt"
+	"github.com/gohouse/gorose/v2"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/Models"
@@ -29,6 +30,8 @@ type EasyModels struct {
 func (that *EasyModels) NodeInit(pageBuilder *builder.PageBuilder) {
 	//注册handle
 	that.NodePageActions["export_insert_data"] = that.ExportInsertData
+	that.NodePageActions["update_all_models_fields"] = that.UpdateAllFields
+	that.NodePageActions["export_all_data"] = that.ExportAllData
 }
 
 // NodeBegin 开始
@@ -55,9 +58,38 @@ func (that EasyModels) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 			"h": "98%",
 		},
 	})
-
+	//新增顶部按钮
+	pageBuilder.SetButton("update_all_models_fields", builder.Button{
+		ButtonName: "刷新字段",
+		Action:     "/easy_models/update_all_models_fields",
+		ActionType: 2,
+		LayerTitle: "刷新全部模型字段",
+		ActionUrl:  config.AdminPath + "/easy_models/update_all_models_fields",
+		Class:      "rose",
+		Icon:       "ri-refresh-fill",
+		Display:    "",
+		Expand: map[string]string{
+			"w": "98%",
+			"h": "98%",
+		},
+	})
+	pageBuilder.SetButton("export_all_data", builder.Button{
+		ButtonName: "导出未禁用",
+		Action:     "/easy_models/export_all_data",
+		ActionType: 2,
+		LayerTitle: "导出全部接口模型",
+		ActionUrl:  config.AdminPath + "/easy_models/export_all_data",
+		Class:      "black",
+		Icon:       "ri-braces-fill",
+		Display:    "",
+		Expand: map[string]string{
+			"w": "98%",
+			"h": "98%",
+		},
+	})
 	//!重置顶部按钮
-	pageBuilder.SetListTopBtns("add", "buttons")
+	pageBuilder.SetListTopBtns("add", "buttons", "update_all_models_fields", "export_all_data")
+
 	//!重置右侧按钮
 	//重新设置编辑按钮
 	pageBuilder.SetButton("edit", builder.Button{
@@ -180,6 +212,37 @@ func (that EasyModels) NodeForm(pageBuilder *builder.PageBuilder, id int64) (err
 	return nil, 0
 }
 
+// UpdateAllFields 更新所有字段
+func (that EasyModels) UpdateAllFields(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	models, err := db.New().Table("tb_easy_models").Where("is_delete", 0).Get()
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+	ModelsFields := EasyModelsFields{}
+	for _, m := range models {
+		ModelsFields.syncModelFields(util.Int642Int(m["id"].(int64)))
+		fmt.Fprint(w, "刷新模型【"+m["model_name"].(string)+"】成功！\n")
+	}
+	fmt.Fprint(w, "操作成功！")
+}
+
+// ExportAllData 导出所有数据
+func (that EasyModels) ExportAllData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	models, err := db.New().
+		Table("tb_easy_models").
+		Where("is_delete", 0).
+		Where("status", 1).
+		Get()
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+	for _, m := range models {
+		that.ExportModelsAndFileds(w, m)
+	}
+}
+
 // ExportInsertData 导出内置数据
 func (that EasyModels) ExportInsertData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := util.GetValue(r, "id")
@@ -192,7 +255,15 @@ func (that EasyModels) ExportInsertData(w http.ResponseWriter, r *http.Request, 
 	if easyModel == nil {
 		return
 	}
+	that.ExportModelsAndFileds(w, easyModel)
+}
+
+func (that EasyModels) ExportModelsAndFileds(w http.ResponseWriter, easyModel gorose.Data) {
+
 	fmt.Fprint(w, "//! 后台模型【"+easyModel["model_name"].(string)+"】")
+
+	fieldsContent := that.ExportModelFileds(easyModel["id"].(int64))
+	searchFormContent := that.ExportModelSearchForm(easyModel["id"].(int64))
 	delete(easyModel, "id")
 	delete(easyModel, "create_time")
 	delete(easyModel, "update_time")
@@ -204,18 +275,17 @@ func (that EasyModels) ExportInsertData(w http.ResponseWriter, r *http.Request, 
 	Data: map[string]interface{}` + util.JsonEncode(easyModel) + `,
 	Children:[]interface{}{
 		//!后台模型的字段
-		
+		` + fieldsContent + `
+		//!后台模型的搜索表单
+		` + searchFormContent + `
 	},
 },
 `
 	fmt.Fprint(w, content)
+}
 
-	fmt.Fprint(w, "\n\n//=============================================>\n")
-	fmt.Fprint(w, "//=============================================>\n")
-	fmt.Fprint(w, "//=============================================>\n")
-	fmt.Fprint(w, "//=============================================>\n\n\n")
-	fmt.Fprint(w, "//!下边是后台模型字段\n\n")
-
+// ExportModelFileds 导出字段
+func (that EasyModels) ExportModelFileds(id int64) string {
 	Fields, err := db.New().
 		Table("tb_easy_models_fields").
 		Where("is_delete", 0).
@@ -223,8 +293,9 @@ func (that EasyModels) ExportInsertData(w http.ResponseWriter, r *http.Request, 
 		Order("index_num,id asc").Get()
 	if err != nil {
 		logger.Error(err.Error())
-		return
+		return ""
 	}
+	content := ""
 	for index, Item := range Fields {
 		//删除部分字段
 		delete(Item, "id")
@@ -235,21 +306,19 @@ func (that EasyModels) ExportInsertData(w http.ResponseWriter, r *http.Request, 
 		Item["index_num"] = index + 1
 		//标记上级ID
 		Item["model_id"] = "__PID__"
-		content = `
-gef.InsideData{
-	TableName: "tb_easy_models_fields",
-	Condition: [][]interface{}{{"model_id", "__PID__"},{"field_key", "` + Item["field_key"].(string) + `"}},
-	Data: map[string]interface{}` + util.JsonEncode(Item) + `,
-},
+		content += `
+		gef.InsideData{
+			TableName: "tb_easy_models_fields",
+			Condition: [][]interface{}{{"model_id", "__PID__"},{"field_key", "` + Item["field_key"].(string) + `"}},
+			Data: map[string]interface{}` + util.JsonEncode(Item) + `,
+		},
 `
-		fmt.Fprint(w, content)
 	}
-	fmt.Fprint(w, "\n\n//=============================================>\n")
-	fmt.Fprint(w, "//=============================================>\n")
-	fmt.Fprint(w, "//=============================================>\n")
-	fmt.Fprint(w, "//=============================================>\n\n\n")
-	fmt.Fprint(w, "//!下边是搜索表单\n\n")
+	return content
+}
 
+// ExportModelSearchForm 导出搜索表单
+func (that EasyModels) ExportModelSearchForm(id int64) string {
 	SearchForm, err := db.New().
 		Table("tb_easy_models_search_form").
 		Where("is_delete", 0).
@@ -257,8 +326,9 @@ gef.InsideData{
 		Order("index_num,id asc").Get()
 	if err != nil {
 		logger.Error(err.Error())
-		return
+		return ""
 	}
+	content := ""
 	for index, Item := range SearchForm {
 		//删除部分字段
 		delete(Item, "id")
@@ -269,15 +339,13 @@ gef.InsideData{
 		Item["index_num"] = index + 1
 		//标记上级ID
 		Item["model_id"] = "__PID__"
-		content = `
-gef.InsideData{
-	TableName: "tb_easy_models_search_form",
-	Condition: [][]interface{}{{"model_id", "__PID__"},{"search_key", "` + Item["search_key"].(string) + `"}},
-	Data: map[string]interface{}` + util.JsonEncode(Item) + `,
-},
+		content += `
+		gef.InsideData{
+			TableName: "tb_easy_models_search_form",
+			Condition: [][]interface{}{{"model_id", "__PID__"},{"search_key", "` + Item["search_key"].(string) + `"}},
+			Data: map[string]interface{}` + util.JsonEncode(Item) + `,
+		},
 `
-		fmt.Fprint(w, content)
 	}
-
-	fmt.Fprint(w, "\n\n\n\n\n")
+	return content
 }
