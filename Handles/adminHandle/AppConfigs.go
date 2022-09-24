@@ -10,6 +10,7 @@
 package adminHandle
 
 import (
+	"fmt"
 	"github.com/gohouse/gorose/v2"
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
@@ -27,6 +28,7 @@ type AppConfigs struct {
 
 func (that *AppConfigs) NodeInit(pageBuilder *builder.PageBuilder) {
 	that.NodePageActions["edit2"] = that.Edit2
+	that.NodePageActions["dev_status"] = that.DevStatus
 }
 
 // 查询分组名
@@ -116,6 +118,53 @@ func (that AppConfigs) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 		},
 	})
 	pageBuilder.SetListTopBtns("edit2")
+
+	//新增开发模式开关,仅超级管理员有权限
+	if that.GroupId == 1 && pageBuilder.HttpParams.ByName("account_id") == "1" {
+		first, err := db.New().Table("tb_admin_rules").
+			Where("is_delete", 0).
+			Where("route", "#dev").
+			Order("index_num desc").First()
+		if err != nil {
+			logger.Error(err.Error())
+			return err, 0
+		}
+		if first == nil {
+			return nil, 0
+		}
+		if first["status"].(int64) == 1 {
+			pageBuilder.SetButton("dev_status", builder.Button{
+				ButtonName: "关闭开发模式",
+				Action:     "dev_status",
+				ActionType: 2,
+				LayerTitle: "正在关闭开发模式",
+				ActionUrl:  "dev_status?status=0",
+				Class:      "black",
+				Icon:       "ri-bug-line",
+				Display:    "",
+				Expand: map[string]string{
+					"w": "50%",
+					"h": "50%",
+				},
+			})
+		} else {
+			pageBuilder.SetButton("dev_status", builder.Button{
+				ButtonName: "开启开发模式",
+				Action:     "dev_status",
+				ActionType: 2,
+				LayerTitle: "正在打开开发模式",
+				ActionUrl:  "dev_status?status=1",
+				Class:      "black",
+				Icon:       "ri-bug-line",
+				Display:    "",
+				Expand: map[string]string{
+					"w": "50%",
+					"h": "50%",
+				},
+			})
+		}
+		pageBuilder.SetListTopBtns("edit2", "dev_status")
+	}
 
 	return nil, 0
 }
@@ -253,4 +302,55 @@ func (that *AppConfigs) Edit2(w http.ResponseWriter, r *http.Request, ps httprou
 	that.ActShow(w, builder.Displayer{
 		TplName: "edit.html",
 	}, that.PageBuilder)
+}
+
+func (that *AppConfigs) DevStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	status := util.GetValue(r, "status")
+	first, err := db.New().Table("tb_admin_rules").
+		Where("is_delete", 0).
+		Where("route", "#dev").
+		Order("index_num desc").First()
+	if err != nil {
+		logger.Error(err.Error())
+		that.ErrResult(w, r, 500, "查询数据库出错！", nil)
+		return
+	}
+	if first == nil {
+		that.ErrResult(w, r, 404, "查询不到开发信息！", nil)
+		return
+	}
+	if ps.ByName("account_id") != "1" {
+		that.ErrResult(w, r, 110, "操作受限！", nil)
+		return
+	}
+	if status == "1" {
+		//开启开发模式
+		_, err = db.New().Table("tb_admin_rules").
+			Where("is_delete", 0).
+			Where("route", "#dev").
+			Update(map[string]interface{}{
+				"status":      1,
+				"update_time": util.TimeNow(),
+			})
+		if err != nil {
+			that.ErrResult(w, r, 500, "系统出错了！", nil)
+			return
+		}
+		fmt.Fprint(w, "打开开发菜单成功！\n")
+
+	} else {
+		//关闭开发模式
+		_, err = db.New().Table("tb_admin_rules").
+			Where("is_delete", 0).
+			Where("route", "#dev").
+			Update(map[string]interface{}{
+				"status":      0,
+				"update_time": util.TimeNow(),
+			})
+		if err != nil {
+			that.ErrResult(w, r, 500, "系统出错了！", nil)
+			return
+		}
+		fmt.Fprint(w, "关闭开发菜单成功！\n")
+	}
 }
