@@ -12,7 +12,7 @@ package gef
 import "time"
 
 type ID struct {
-	ID int64 `gorm:"column:id;type:int(10);comment:ID;AUTO_INCREMENT;primaryKey" json:"id"`
+	ID uint64 `gorm:"column:id;comment:ID;AUTO_INCREMENT;primaryKey" json:"id"`
 }
 type CUSD struct {
 	CreateTime time.Time `gorm:"column:create_time;type:TIMESTAMP;default:CURRENT_TIMESTAMP;NOT NULL;comment:创建时间" json:"create_time"`
@@ -157,15 +157,15 @@ func (m *TbAppConfigs) TableName() string {
 
 // TbAttachment 附件表
 type TbAttachment struct {
-	ID       uint64 `gorm:"column:id;type:bigint(20) unsigned;primary_key" json:"id"`                                 // ID
-	GroupID  uint   `gorm:"column:group_id;type:tinyint(4) unsigned;default:0;NOT NULL;comment:用户分组" json:"group_id"` // 用户分组
-	UserID   uint64 `gorm:"column:user_id;type:bigint(20) unsigned;default:0;NOT NULL;comment:用户ID" json:"user_id"`   // 用户ID
+	ID       uint64 `gorm:"column:id;type:bigint(20);primary_key" json:"id"`                                          // ID
+	GroupID  uint   `gorm:"column:group_id;type:tinyint(4);default:0;NOT NULL;comment:用户分组" json:"group_id"`          // 用户分组
+	UserID   uint64 `gorm:"column:user_id;type:bigint(20);default:0;NOT NULL;comment:用户ID" json:"user_id"`            // 用户ID
 	FileType int    `gorm:"column:file_type;type:int(11);default:1;NOT NULL;comment:文件类型|1图片2视频3文件" json:"file_type"` // 文件类型|1图片2视频3文件
 	FileName string `gorm:"column:file_name;type:varchar(200);default:'';NOT NULL;comment:文件名称" json:"file_name"`     // 文件名称
 	Path     string `gorm:"column:path;type:varchar(255);default:'';NOT NULL;comment:文件路径" json:"path"`               // 文件路径
 	Src      string `gorm:"column:src;type:varchar(255);default:'';NOT NULL;comment:文件链接（暂时无用）" json:"src"`           // 文件链接（暂时无用）
 	Ext      string `gorm:"column:ext;type:char(8);default:'';NOT NULL;comment:文件类型" json:"ext"`                      // 文件类型
-	FileSize uint   `gorm:"column:file_size;type:int(11) unsigned;default:0;NOT NULL;comment:文件大小" json:"file_size"`  // 文件大小
+	FileSize uint   `gorm:"column:file_size;type:int(11);default:0;NOT NULL;comment:文件大小" json:"file_size"`           // 文件大小
 	Md5      string `gorm:"column:md5;type:char(32);default:'';NOT NULL" json:"md5"`
 	CUSD
 }
