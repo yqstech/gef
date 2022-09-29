@@ -13,6 +13,7 @@ import (
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/Utils/db"
 	"github.com/yqstech/gef/Utils/gdb"
+	"github.com/yqstech/gef/config"
 	"github.com/yqstech/gef/util"
 	"strings"
 )
@@ -23,10 +24,18 @@ type DbManager struct {
 
 // AutoTable 自动维护数据库结构
 func (that DbManager) AutoTable(tables []interface{}) {
-	err := gdb.New().Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(tables...)
-	if err != nil {
-		logger.Error(err.Error())
-		return
+	if config.DbType == "mysql" {
+		err := gdb.New().Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(tables...)
+		if err != nil {
+			logger.Error(err.Error())
+			return
+		}
+	} else if config.DbType == "sqlite3" {
+		err := gdb.New().AutoMigrate(tables...)
+		if err != nil {
+			logger.Error(err.Error())
+			return
+		}
 	}
 }
 

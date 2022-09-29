@@ -18,6 +18,8 @@ var (
 
 // 数据库
 var (
+	DbType         = "mysql"       //mysql sqlite3
+	DbFile         = "./db.sqlite" //针对于sqlite
 	DbHost         = "localhost:3306"
 	DbName         = "db-name"
 	DbUser         = "db-user"
@@ -83,6 +85,13 @@ func Init() error {
 		}
 	}
 	//# 数据库
+	//! 新增支持自定义数据库类型
+	if os.Getenv("DbType") != "" {
+		DbType = os.Getenv("DbType")
+	}
+	if os.Getenv("DbFile") != "" {
+		DbFile = os.Getenv("DbFile")
+	}
 	DbHost = os.Getenv("DbHost")
 	DbName = os.Getenv("DbName")
 	DbUser = os.Getenv("DbUser")
