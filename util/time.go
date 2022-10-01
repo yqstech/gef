@@ -11,6 +11,15 @@ func Time() string {
 	return Int2String(Int642Int(time.Now().Unix()))
 }
 
+func IfTimeFmt(t interface{}) interface{} {
+	switch t.(type) {
+	case time.Time:
+		return t.(time.Time).Format("2006-01-02 15:04:05")
+	default:
+		return t
+	}
+}
+
 func TimeNow() string {
 	var cstSh, _ = time.LoadLocation("Asia/Shanghai") //上海
 	return time.Now().In(cstSh).Format("2006-01-02 15:04:05")

@@ -171,6 +171,12 @@ func (that Configs) NodeFormData(pageBuilder *builder.PageBuilder, data gorose.D
 	return data, nil, 0
 }
 
+// NodeSaveData 表单保存数据前使用
+func (that Configs) NodeSaveData(pageBuilder *builder.PageBuilder, oldData gorose.Data, postData map[string]interface{}) (map[string]interface{}, error, int) {
+	postData["is_inside"] = 0
+	return postData, nil, 0
+}
+
 // NodeSaveSuccess 保存成功后操作
 func (that Configs) NodeSaveSuccess(pageBuilder *builder.PageBuilder, postData map[string]interface{}, id int64) (bool, error, int) {
 	if id > 0 {

@@ -223,6 +223,14 @@ func (that *NodePage) Index(w http.ResponseWriter, r *http.Request, ps httproute
 				}
 			}
 		}
+		//! 时间数据格式化成字符串（兼容sqlite3）
+		for k, d := range data {
+			for k2, d2 := range d {
+				d[k2] = util.IfTimeFmt(d2)
+			}
+			data[k] = d
+		}
+
 		that.ApiResult(w, 200, "success", map[string]interface{}{"total": total, "data": data})
 		return
 	}
@@ -466,7 +474,10 @@ func (that *NodePage) Edit(w http.ResponseWriter, r *http.Request, ps httprouter
 		return
 	}
 	//logger.Alert("Edit查询数据", conn.LastSql())
-
+	//! 时间数据格式化成字符串（兼容sqlite3）
+	for k, v := range info {
+		info[k] = util.IfTimeFmt(v)
+	}
 	//原始表信息转换
 	that.PageBuilder.formData, err, code = that.NodePage.NodeFormData(that.PageBuilder, info, id)
 	if err != nil {

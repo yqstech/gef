@@ -30,7 +30,7 @@ type IndexNum struct {
 }
 
 // IsInside 是否是内置数据
-// 无此字段的表，程序重启不更新数据，程序升级不更新新的内置数据，
+// 无此字段的表，程序重启不更新数据，程序升级不更新新的内置数据，上层应用不能修改框架内容
 // 有此字段且为1，重启和升级会自动刷新数据
 // 有此字段且为0（标识后台修改后就锁定了），不再自动更新
 type IsInside struct {
@@ -186,6 +186,7 @@ type TbConfigs struct {
 	Options   string `gorm:"column:options;type:varchar(1024);default:[];NOT NULL" json:"options"`
 	IndexNum
 	If string `gorm:"column:if;type:varchar(100);default:'';NOT NULL;comment:展示条件" json:"if"` // 展示条件
+	IsInside
 	CUSD
 }
 

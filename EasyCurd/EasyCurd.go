@@ -47,23 +47,23 @@ type DbModel struct {
 	SoftDeleteDisable  bool   //软删除是否禁用，禁用标识真删除
 	CheckLogin         bool   //是否校验登录
 	SelectWithDisabled bool   //是否校验登录
-	
+
 	Condition map[string]interface{} //查询或更新的sql条件
 	Data      map[string]interface{} //新增或更新数据
 	UkName    string                 //用户键字段
 	PkName    string                 //主键
 	Order     string                 //排序 默认id desc
-	
+
 	Fields        string   //公开查询字段，不填为*
 	PrivateFields []string //私密的数据库字段，不对外展示，查询出的数据做删除处理
 	LockFields    []string //锁定字段，锁定的字段不许修改，假如是更新操作，删除此字段
-	
+
 	FmtRule map[string]func(interface{}) interface{} //对定义某个键的数据值进行格式化
-	
+
 	ResultExtend map[string]interface{} //返回数据拓展数据
-	
+
 	SelectSuccess func([]gorose.Data, EasyCurd) []gorose.Data //列表查询成功后操作
-	
+
 	FindSuccess func(gorose.Data, EasyCurd) gorose.Data //单个查询成功后操作
 }
 
@@ -135,11 +135,11 @@ func (that *EasyCurd) Find(w http.ResponseWriter, r *http.Request, ps httprouter
 		//格式化数据
 		data = that.FmtData(data)
 	}
-	
+
 	if that.DbModel.FindSuccess != nil {
 		data = that.DbModel.FindSuccess(data, *that)
 	}
-	
+
 	//返回数据
 	resultData := map[string]interface{}{
 		"data":       data,
@@ -158,7 +158,7 @@ func (that *EasyCurd) Create(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	//确认数据
 	that.verifyData(false)
-	
+
 	//插入数据
 	conn := that.getOrm(ps)
 	insertId, err := conn.InsertGetId(that.DbModel.Data)
@@ -171,7 +171,7 @@ func (that *EasyCurd) Create(w http.ResponseWriter, r *http.Request, ps httprout
 		that.ApiResult(w, 500, "插入数据失败！", nil)
 		return
 	}
-	
+
 	//返回结果
 	resultData := map[string]interface{}{
 		"id":         insertId,
@@ -180,7 +180,7 @@ func (that *EasyCurd) Create(w http.ResponseWriter, r *http.Request, ps httprout
 		"_unix_time": util.Str2UnixTime(util.TimeNow()),
 	}
 	that.ApiResult(w, 200, "success", resultData)
-	
+
 }
 func (that *EasyCurd) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	that.Action = UpdateAction
@@ -189,10 +189,10 @@ func (that *EasyCurd) Update(w http.ResponseWriter, r *http.Request, ps httprout
 		that.ApiResult(w, 101, "无权操作！", nil)
 		return
 	}
-	
+
 	//格式化要更新的数据
 	that.verifyData(true)
-	
+
 	//更新数据
 	conn := that.getOrm(ps)
 	update, err := conn.Update(that.DbModel.Data)
@@ -212,9 +212,9 @@ func (that *EasyCurd) Update(w http.ResponseWriter, r *http.Request, ps httprout
 		"_time":      util.TimeNow(),
 		"_unix_time": util.Str2UnixTime(util.TimeNow()),
 	}
-	
+
 	that.ApiResult(w, 200, "success", resultData)
-	
+
 }
 func (that *EasyCurd) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	that.Action = DeleteAction
@@ -247,7 +247,7 @@ func (that *EasyCurd) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 			"_time":      util.TimeNow(),
 			"_unix_time": util.Str2UnixTime(util.TimeNow()),
 		}
-		
+
 		that.ApiResult(w, 200, "success", resultData)
 	} else {
 		delete, err := conn.Delete()
@@ -275,7 +275,7 @@ func (that *EasyCurd) Error(w http.ResponseWriter, r *http.Request, ps httproute
 	return
 }
 
-//初始化一个数据库连接,并且格式化条件
+// 初始化一个数据库连接,并且格式化条件
 func (that *EasyCurd) getOrm(ps httprouter.Params) gorose.IOrm {
 	conn := db.New()
 	conn = conn.Table(that.DbModel.TableName)
@@ -380,6 +380,8 @@ func (that *EasyCurd) FmtData(data gorose.Data) gorose.Data {
 		if fn, ok := that.DbModel.FmtRule[key]; ok {
 			value = fn(value)
 		}
+		//! 时间格式化成字符串（兼容sqlite3数据库）
+		value = util.IfTimeFmt(value)
 		//保存最新值
 		data[key] = value
 	Eed:

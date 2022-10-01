@@ -14,6 +14,7 @@ var (
 	GOOS     = "linux"
 	WorkPath = ""
 	AppPath  = ""
+	Debug    = "" //是否开启调试模式
 )
 
 // 数据库
@@ -84,6 +85,8 @@ func Init() error {
 			return errors.New("获取系统配置信息失败！")
 		}
 	}
+	//!开启调试模式
+	Debug = os.Getenv("Debug")
 	//# 数据库
 	//! 新增支持自定义数据库类型
 	if os.Getenv("DbType") != "" {

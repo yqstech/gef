@@ -219,11 +219,17 @@ func (that EasyModelsFields) NodeListData(pageBuilder *builder.PageBuilder, data
 // NodeForm 初始化表单
 func (that EasyModelsFields) NodeForm(pageBuilder *builder.PageBuilder, id int64) (error, int) {
 	//pageBuilder.FormFieldsAdd("model_id", "select-disabled", "所属模型", "", "", false, that.EasyModels(), "", nil)
-	//pageBuilder.FormFieldsAdd("field_key", "text-disabled", "数据表字段", "必须和数据表内的字段一致", "", false, nil, "", nil)
-	//pageBuilder.FormFieldsAdd("field_name", "text-disabled", "字段名称", "字段自定义名称", "", false, nil, "", nil)
-	//pageBuilder.FormFieldsAdd("field_notice", "text-disabled", "提示信息", "表单数据项的提示信息", "", false, nil, "", nil)
 	//pageBuilder.FormFieldsAdd("is_show_on_list", "radio", "列表页显示", "是否在列表页显示此字段", "1", true, Models.DefaultIsOrNot, "", nil)
+	if config.DbType == "sqlite" || config.DbType == "sqlite3" {
+		pageBuilder.FormFieldsAdd("field_key", "text-disabled", "数据表字段", "必须和数据表内的字段一致", "", false, nil, "", nil)
+		pageBuilder.FormFieldsAdd("field_name", "text-sm", "字段名称", "字段自定义名称", "", false, nil, "", nil)
+		pageBuilder.FormFieldsAdd("field_notice", "text-sm", "提示信息", "表单数据项的提示信息", "", false, nil, "", nil)
 
+	} else {
+		pageBuilder.FormFieldsAdd("field_key", "text-disabled", "数据表字段", "必须和数据表内的字段一致", "", false, nil, "", nil)
+		pageBuilder.FormFieldsAdd("field_name", "text-disabled", "字段名称", "字段自定义名称", "", false, nil, "", nil)
+		pageBuilder.FormFieldsAdd("field_notice", "text-disabled", "提示信息", "表单数据项的提示信息", "", false, nil, "", nil)
+	}
 	//数据类型和选项
 	pageBuilder.FormFieldsAdd("", "block", "字段基础信息", "", "", false, nil, "", nil)
 	pageBuilder.FormFieldsAdd("data_type_on_list", "select", "列表数据类型", "列表页显示的组件", "text", false, listDataType, "", nil)
@@ -327,13 +333,22 @@ func (that EasyModelsFields) syncModelFields(easyModelId int) {
 	tableName := easyModelInfo["table_name"].(string)
 
 	//查询数据表实时字段信息
-	query, err := db.New().Query("select COLUMN_NAME,COLUMN_COMMENT,COLUMN_DEFAULT,"+
-		"COLUMN_TYPE from information_schema.COLUMNS where table_name = ? and table_schema = ? order by ordinal_position",
-		tableName,
-		config.DbName)
-	if err != nil {
-		logger.Error(err.Error())
-		return
+	var query []gorose.Data
+	if config.DbType == "mysql" {
+		query, err = db.New().Query("select COLUMN_NAME,COLUMN_COMMENT,COLUMN_DEFAULT,"+
+			"COLUMN_TYPE from information_schema.COLUMNS where table_name = ? and table_schema = ? order by ordinal_position",
+			tableName,
+			config.DbName)
+		if err != nil {
+			logger.Error(err.Error())
+			return
+		}
+	} else if config.DbType == "sqlite" || config.DbType == "sqlite3" {
+		query, err = db.New().Query("pragma table_info(" + tableName + ")")
+		if err != nil {
+			logger.Error(err.Error())
+			return
+		}
 	}
 
 	//查询模型字段列表
@@ -353,18 +368,24 @@ func (that EasyModelsFields) syncModelFields(easyModelId int) {
 	timeNow := util.TimeNow()
 	//对比更新模型字段信息
 	for index, fieldInfo := range query {
-		//字段key
-		fieldKey := fieldInfo["COLUMN_NAME"].(string)
-		//字段名称和备注，直接同步数据库的备注信息
+		//字段Key、名称和备注，直接同步数据库的备注信息
+		fieldKey := ""
 		fieldName := ""
 		fieldNotice := ""
-		commands := strings.Split(fieldInfo["COLUMN_COMMENT"].(string), "|")
-		if len(commands) > 0 {
-			fieldName = commands[0]
+		if config.DbType == "mysql" {
+			fieldKey = fieldInfo["COLUMN_NAME"].(string)
+			commands := strings.Split(fieldInfo["COLUMN_COMMENT"].(string), "|")
+			if len(commands) > 0 {
+				fieldName = commands[0]
+			}
+			if len(commands) > 1 {
+				fieldNotice = commands[1]
+			}
+		} else if config.DbType == "sqlite" || config.DbType == "sqlite3" {
+			//! sqlite无备注信息
+			fieldKey = fieldInfo["name"].(string)
 		}
-		if len(commands) > 1 {
-			fieldNotice = commands[1]
-		}
+
 		//数据类型
 		dataTypeOnList := "text"
 		dataTypeOnEdit := "text"
@@ -392,13 +413,16 @@ func (that EasyModelsFields) syncModelFields(easyModelId int) {
 		}
 		//是否存在字段
 		if field, ok := fieldsMap[fieldKey]; ok {
-			db.New().Table("tb_easy_models_fields").
-				Where("id", field["id"]).
-				Update(map[string]interface{}{
-					"field_name":   fieldName,
-					"field_notice": fieldNotice,
-					"update_time":  timeNow,
-				})
+			//!仅在mysql环境下更新字段
+			if config.DbType == "mysql" {
+				db.New().Table("tb_easy_models_fields").
+					Where("id", field["id"]).
+					Update(map[string]interface{}{
+						"field_name":   fieldName,
+						"field_notice": fieldNotice,
+						"update_time":  timeNow,
+					})
+			}
 			fieldsMap[fieldKey]["sync_tag"] = true
 		} else {
 			db.New().Table("tb_easy_models_fields").Insert(map[string]interface{}{

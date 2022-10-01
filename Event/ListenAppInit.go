@@ -9,13 +9,18 @@
 
 package Event
 
-import "github.com/wonderivan/logger"
+import (
+	"github.com/wonderivan/logger"
+	"github.com/yqstech/gef/config"
+)
 
 type ListenAppInit struct {
 }
 
 func (that ListenAppInit) Do(eventName string, data ...interface{}) (error, int) {
-	logger.Debug("应用开始")
+	if config.Debug != "" {
+		logger.Debug("应用开始")
+	}
 	//*data[0].(*string) = "中国"
 	//*data[1].(*string) = "加油"
 	return nil, 0

@@ -777,7 +777,8 @@ func GetEasyModelInfo(pageBuilder *builder.PageBuilder, modelKey string, actionN
 					newTab.TabName = Opts[0]
 				}
 				if OptsLength > 1 && Opts[1] != "" {
-					newTab.SelectCondition = Opts[1]
+					//!对自定义查询条件进行数据库兼容处理
+					newTab.SelectCondition = util.Sql(Opts[1])
 				}
 				//! tab和搜索表单的联动参数设置
 				if OptsLength > 2 && Opts[2] != "" {

@@ -22,7 +22,7 @@ func MD5(str string) string {
 	return md5str
 }
 
-//密码加密
+// 密码加密
 func GetPassword(str string) string {
 	return MD5(MD5("*cradmin*" + MD5(str)))
 }
@@ -43,7 +43,7 @@ func GetCurrentPath() (string, error) {
 	return string(path[0 : i+1]), nil
 }
 
-//int64转int
+// int64转int
 func Int642Int(v int64) int {
 	r, err := strconv.Atoi(strconv.FormatInt(v, 10))
 	if err != nil {
@@ -52,7 +52,7 @@ func Int642Int(v int64) int {
 	return r
 }
 
-//字符串转int
+// 字符串转int
 func String2Int(s string) int {
 	i, err := strconv.Atoi(s)
 	if err != nil {
@@ -61,7 +61,7 @@ func String2Int(s string) int {
 	return i
 }
 
-//int转字符串
+// int转字符串
 func Int2String(i int) string {
 	s := strconv.Itoa(i)
 	return s
@@ -71,7 +71,7 @@ func Int642String(i int64) string {
 	return s
 }
 
-//json字符串编码
+// json字符串编码
 func JsonEncode(data interface{}) string {
 	if data == nil {
 		return "[]"
@@ -85,12 +85,12 @@ func JsonEncode(data interface{}) string {
 	}
 }
 
-//json字符串解码
+// json字符串解码
 func JsonDecode(jsonstr string, data interface{}) {
 	json.Unmarshal([]byte(jsonstr), data)
 }
 
-//任意对象转字符串
+// 任意对象转字符串
 func Interface2String(value interface{}) string {
 	var key string
 	if value == nil {
@@ -136,6 +136,8 @@ func Interface2String(value interface{}) string {
 		key = strconv.FormatUint(it, 10)
 	case string:
 		key = value.(string)
+	case time.Time:
+		key = value.(time.Time).Format("2006-01-02 15:04:05")
 	case []byte:
 		key = string(value.([]byte))
 	default:
@@ -195,7 +197,7 @@ func Float642String(a float64) string {
 	return b
 }
 
-//字符串截取中间部分
+// 字符串截取中间部分
 func GetBetweenStr(str, start, end string) string {
 	n := strings.Index(str, start)
 	if n == -1 {
@@ -212,7 +214,7 @@ func GetBetweenStr(str, start, end string) string {
 	return str
 }
 
-//数字转中文称谓
+// 数字转中文称谓
 func ChineseNum(str string) int {
 	if len(str) == 0 {
 		return 0
@@ -274,7 +276,7 @@ func ChineseNum(str string) int {
 	return 0
 }
 
-//数组去重
+// 数组去重
 func ArrayIntOnly(a []int) []int {
 	b := []int{}
 	c := map[int]int{}
@@ -287,17 +289,17 @@ func ArrayIntOnly(a []int) []int {
 	return b
 }
 
-//数组转字符串
+// 数组转字符串
 func ArrayInt2String(a []int, sp string) string {
 	return strings.Replace(strings.Trim(fmt.Sprint(a), "[]"), " ", sp, -1)
 }
 
-//屏幕输出
+// 屏幕输出
 func Echo(name string, value interface{}) {
 	fmt.Printf(name+"=%d\n", value)
 }
 
-//雪花算法（服务器相关）
+// 雪花算法（服务器相关）
 func GetOnlyID() int64 {
 	snowflake.SetMachineId(1)
 	id := snowflake.GetSnowflakeId()
