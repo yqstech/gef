@@ -2,6 +2,7 @@ package serv
 
 import (
 	"flag"
+	"fmt"
 	"github.com/facebookgo/grace/gracehttp"
 	"github.com/gorilla/mux"
 	"github.com/julienschmidt/httprouter"
@@ -63,7 +64,7 @@ func (that *Server) Run() {
 				Handler: server.Router,
 			},
 		)
-		logger.Alert(server.Name+" running by port ", server.Port)
+		fmt.Println(server.Name+" running by port ", server.Port)
 	}
 	for _, server := range that.MuxServeList {
 		TServ := flag.String(server.Name, ":"+util.Int2String(server.Port), server.Name)
@@ -73,7 +74,7 @@ func (that *Server) Run() {
 				Handler: server.Router,
 			},
 		)
-		logger.Alert(server.Name+"(mux) running by port ", server.Port)
+		fmt.Println(server.Name+"(mux) running by port ", server.Port)
 	}
 
 	//启动服务器组

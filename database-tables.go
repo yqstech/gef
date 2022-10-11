@@ -313,7 +313,8 @@ type TbEasyModelsFields struct {
 	FieldNameReset string `gorm:"column:field_name_reset;type:varchar(50);default:'';NOT NULL;comment:重置字段名称（列表顶部）" json:"field_name_reset"` // 重置字段名称（列表顶部）
 	FieldNotice    string `gorm:"column:field_notice;type:varchar(50);default:'';NOT NULL;comment:字段提示" json:"field_notice"`                 // 字段提示
 	IndexNum
-	OptionModelsKey        string `gorm:"column:option_models_key;type:varchar(50);default:'';NOT NULL;comment:选项集key" json:"option_models_key"`                       // 选项集key
+	OptionModelsKey string `gorm:"column:option_models_key;type:varchar(50);default:'';NOT NULL;comment:选项集key" json:"option_models_key"` // 选项集key
+	//OptionModelsListWhere  string `gorm:"column:option_models_list_where;type:varchar(1024);default:'';NOT NULL;comment:选项集追加条件|列表页当前字段的选项集追加查询条件" json:"option_models_list_where"`    // 列表页当前字段的选项集追加查询条件
 	OptionBeautify         int    `gorm:"column:option_beautify;type:tinyint(1);default:1;NOT NULL;comment:选项美化" json:"option_beautify"`                               // 选项美化
 	OptionIndent           int    `gorm:"column:option_indent;type:tinyint(1);default:0;NOT NULL;comment:选项按照上下级缩进" json:"option_indent"`                              // 选项按照上下级缩进
 	DynamicOptionModelsKey string `gorm:"column:dynamic_option_models_key;type:varchar(50);default:'';NOT NULL;comment:动态选项集" json:"dynamic_option_models_key"`        // 动态选项集
@@ -351,6 +352,7 @@ type TbEasyModelsSearchForm struct {
 	DataType        string `gorm:"column:data_type;type:varchar(50);default:'';NOT NULL;comment:组件类型|表单组件类型" json:"data_type"`                                                     // 组件类型|表单组件类型
 	OptionModelsKey string `gorm:"column:option_models_key;type:varchar(50);default:'';NOT NULL;comment:关联选项集|选择关联的选项集" json:"option_models_key"`                                  // 选项集key
 	OptionModelsAdd string `gorm:"column:option_models_add;type:varchar(1000);default:'';NOT NULL;comment:追加选项|扩充选项集选项,格式为：value|name|sql；sql为空执行默认查询条件" json:"option_models_add"` // 追加选项
+	OptionIndent    int    `gorm:"column:option_indent;type:tinyint(1);default:0;NOT NULL;comment:选项按照上下级缩进" json:"option_indent"`                                                 // 选项按照上下级缩进
 	SubQuery        string `gorm:"column:sub_query;type:varchar(1000);default:'';NOT NULL;comment:子查询|提交的数据嵌入子查询语句中" json:"sub_query"`                                             // 子查询
 	SearchFields    string `gorm:"column:search_fields;type:varchar(200);default:'';NOT NULL;comment:搜索字段|多个字段是 或 的关系" json:"search_fields"`                                       // 搜索字段|多个字段用逗号分割
 	MatchType       string `gorm:"column:match_type;type:varchar(50);default:'';NOT NULL;comment:匹配类型|搜索匹配类型" json:"match_type"`                                                   // 匹配类型|搜索匹配类型

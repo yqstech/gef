@@ -24,6 +24,9 @@ type DbManager struct {
 
 // AutoTable 自动维护数据库结构
 func (that DbManager) AutoTable(tables []interface{}) {
+	if len(tables) == 0 {
+		return
+	}
 	if config.DbType == "mysql" {
 		err := gdb.New().Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(tables...)
 		if err != nil {
@@ -41,6 +44,9 @@ func (that DbManager) AutoTable(tables []interface{}) {
 
 // AutoAdminRules 后台权限表
 func (that DbManager) AutoAdminRules(rules []map[string]interface{}) {
+	if len(rules) == 0 {
+		return
+	}
 	setAdminRules(0, rules)
 }
 func setAdminRules(pid int64, rules []map[string]interface{}) {

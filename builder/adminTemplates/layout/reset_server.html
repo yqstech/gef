@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>重启服务</title>
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <style>
+        html,body {
+            padding: 20px;
+            height: 100%;
+            background-color: #000000;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+<div>
+    正在重启服务，请勿进行其他操作...
+</div>
+<div id="result">
+
+</div>
+<script>
+    $.ajax({
+        url: "/server/manage/restart",
+        type: "GET",
+        dataType: "text",
+        success: function (data) {
+            if (data == "ok") {
+                setTimeout(function () {
+                    $("#result").html("服务启动成功,请稍后...")
+                    setTimeout(function () {
+                        parent.parent.location.reload();
+                    }, 1000)
+                }, 1000)
+            } else {
+                $("#result").html("服务启动异常...")
+            }
+        },
+    })
+</script>
+</body>
+</html>

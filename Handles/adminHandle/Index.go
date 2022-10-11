@@ -49,6 +49,7 @@ func (that *Index) Main(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 	tpl := builder.Displayer{
 		TplName: "main.html",
 	}
+	//设置的应用信息
 	tpl.SetDate("app", Models.AppConfigs{}.Values(2))
 	//当前账户信息
 	tpl.SetDate("account", map[string]interface{}{
@@ -56,6 +57,11 @@ func (that *Index) Main(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 		"account_name": ps.ByName("account_name"),
 		"account":      ps.ByName("account"),
 	})
+	tpl.SetDate("software", map[string]string{
+		"key":     config.SoftKey,
+		"version": config.SoftVersion,
+	})
+	tpl.SetDate("licence", config.LicenceResult)
 	that.ActShow(w, tpl, that.PageBuilder)
 }
 

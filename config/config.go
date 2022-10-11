@@ -11,10 +11,13 @@ import (
 
 // 系统
 var (
-	GOOS     = "linux"
-	WorkPath = ""
-	AppPath  = ""
-	Debug    = "" //是否开启调试模式
+	GOOS          = "linux"
+	WorkPath      = ""
+	AppPath       = ""
+	Debug         = ""                       //是否开启调试模式
+	SoftKey       = ""                       //软件代码
+	SoftVersion   = ""                       //软件版本
+	LicenceResult = map[string]interface{}{} //软件许可证校验结果
 )
 
 // 数据库

@@ -31,18 +31,17 @@ var DefaultIsOrNot = []map[string]interface{}{
 	{"value": 0, "name": "否"},
 }
 
-//
 // SelectOptionsData
-//  @Description: 通用的获取select组件数据或者列表array类型数据的方法，支持键名转换
-//  @receiver mod
-//  @param tbName string 表名称
-//  @param keyTrans 数据键名转换，map[string(旧键名)]string(新键名)
-//  @param defValue 默认值
-//  @param defName 默认值名称
-//  @return []map[string]interface{}
-//  @return error
-//  @return int
 //
+//	@Description: 通用的获取select组件数据或者列表array类型数据的方法，支持键名转换
+//	@receiver mod
+//	@param tbName string 表名称
+//	@param keyTrans 数据键名转换，map[string(旧键名)]string(新键名)
+//	@param defValue 默认值
+//	@param defName 默认值名称
+//	@return []map[string]interface{}
+//	@return error
+//	@return int
 func (mod Model) SelectOptionsData(tbName string, keyTrans map[string]string, defValue, defName, where string, order string) ([]map[string]interface{}, error, int) {
 
 	//设置默认值
@@ -63,7 +62,7 @@ func (mod Model) SelectOptionsData(tbName string, keyTrans map[string]string, de
 	}
 	data, err := conn.Where("is_delete", 0).Order(order).Get()
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error(err.Error(), conn.LastSql())
 		return nil, errors.New("系统错误！"), 500
 	}
 	//数据转成map数组并合并
@@ -76,14 +75,13 @@ func (mod Model) SelectOptionsData(tbName string, keyTrans map[string]string, de
 	return result, nil, 0
 }
 
-//
 // GoroseArrayToMap
-//  @Description: goroseData数据转为map数组，支持键名转换，忽略未设置键名的数据
-//  @receiver mod
-//  @param data
-//  @param keyTrans
-//  @return []map[string]interface{}
 //
+//	@Description: goroseData数据转为map数组，支持键名转换，忽略未设置键名的数据
+//	@receiver mod
+//	@param data
+//	@param keyTrans
+//	@return []map[string]interface{}
 func (mod Model) GoroseArrayToMap(data []gorose.Data, keyTrans map[string]string) []map[string]interface{} {
 	var result []map[string]interface{}
 	for _, d := range data {

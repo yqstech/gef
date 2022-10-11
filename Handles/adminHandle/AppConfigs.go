@@ -29,6 +29,7 @@ type AppConfigs struct {
 func (that *AppConfigs) NodeInit(pageBuilder *builder.PageBuilder) {
 	that.NodePageActions["edit2"] = that.Edit2
 	that.NodePageActions["dev_status"] = that.DevStatus
+	that.NodePageActions["reset_server"] = that.ResetServer
 }
 
 // 查询分组名
@@ -163,7 +164,21 @@ func (that AppConfigs) NodeList(pageBuilder *builder.PageBuilder) (error, int) {
 				},
 			})
 		}
-		pageBuilder.SetListTopBtns("edit2", "dev_status")
+		pageBuilder.SetButton("reset_server", builder.Button{
+			ButtonName: "重启",
+			Action:     "reset_server",
+			ActionType: 2,
+			LayerTitle: "重启应用实例",
+			ActionUrl:  "reset_server",
+			Class:      "layui-btn-danger",
+			Icon:       "ri-restart-fill",
+			Display:    "",
+			Expand: map[string]string{
+				"w": "50%",
+				"h": "50%",
+			},
+		})
+		pageBuilder.SetListTopBtns("edit2", "dev_status", "reset_server")
 	}
 
 	return nil, 0
@@ -353,4 +368,11 @@ func (that *AppConfigs) DevStatus(w http.ResponseWriter, r *http.Request, ps htt
 		}
 		fmt.Fprint(w, "关闭开发菜单成功！\n")
 	}
+}
+
+func (that *AppConfigs) ResetServer(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	tpl := builder.Displayer{
+		TplName: "reset_server.html",
+	}
+	that.ActShow(w, tpl, that.PageBuilder)
 }

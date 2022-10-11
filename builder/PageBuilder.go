@@ -16,6 +16,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/wonderivan/logger"
 	"github.com/yqstech/gef/Utils/db"
+	"github.com/yqstech/gef/config"
 	"github.com/yqstech/gef/util"
 	"html"
 	"net/http"
@@ -695,6 +696,10 @@ func (builder *PageBuilder) GetEasyModelsButtons(allButton []interface{}) (map[s
 			return buttons, errors.New("系统运行错误！")
 		}
 		for _, btnInfo := range selfButtonList {
+			//!按钮地址补充后台路径前缀
+			if len(btnInfo["action_url"].(string)) > 1 && btnInfo["action_url"].(string)[0:1] == "/" {
+				btnInfo["action_url"] = config.AdminPath + btnInfo["action_url"].(string)
+			}
 			buttons[btnInfo["button_key"].(string)] = Button{
 				ButtonName: btnInfo["button_name"].(string),
 				Action:     btnInfo["action"].(string),

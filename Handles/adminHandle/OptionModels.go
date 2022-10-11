@@ -52,7 +52,7 @@ func (that OptionModels) NodeList(pageBuilder *builder.PageBuilder) (error, int)
 		ButtonName: "导出数据",
 		Action:     "export_insert_data",
 		ActionType: 2,
-		LayerTitle: "后台模型导出成内置数据",
+		LayerTitle: "选项集导出成内置数据",
 		ActionUrl:  "export_insert_data",
 		Class:      "black",
 		Icon:       "ri-braces-fill",

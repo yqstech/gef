@@ -84,6 +84,17 @@ type Server struct {
 	RouterType int         //路由类型 0httprouter 1 mux
 }
 
+// SetSoftInfo 设置软件信息
+func (g *Gef) SetSoftInfo(key, version string) {
+	config.SoftKey = key
+	config.SoftVersion = version
+}
+
+// SetLicenceResult 设置软件版权信息
+func (g *Gef) SetLicenceResult(result map[string]interface{}) {
+	config.LicenceResult = result
+}
+
 // SetAdminPages 设置后台页面，支持追加
 func (g *Gef) SetAdminPages(pages map[string]builder.NodePager) {
 	for k, v := range pages {

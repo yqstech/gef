@@ -109,13 +109,23 @@ func (that EasyCurdModelsFields) syncModelFields(easyModelId int) {
 	tableName := easyModelInfo["table_name"].(string)
 
 	//查询数据表实时字段信息
-	query, err := db.New().Query("select COLUMN_NAME,COLUMN_COMMENT,COLUMN_DEFAULT,COLUMN_TYPE from information_schema.COLUMNS where table_name = ? and table_schema = ? order by ordinal_position",
-		tableName,
-		config.DbName)
-	if err != nil {
-		logger.Error(err.Error())
-		return
+	var query []gorose.Data
+	if config.DbType == "mysql" {
+		query, err = db.New().Query("select COLUMN_NAME,COLUMN_COMMENT,COLUMN_DEFAULT,COLUMN_TYPE from information_schema.COLUMNS where table_name = ? and table_schema = ? order by ordinal_position",
+			tableName,
+			config.DbName)
+		if err != nil {
+			logger.Error(err.Error())
+			return
+		}
+	} else if config.DbType == "sqlite" || config.DbType == "sqlite3" {
+		query, err = db.New().Query("pragma table_info(" + tableName + ")")
+		if err != nil {
+			logger.Error(err.Error())
+			return
+		}
 	}
+
 	//logger.Debug(util.JsonEncode(query))
 
 	//查询模型字段列表
@@ -135,18 +145,24 @@ func (that EasyCurdModelsFields) syncModelFields(easyModelId int) {
 	timeNow := util.TimeNow()
 	//对比更新模型字段信息
 	for _, fieldInfo := range query {
-		//字段key
-		fieldKey := fieldInfo["COLUMN_NAME"].(string)
-		//字段名称和备注，直接同步数据库的备注信息
+		//字段Key、名称和备注，直接同步数据库的备注信息
+		fieldKey := ""
 		fieldName := ""
 		fieldNote := ""
-		commands := strings.Split(fieldInfo["COLUMN_COMMENT"].(string), "|")
-		if len(commands) > 0 {
-			fieldName = commands[0]
+		if config.DbType == "mysql" {
+			fieldKey = fieldInfo["COLUMN_NAME"].(string)
+			commands := strings.Split(fieldInfo["COLUMN_COMMENT"].(string), "|")
+			if len(commands) > 0 {
+				fieldName = commands[0]
+			}
+			if len(commands) > 1 {
+				fieldNote = commands[1]
+			}
+		} else if config.DbType == "sqlite" || config.DbType == "sqlite3" {
+			//! sqlite无备注信息
+			fieldKey = fieldInfo["name"].(string)
 		}
-		if len(commands) > 1 {
-			fieldNote = commands[1]
-		}
+
 		//是否默认设置成私密
 		isPrivate := 0
 		if util.IsInArray(fieldKey, defaultPrivateFields) {
@@ -159,13 +175,16 @@ func (that EasyCurdModelsFields) syncModelFields(easyModelId int) {
 		}
 		//是否存在字段
 		if field, ok := fieldsMap[fieldKey]; ok {
-			db.New().Table("tb_easy_curd_models_fields").
-				Where("id", field["id"]).
-				Update(map[string]interface{}{
-					"field_name":  fieldName,
-					"field_note":  fieldNote,
-					"update_time": timeNow,
-				})
+			//!仅在mysql环境下更新字段
+			if config.DbType == "mysql" {
+				db.New().Table("tb_easy_curd_models_fields").
+					Where("id", field["id"]).
+					Update(map[string]interface{}{
+						"field_name":  fieldName,
+						"field_note":  fieldNote,
+						"update_time": timeNow,
+					})
+			}
 			fieldsMap[fieldKey]["sync_tag"] = true
 		} else {
 			db.New().Table("tb_easy_curd_models_fields").Insert(map[string]interface{}{

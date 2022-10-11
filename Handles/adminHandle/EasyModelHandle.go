@@ -166,13 +166,52 @@ func (that EasyModelHandle) NodeList(pageBuilder *builder.PageBuilder) (error, i
 			for _, oma := range searchItem.OptionModelsAdd {
 				ItemOptionModels = append(ItemOptionModels, oma)
 			}
+
+			//选项集缩进
+			var FieldOptions []map[string]interface{}
+			//深度拷贝，直接复制的话，多次刷新会造成多次缩进
+			for _, v := range ItemOptionModels {
+				x := map[string]interface{}{}
+				for k1, v1 := range v {
+					x[k1] = v1
+				}
+				FieldOptions = append(FieldOptions, x)
+			}
+			if searchItem.OptionIndent {
+				//转一下类型
+				var FieldOptionsCopy []gorose.Data
+				for _, v := range FieldOptions {
+					v["id"] = int64(util.String2Int(util.Interface2String(v["id"])))
+					v["pid"] = int64(util.String2Int(util.Interface2String(v["pid"])))
+					FieldOptionsCopy = append(FieldOptionsCopy, v)
+				}
+				//执行缩进
+				FieldOptionsCopy = Models.Model{}.GoroseDataLevelOrder(FieldOptionsCopy, "id", "pid", 0, 0)
+				for k, v := range FieldOptionsCopy {
+					if v["level"] == int64(0) {
+					} else if v["level"] == int64(1) {
+						FieldOptionsCopy[k]["name"] = "&nbsp;&nbsp;&nbsp;&nbsp;├─&nbsp;" + v["name"].(string)
+					} else if v["level"] == int64(2) {
+						FieldOptionsCopy[k]["name"] = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─&nbsp;" + v["name"].(string)
+					} else if v["level"] == int64(3) {
+						FieldOptionsCopy[k]["name"] = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─&nbsp;" + v["name"].(string)
+					} else if v["level"] == int64(4) {
+						FieldOptionsCopy[k]["name"] = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├&nbsp;&nbsp;&nbsp;&nbsp;├─&nbsp;" + v["name"].(string)
+					}
+				}
+				//类型再回来
+				FieldOptions = []map[string]interface{}{}
+				for _, v := range FieldOptionsCopy {
+					FieldOptions = append(FieldOptions, v)
+				}
+			}
 			pageBuilder.ListSearchFieldAdd(
 				searchItem.SearchKey,
 				searchItem.DataType,
 				searchItem.SearchName,
 				"",
 				searchItem.DefaultValue,
-				ItemOptionModels,
+				FieldOptions,
 				searchItem.Style,
 				map[string]interface{}{
 					"placeholder": searchItem.Placeholder,
@@ -708,6 +747,7 @@ type SearchFromItem struct {
 	Style           string                   //附加样式
 	OptionModelsKey string                   //关联选项集
 	OptionModelsAdd []map[string]interface{} //选项集追加
+	OptionIndent    bool                     //选项按照上下级缩进
 	SearchFields    []string                 //搜索字段集合
 	MatchType       string                   //匹配规则
 	DefaultValue    string                   //默认值
@@ -875,6 +915,25 @@ func GetEasyModelInfo(pageBuilder *builder.PageBuilder, modelKey string, actionN
 				SaveTransRule:                field["save_trans_rule"].(string),
 			}
 			if field["option_models_key"].(string) != "" {
+				//!新增，选项集追加sql条件
+				//if field["option_models_list_where"].(string) != "" {
+				//	//遍历get参数和值
+				//	subWhere := field["option_models_list_where"].(string)
+				//	query := pageBuilder.HttpRequest.URL.Query()
+				//	for k, _ := range query {
+				//		v := query[k][0]
+				//		if v != "" {
+				//			subWhere = strings.Replace(subWhere, "{{"+k+"}}", v, -1)
+				//		}
+				//	}
+				//	if actionName == "list" {
+				//		modelField.FieldOptions = Models.OptionModels{}.Select(0, "unique_key = '"+field["option_models_key"].(string)+"'", subWhere, field["option_beautify"].(int64) > 0)
+				//	} else {
+				//		modelField.FieldOptions = Models.OptionModels{}.Select(0, "unique_key = '"+field["option_models_key"].(string)+"'", subWhere, field["option_beautify"].(int64) == 1)
+				//	}
+				//} else {
+				//
+				//}
 				if actionName == "list" {
 					modelField.FieldOptions = Models.OptionModels{}.ByKey(field["option_models_key"], field["option_beautify"].(int64) > 0)
 				} else {
@@ -940,6 +999,7 @@ func GetEasyModelInfo(pageBuilder *builder.PageBuilder, modelKey string, actionN
 				OptionModelsKey: item["option_models_key"].(string),
 				OptionModelsAdd: OptionModelsAdds,
 				SearchFields:    searchFields,
+				OptionIndent:    item["option_indent"].(int64) == 1,
 				MatchType:       item["match_type"].(string),
 				DefaultValue:    item["default_value"].(string),
 				SubQuery:        item["sub_query"].(string),

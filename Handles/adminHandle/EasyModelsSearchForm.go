@@ -86,8 +86,11 @@ func (that EasyModelsSearchForm) NodeForm(pageBuilder *builder.PageBuilder, id i
 		pageBuilder.FormFieldsAdd("option_models_key", "select-xs", "关联选项集", "下拉选项关联选项集", "", false, that.OptionModelsList(), "", map[string]interface{}{
 			"if": "formFields.data_type=='select' || formFields.data_type=='select-sm'",
 		})
-		pageBuilder.FormFieldsAdd("option_models_add", "textarea", "追加选项", "扩充选项集选项,格式为：value|name|sql；sql为空执行默认查询条件", "", false, that.OptionModelsList(), "", map[string]interface{}{
+		pageBuilder.FormFieldsAdd("option_models_add", "textarea", "追加选项", "扩充选项集选项,格式为：value|name|sql；sql为空执行默认查询条件", "", false, nil, "", map[string]interface{}{
 			"if": "formFields.data_type=='select' || formFields.data_type=='select-sm'",
+		})
+		pageBuilder.FormFieldsAdd("option_indent", "radio", "选项按级缩进", "", "0", false, Models.OptionModels{}.ByKey("is", false), "", map[string]interface{}{
+			"if": "formFields.option_models_key!=''",
 		})
 		pageBuilder.FormFieldsAdd("default_value", "text-xxs", "默认值", "搜索填充默认值", "", false, nil, "", nil)
 		pageBuilder.FormFieldsAdd("search_fields", "checkbox", "匹配字段", "搜索值关联的字段，多字段为'或'的关系", "", true, that.GetEasyModelsFields(modelId), "", nil)

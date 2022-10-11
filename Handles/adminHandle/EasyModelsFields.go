@@ -239,6 +239,9 @@ func (that EasyModelsFields) NodeForm(pageBuilder *builder.PageBuilder, id int64
 	pageBuilder.FormFieldsAdd("data_type_on_create", "select", "新增页数据类型", "新增页的数据类型", "text", false, formDataType, "", nil)
 	pageBuilder.FormFieldsAdd("data_type_on_update", "select", "编辑页数据类型", "修改页的数据类型", "text", false, formDataType, "", nil)
 	pageBuilder.FormFieldsAdd("option_models_key", "select", "关联选项集", "", "", false, that.OptionModelsList(), "", nil)
+	//pageBuilder.FormFieldsAdd("option_models_list_where", "text", "选项集追加SQL", "选项集追加条件，列表页支持URL参数变量,格式为{{id}}", "", false, nil, "", map[string]interface{}{
+	//	"if": "formFields.option_models_key!=''",
+	//})
 	pageBuilder.FormFieldsAdd("option_beautify", "radio", "选项集美化", "", "1", false, []map[string]interface{}{
 		{"name": "是", "value": "1"},
 		{"name": "否", "value": "0"},

@@ -67,6 +67,7 @@
 
         </div>
     </div>
+
     {{if gt .pageTabsLength 0}}
     <div class="layui-tab">
         <div class="layui-tab-title">
@@ -142,15 +143,14 @@
         </div>
     </div>
     {{end}}
-
-    <div class="list_table" style="width:100%;overflow-x: auto;">
+    <div class="list_table" style="width:100%;overflow-x: auto;" :style="'height: calc(100% - '+(h1+h2+90)+'px);'">
         <table class="layui-table layui-form">
             <thead>
             <tr>
                 <th v-if="batchAction" class="column column_check"><i v-if="isAllChecked" class="ri-checkbox-line" @click="checkAll(false)"></i><i v-else class="ri-checkbox-blank-line" @click="checkAll(true)"></i></th>
                 {{range .listColumns}}<th class="column column_{{.FieldName}} title" {{if $style := index $.listColumnsStyles .FieldName}} style="{{$style}}" {{end}}>{{.ColumnName}}</th>{{end}}
                 {{if .rightBtns}}
-                <th class="column column_action title " {{if $style := index $.listColumnsStyles "action"}} style="{{$style}}" {{end}}>操作</th>
+                <th class="column column_action title sticky" {{if $style := index $.listColumnsStyles "action"}} style="{{$style}}" {{end}}>操作</th>
                 {{end}}
             </tr>
             </thead>
@@ -163,7 +163,7 @@
                 </td>
                 {{end}}
                 {{if .rightBtns}}
-                <td class="column column_action" {{if $style := index $.listColumnsStyles "action"}} style="{{$style}}" {{end}}>
+                <td class="column column_action sticky" {{if $style := index $.listColumnsStyles "action"}} style="{{$style}}" {{end}}>
                 {{range $index,$button := .rightBtns}}
                 {{ if $button}}
                 <a {{if $button.Display}}v-if="{{$button.Display}}"{{end}}
@@ -192,54 +192,6 @@
             </tbody>
         </table>
     </div>
-    <div class="list_table_mobile" style="width:100%;overflow-x: auto;">
-        <table class="layui-table layui-form">
-            <thead>
-            <tr>
-                <td v-if="batchAction" class="column column_check"><i v-if="isAllChecked" class="ri-checkbox-line" @click="checkAll(false)"></i><i v-else class="ri-checkbox-blank-line" @click="checkAll(true)"></i></td>
-                <td class="column" style="white-space: normal">
-                    {{range .listColumns}}<span class="mobile_title_item">{{.ColumnName}}</span>{{end}}
-                </td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="(item,index) in data_list" :key="item.id">
-                <td v-if="batchAction" class="column column_check"><i v-if="item._checked" class="ri-checkbox-line" @click="item._checked = false;"></i><i v-else class="ri-checkbox-blank-line" @click="item._checked = true;"></i></td>
-                <td class="column">
-                    {{range $columnIndex,$column :=.listColumns}}
-                    <div class="mobile_list_item">
-                        {{ template "listColumn" $column}}
-                    </div>
-                    {{end}}
-                    <div class="mobile_list_button">
-                        {{range $index,$button := .rightBtns}}
-                        {{ if $button}}
-                        <a {{if $button.Display}}v-if="{{$button.Display}}"{{end}}
-                           {{if eq $button.ActionType 1}}
-                           {{if $button.ConfirmMsg}}
-                           @click="confirm(item.id,'{{$button.ActionUrl}}','{{$button.ConfirmMsg}}')"
-                           {{else}}
-                           @click="ajax(item.id,'{{$button.ActionUrl}}')"
-                           {{end}}
-                           {{end}}
-                           {{if eq $button.ActionType 2}}
-                           @click="layer(item.id,'{{$button.ActionUrl}}','{{$button.ButtonName}}','{{$button.LayerTitle}}','{{$button.Expand.w}}','{{$button.Expand.h}}')"
-                           {{end}}
-                           {{if eq $button.ActionType 3}}
-                           onclick="{{$button.ActionUrl}}"
-                           {{end}}
-                           class="layui-btn layui-btn-sm {{$button.Class}}"
-                        >{{template "icon" $button.Icon}}
-                            {{$button.ButtonName}}</a>
-                        {{end}}
-                        {{end}}
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-
 
     <div v-if="checkedTotal>0" class="batchActionButtons">
         {{range $index,$button := .rightBtns}}
@@ -288,6 +240,8 @@
             page: 1,
             page_size: listPageSize,
             batchAction:batchAction,//是否支持批量操作
+            h1:{{if gt .pageTabsLength 0}}68{{else}}0{{end}},
+            h2:{{if .listSearchFields}}68{{else}}0{{end}},
         },
         created: function () {
             this.searchForm = searchFormDefault
