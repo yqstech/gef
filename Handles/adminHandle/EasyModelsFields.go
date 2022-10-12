@@ -39,6 +39,7 @@ var listDataType = []map[string]interface{}{
 	{"name": "图片50尺寸(image50)", "value": "image50"},
 	{"name": "图片40尺寸(image60)", "value": "image40"},
 	{"name": "图片30尺寸(image30)", "value": "image30"},
+	{"name": "图片集重叠图（默认160）(images)", "value": "images"},
 }
 
 // 表单数据类型

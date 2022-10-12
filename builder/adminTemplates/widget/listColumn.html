@@ -33,6 +33,15 @@
         <img style="max-width:40px;max-height:40px;" :src="item.{{.FieldName}}?item.{{.FieldName}}:'/static/images/image_null.png'"></img>
     {{else if eq .DataType "image30"}}
         <img style="max-width:30px;max-height:30px;" :src="item.{{.FieldName}}?item.{{.FieldName}}:'/static/images/image_null.png'"></img>
+    {{else if eq .DataType "images"}}
+    <div class="list_images">
+        <div class="image_overlap" v-if="item.{{.FieldName}}" :style="'padding-right:'+(JSON.parse(item.{{.FieldName}}).length-1)*10+'px;padding-bottom:'+(JSON.parse(item.{{.FieldName}}).length-1)*10+'px;'">
+            <img v-for="(img,index) in JSON.parse(item.{{.FieldName}})" style="max-width:160px;max-height:160px;" :style="'top:'+(index*10)+'px;left:'+(index*10)+'px'" :src="img">
+        </div>
+        <div class="image_overlap" v-else>
+            <img style="max-width:160px;max-height:160px;" src="/static/images/image_null.png">
+        </div>
+    </div>
     {{else}}
         ${item.{{.FieldName}} }
     {{end}}

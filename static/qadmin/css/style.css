@@ -957,3 +957,14 @@ header .topMenus a.on {
 }
 
 .wangEditor li{list-style: unset!important;}
+
+.image_overlap{
+    position: relative;
+}
+.image_overlap img{
+    position: absolute;
+    box-shadow: -3px 3px 6px rgba(0, 0, 0, 0.2);
+}
+.image_overlap img:first-child{
+    position: relative;
+}
