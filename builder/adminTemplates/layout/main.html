@@ -8,12 +8,107 @@
     <script src="/static/layui/layui.js"></script>
     <script src="/static/js/jquery-3.3.1.min.js"></script>
     <script src="/static/js/vue.min.js"></script>
+    <style>
+        .list_item{
+            padding: 7px 0px;
+            clear: both;
+            display: flex;
+            justify-content: space-between;
+        }
+        .list_item .list_title{
+            line-height: 28px;
+            font-size: 14px;
+        }
+        .list_item .list_sub{
+            color: #999999;
+            font-size: 12px !important;
+        }
+        .empty{
+            width: 100%;
+            text-align: center;
+            height: 100px;
+            line-height: 100px;
+            font-size: 12px !important;
+            color: #999999;
+        }
+        .layui-table tr th{
+            width: 30%;
+            background-color: #f5f5f5;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
 <div id="app" class="p20">
     <blockquote class="layui-elem-quote">
         {{.account.account_name}},欢迎您登录<strong>{{.app.app_name}}</strong>管理后台！
     </blockquote>
+    <div class="layui-row layui-col-space5">
+        <div class="layui-col-lg6 layui-col-md12 layui-col-sm12">
+            <div class="layui-card">
+                <div class="layui-card-header"><i class="fa fa-warning icon"></i>最新消息</div>
+                <div class="layui-card-body">
+                    {{$data := select "tb_admin" 10 5}}
+                    {{if $data}}
+                    {{range $data}}
+                    <div class="list_item">
+                        <div class="list_title">{{.name}}</div>
+                        <div class="list_sub">{{.create_time}}</div>
+                    </div>
+                    {{end}}
+                    {{else}}
+                    <div class="empty">暂无数据~</div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-lg3 layui-col-md6 layui-col-sm6">
+            <div class="layui-card">
+                <div class="layui-card-header"><i class="fa fa-warning icon"></i>数据统计</div>
+                <div class="layui-card-body">
+                    <table class="layui-table layui-form">
+                        <tbody>
+                        <tr>
+                            <th>账户</th>
+                            <td>{{count "tb_admin"}}个</td>
+                        </tr>
+                        <tr>
+                            <th>角色</th>
+                            <td>{{count "tb_admin_group"}}个</td>
+                        </tr>
+                        <tr>
+                            <th>附件</th>
+                            <td>{{count "tb_attachment"}}个</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-lg3 layui-col-md6 layui-col-sm6">
+            <div class="layui-card">
+                <div class="layui-card-header"><i class="fa fa-warning icon"></i>软件信息</div>
+                <div class="layui-card-body">
+                    <table class="layui-table layui-form">
+                        <tbody>
+                        <tr>
+                            <th>软件名称</th>
+                            <td>{{.software.key}}</td>
+                        </tr>
+                        <tr>
+                            <th>软件版本</th>
+                            <td>v{{.software.version}}</td>
+                        </tr>
+                        <tr>
+                            <th>软件许可</th>
+                            <td>{{if .licence.valid_time}}{{.licence.valid_time}}{{else}}-{{end}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>

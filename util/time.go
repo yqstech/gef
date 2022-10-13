@@ -6,6 +6,51 @@ import (
 	"time"
 )
 
+// TimeGo 时光机
+func TimeGo(options ...interface{}) string {
+	optionsLen := len(options)
+
+	fmt := "2006-01-02 15:04:05"
+	if optionsLen > 0 && options[0].(string) != "" {
+		fmt = options[0].(string)
+	}
+	y := 0
+	m := 0
+	d := 0
+	h := 0
+	i := 0
+	s := 0
+	if optionsLen > 1 {
+		y = options[1].(int)
+	}
+	if optionsLen > 2 {
+		m = options[2].(int)
+	}
+	if optionsLen > 3 {
+		d = options[3].(int)
+	}
+	if optionsLen > 4 {
+		h = options[4].(int)
+	}
+	if optionsLen > 5 {
+		i = options[5].(int)
+	}
+	if optionsLen > 6 {
+		s = options[6].(int)
+	}
+
+	cstSh, _ := time.LoadLocation("Asia/Shanghai") //上海
+	t := time.Now().AddDate(y, m, d).In(cstSh)
+
+	if h != 0 || i != 0 || s != 0 {
+		//时分秒需要变化,先转成时间戳计算完再格式化
+		tStr := t.Format("2006-01-02 15:04:05")
+		tInt64 := Str2UnixTime(tStr) + int64(h)*3600 + int64(i)*60 + int64(s)
+		return UnixTimeFormat(tInt64, fmt)
+	}
+	return t.Format(fmt)
+}
+
 // 获取时间字符串
 func Time() string {
 	return Int2String(Int642Int(time.Now().Unix()))
